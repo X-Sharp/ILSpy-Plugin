@@ -11,6 +11,7 @@ Lots of things are still to be done, but most is working.
 
 ### Warnings
 - Currently, Array access are all zero-based
+- Only dot (.) is used as selector
 
 ### ILSPY Copyright
 Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team

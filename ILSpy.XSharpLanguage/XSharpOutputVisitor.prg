@@ -1040,8 +1040,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 documentationReference:DeclaringType:AcceptVisitor(SELF)
                 IF (documentationReference:SymbolKind != SymbolKind.TypeDefinition)
                     //
-                SELF:WriteToken(XSRoles.Dot)
-            ENDIF
+                    SELF:WriteToken(XSRoles.Dot)
+                ENDIF
             ENDIF
             symbolKind := documentationReference:SymbolKind
             IF (symbolKind != SymbolKind.TypeDefinition)
@@ -1518,7 +1518,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:WriteToken(XSRoles.DoubleColon)
             ELSE
                 //
-            SELF:WriteToken(XSRoles.Dot)
+                SELF:WriteToken(XSRoles.Dot)
             ENDIF
             SELF:WriteIdentifier(memberType:MemberNameToken)
             SELF:WriteTypeArguments(memberType:TypeArguments)
@@ -2741,7 +2741,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF (! privateImplementationType:IsNull)
                 //
                 privateImplementationType:AcceptVisitor(SELF)
-            SELF:WriteToken(XSRoles.Dot)
+                SELF:WriteToken(XSRoles.Dot)
             ENDIF
             
         PROTECTED VIRTUAL METHOD WriteQualifiedIdentifier(identifiers AS System.Collections.Generic.IEnumerable<Identifier>) AS VOID
@@ -2755,9 +2755,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     flag := FALSE
                 ELSE
                     //
-                SELF:writer:WriteToken(XSRoles.Dot, ".")
+                    SELF:writer:WriteToken(XSRoles.Dot, ".")
                 ENDIF
-            SELF:writer:WriteIdentifier(identifier)
+                SELF:writer:WriteIdentifier(identifier)
             NEXT
             
         PROTECTED VIRTUAL METHOD WriteToken(tokenRole AS TokenRole) AS VOID
