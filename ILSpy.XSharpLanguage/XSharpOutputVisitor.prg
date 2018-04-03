@@ -16,6 +16,7 @@ USING ICSharpCode.Decompiler.CSharp.Syntax
 USING ICSharpCode.Decompiler.CSharp.Syntax.PatternMatching
 USING ICSharpCode.Decompiler.CSharp.Transforms
 USING ICSharpCode.Decompiler.CSharp.OutputVisitor
+USING ICSharpCode.Decompiler.Semantics
 USING ICSharpCode.Decompiler.TypeSystem
 USING Mono.Cecil
 
@@ -35,6 +36,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         INITONLY PROTECTED writer AS TokenWriter
         INITONLY PROTECTED policy AS CSharpFormattingOptions
         INITONLY PRIVATE system AS IDecompilerTypeSystem
+        PRIVATE currentType AS IType
         //
         STATIC INITONLY PRIVATE queryKeywords AS System.Collections.Generic.HashSet<STRING>
         STATIC INITONLY PRIVATE unconditionalKeywords AS System.Collections.Generic.HashSet<STRING>
@@ -315,7 +317,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SWITCH style
                 CASE BraceStyle.DoNotChange
-            CASE BraceStyle.EndOfLine
+                CASE BraceStyle.EndOfLine
                 CASE BraceStyle.BannerStyle
                     //
                     IF (! SELF:isAtStartOfLine)
@@ -350,7 +352,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //SELF:writer:WriteToken(XSRoles.LBrace, "{")
                 OTHERWISE
                     //
-                    THROW System.ArgumentOutOfRangeException{}
+                THROW System.ArgumentOutOfRangeException{}
             END SWITCH
             SELF:writer:Indent()
             //SELF:NewLine()
@@ -387,29 +389,29 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 nextLine := BraceStyle.NextLine
             ELSE
                 //
-                nextLine := BraceStyle.EndOfLine
+            nextLine := BraceStyle.EndOfLine
             ENDIF
             SELF:OpenBrace(nextLine)
-            Self:LBrace()
+            SELF:LBrace()
             flag := TRUE
             node := NULL
             FOREACH node2 AS AstNode IN elements
                 //
                 IF (flag)
-                    //
+                        //
                     flag := FALSE
                 ELSE
                     //
                     SELF:Comma(node2, TRUE)
                     SELF:WriteToken( ";" )
-                    SELF:NewLine()
+                SELF:NewLine()
                 ENDIF
                 node := node2
-                node2:AcceptVisitor(SELF)
+            node2:AcceptVisitor(SELF)
             NEXT
             IF (node != NULL)
                 //
-                SELF:OptionalComma(node:NextSibling)
+            SELF:OptionalComma(node:NextSibling)
             ENDIF
             SELF:NewLine()
             SELF:RBrace()
@@ -564,11 +566,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             // or "MyObject{}{ field1 := 1, field2 := 2 }"
             SELF:StartNode(arrayInitializerExpression)
             IF ((((arrayInitializerExpression:Elements:Count == 1) .AND. SELF:IsObjectOrCollectionInitializer(arrayInitializerExpression:Parent)) .AND. ! SELF:CanBeConfusedWithObjectInitializer(System.Linq.Enumerable.Single<Expression>(arrayInitializerExpression:Elements))) .AND. arrayInitializerExpression:LBraceToken:IsNull)
-                //
+                    //
                 System.Linq.Enumerable.Single<Expression>(arrayInitializerExpression:Elements):AcceptVisitor(SELF)
             ELSE
                 //
-                SELF:PrintInitializerElements(arrayInitializerExpression:Elements)
+            SELF:PrintInitializerElements(arrayInitializerExpression:Elements)
             ENDIF
             SELF:EndNode(arrayInitializerExpression)
             
@@ -622,7 +624,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 //
                 SELF:WriteKeyword(attributeSection:AttributeTarget, XSRoles.Identifier)
                 SELF:WriteToken(XSRoles.Colon)
-                SELF:Space(TRUE)
+            SELF:Space(TRUE)
             ENDIF
             SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)attributeSection:Attributes )
             SELF:WriteToken(XSRoles.RBracket)
@@ -632,7 +634,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ELSE
                 //
                 SELF:WriteToken( XSRoles.Semicolon )
-                SELF:NewLine()
+            SELF:NewLine()
             ENDIF
             SELF:EndNode(attributeSection)
             
@@ -655,7 +657,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(binaryOperatorExpression)
             binaryOperatorExpression:Left:AcceptVisitor(SELF)
             SWITCH binaryOperatorExpression:Operator
-            CASE BinaryOperatorType.BitwiseAnd
+                CASE BinaryOperatorType.BitwiseAnd
                 CASE BinaryOperatorType.BitwiseOr
                 CASE BinaryOperatorType.ExclusiveOr
                     //
@@ -666,7 +668,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //
                     spaceAroundBitwiseOperator := SELF:policy:SpaceAroundLogicalOperator
                     
-                CASE BinaryOperatorType.GreaterThan
+            CASE BinaryOperatorType.GreaterThan
                 CASE BinaryOperatorType.GreaterThanOrEqual
                 CASE BinaryOperatorType.LessThan
                 CASE BinaryOperatorType.LessThanOrEqual
@@ -1040,8 +1042,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 documentationReference:DeclaringType:AcceptVisitor(SELF)
                 IF (documentationReference:SymbolKind != SymbolKind.TypeDefinition)
                     //
-                    SELF:WriteToken(XSRoles.Dot)
-                ENDIF
+                SELF:WriteToken(XSRoles.Dot)
+            ENDIF
             ENDIF
             symbolKind := documentationReference:SymbolKind
             IF (symbolKind != SymbolKind.TypeDefinition)
@@ -1068,7 +1070,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                             SELF:Space(TRUE)
                             
                             SWITCH operatorType
-                                CASE OperatorType.Explicit
+                            CASE OperatorType.Explicit
                                 CASE OperatorType.Implicit
                                     //
                                     documentationReference:ConversionOperatorReturnType:AcceptVisitor(SELF)
@@ -1076,7 +1078,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                                 OTHERWISE
                                     //
                                     SELF:WriteToken(OperatorDeclaration.GetToken(operatorType), OperatorDeclaration.GetRole(operatorType))
-                                
+                                    
                         END SWITCH
                     ELSE
                         //
@@ -1133,7 +1135,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:Space(SELF:policy:SpaceAroundAssignment)
                 SELF:WriteToken(XSRoles.Assign)
                 SELF:Space(SELF:policy:SpaceAroundAssignment)
-                enumMemberDeclaration:Initializer:AcceptVisitor(SELF)
+            enumMemberDeclaration:Initializer:AcceptVisitor(SELF)
             ENDIF
             SELF:EndNode(enumMemberDeclaration)
             
@@ -1227,16 +1229,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(foreachStatement)
             SELF:WriteKeyword("FOREACH")
-            SELF:Space(SELF:policy:SpaceBeforeForeachParentheses)
-            SELF:Space(SELF:policy:SpacesWithinForeachParentheses)
-            foreachStatement:VariableType:AcceptVisitor(SELF)
-            SELF:Space(TRUE)
+            SELF:Space()
             SELF:WriteIdentifier(foreachStatement:VariableNameToken)
-            SELF:Space(TRUE)
+            SELF:Space()
+            SELF:WriteKeyword("AS")
+            SELF:Space()
+            foreachStatement:VariableType:AcceptVisitor(SELF)
+            SELF:Space()
             SELF:WriteKeyword("IN")
-            SELF:Space(TRUE)
+            SELF:Space()
             foreachStatement:InExpression:AcceptVisitor(SELF)
-            SELF:Space(SELF:policy:SpacesWithinForeachParentheses)
+            SELF:Space()
             SELF:WriteEmbeddedStatement(foreachStatement:EmbeddedStatement, NewLinePlacement.NewLine)
             SELF:WriteKeyword("NEXT")
             SELF:NewLine()
@@ -1246,20 +1249,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(forStatement)
             SELF:WriteKeyword("FOR")
-            SELF:Space(TRUE)
+            SELF:Space()
             SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Initializers )
-            SELF:Space(SELF:policy:SpaceBeforeForSemicolon)
-            SELF:WriteToken(XSRoles.Semicolon)
-            SELF:Space(SELF:policy:SpaceAfterForSemicolon)
+            SELF:Space()
+            SELF:WriteKeyword("TO")
+            SELF:Space()
             forStatement:Condition:AcceptVisitor(SELF)
-            SELF:Space(SELF:policy:SpaceBeforeForSemicolon)
-            SELF:WriteToken(XSRoles.Semicolon)
+            SELF:Space()
             IF (System.Linq.Enumerable.Any<Statement>(forStatement:Iterators))
                 //
-                SELF:Space(SELF:policy:SpaceAfterForSemicolon)
-            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
+                SELF:WriteKeyword("STEP")
+                SELF:Space()
+                SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
             ENDIF
-            SELF:Space(SELF:policy:SpacesWithinForParentheses)
+            SELF:Space()
             SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement, NewLinePlacement.NewLine)
             SELF:WriteKeyword("NEXT")
             SELF:NewLine()
@@ -1298,6 +1301,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitIdentifierExpression(identifierExpression AS IdentifierExpression) AS VOID
             //
             SELF:StartNode(identifierExpression)
+            //            
+            IF ( SELF:IsUsingCurrentType(identifierExpression:Annotations) )
+                SELF:WriteKeyword( "SELF" )
+                SELF:WriteToken( "." )
+            ENDIF
+            //
             SELF:WriteIdentifier(identifierExpression:IdentifierToken)
             SELF:WriteTypeArguments(identifierExpression:TypeArguments)
             SELF:EndNode(identifierExpression)
@@ -1409,6 +1418,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             LOCAL expression AS MemberReferenceExpression
             //
             SELF:StartNode(invocationExpression)
+            //            
+            IF ( SELF:IsUsingCurrentType(invocationExpression:Annotations) )
+                SELF:WriteKeyword( "SELF" )
+                SELF:WriteToken( "." )
+            ENDIF
+            //
             invocationExpression:Target:AcceptVisitor(SELF)
             SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
             SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)invocationExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
@@ -1518,7 +1533,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:WriteToken(XSRoles.DoubleColon)
             ELSE
                 //
-                SELF:WriteToken(XSRoles.Dot)
+            SELF:WriteToken(XSRoles.Dot)
             ENDIF
             SELF:WriteIdentifier(memberType:MemberNameToken)
             SELF:WriteTypeArguments(memberType:TypeArguments)
@@ -1549,8 +1564,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword("AS", NULL )
             SELF:Space(TRUE)
             methodDeclaration:ReturnType:AcceptVisitor(SELF)
+            // Save the current/Declaring type
+            currentType := SELF:GetCurrentType( methodDeclaration:Annotations )
             //
             SELF:WriteMethodBody(methodDeclaration:Body, SELF:policy:MethodBraceStyle)
+            currentType := NULL
             SELF:EndNode(methodDeclaration)
             
         VIRTUAL METHOD VisitNamedArgumentExpression(namedArgumentExpression AS NamedArgumentExpression) AS VOID
@@ -1670,20 +1688,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             useBraces := (System.Linq.Enumerable.Any<Expression>(objectCreateExpression:Arguments) .OR. objectCreateExpression:Initializer:IsNull)
             IF (! objectCreateExpression:LParToken:IsNull)
                 //
-                useBraces := TRUE
+            useBraces := TRUE
             ENDIF
             IF (useBraces)
-                //
-                SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
+                    //
+                    SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
                 SELF:WriteCommaSeparatedListInBrace((System.Collections.Generic.IEnumerable<AstNode>)objectCreateExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
             ELSE
                 SELF:LBrace()
                 SELF:Space(SELF:policy:SpaceWithinMethodCallParentheses)
-                SELF:RBrace()
+            SELF:RBrace()
             ENDIF
             IF (!objectCreateExpression:Initializer:IsNull)
                 SELF:WriteToken(XSRoles.Semicolon)
-                objectCreateExpression:Initializer:AcceptVisitor(SELF)
+            objectCreateExpression:Initializer:AcceptVisitor(SELF)
             ENDIF
             SELF:EndNode(objectCreateExpression)
             
@@ -2235,7 +2253,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 OTHERWISE
                     //
                     SELF:WriteKeyword("CLASS")
-                    structBraceStyle := SELF:policy:ClassBraceStyle
+                structBraceStyle := SELF:policy:ClassBraceStyle
             END SWITCH
             SELF:Space(TRUE)
             SELF:WriteIdentifier(typeDeclaration:NameToken)
@@ -2243,10 +2261,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF (typeDeclaration:BaseTypes:Any())
                 //
                 IF ( typeDeclaration:ClassType == ClassType.Enum )
-                    SELF:Space()
-				    SELF:WriteKeyword("AS")
-				    SELF:Space()
-				    SELF:WriteCommaSeparatedList(typeDeclaration:BaseTypes)
+                        SELF:Space()
+                        SELF:WriteKeyword("AS")
+                        SELF:Space()
+                    SELF:WriteCommaSeparatedList(typeDeclaration:BaseTypes)
                 ELSE
                     LOCAL typeList AS System.Collections.Generic.IEnumerable<AstType>
                     LOCAL classList AS List<AstType>
@@ -2264,50 +2282,50 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                             IF ( t:Kind == TypeKind.Interface )
                                 interfaceList:Add( typeDef )
                             ELSEIF ( t:Kind == TypeKind.Class )
-                                classList:Add( typeDef )
-                            ENDIF
+                            classList:Add( typeDef )
                         ENDIF
+                    ENDIF
                     NEXT
                     IF ( classList:Count > 0 )
                         SELF:Space(TRUE)
                         SELF:WriteKeyword( "INHERIT" )
                         SELF:Space(TRUE)
-                        SELF:WriteCommaSeparatedList(classList )
+                    SELF:WriteCommaSeparatedList(classList )
                     ENDIF
                     IF ( interfaceList:Count > 0 )
                         SELF:Space(TRUE)
                         SELF:WriteKeyword( "IMPLEMENT" ) 
                         SELF:Space(TRUE)
-                        SELF:WriteCommaSeparatedList(interfaceList)
-                    ENDIF
+                    SELF:WriteCommaSeparatedList(interfaceList)
                 ENDIF
+            ENDIF
             ENDIF
             FOREACH constraint AS Constraint IN typeDeclaration:Constraints
                 //
-                constraint:AcceptVisitor(SELF)
+            constraint:AcceptVisitor(SELF)
             NEXT
             SELF:OpenBrace(structBraceStyle)
             IF (typeDeclaration:ClassType == ClassType.Enum)
-                //
-                flag := TRUE
-                node := NULL
-                FOREACH declaration AS EntityDeclaration IN typeDeclaration:Members
                     //
-                    IF (flag)
-                            //
-                        flag := FALSE
-                    ELSE
+                    flag := TRUE
+                    node := NULL
+                    FOREACH declaration AS EntityDeclaration IN typeDeclaration:Members
                         //
-                        //SELF:Comma(declaration, TRUE)
+                        IF (flag)
+                                //
+                            flag := FALSE
+                        ELSE
+                            //
+                            //SELF:Comma(declaration, TRUE)
                         SELF:NewLine()
-                    ENDIF
-                    node := declaration
+                        ENDIF
+                        node := declaration
                     declaration:AcceptVisitor(SELF)
-                NEXT
-                IF (node != NULL)
-                    //
+                    NEXT
+                    IF (node != NULL)
+                        //
                     SELF:OptionalComma(node:NextSibling)
-                ENDIF
+                    ENDIF
                 SELF:NewLine()
             ELSE
                 //
@@ -2320,12 +2338,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                         WHILE ((i < SELF:policy:MinimumBlankLinesBetweenMembers))
                             //
                             SELF:NewLine()
-                            i++
-                        ENDDO
+                        i++
+                    ENDDO
                     ENDIF
                     flag2 := FALSE
-                    declaration2:AcceptVisitor(SELF)
-                NEXT
+                declaration2:AcceptVisitor(SELF)
+            NEXT
             ENDIF
             SELF:CloseBrace(structBraceStyle)
             SELF:OptionalSemicolon(typeDeclaration:LastChild)
@@ -2344,7 +2362,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     SELF:WriteKeyword("ENUM")
                 OTHERWISE
                     //
-                    SELF:WriteKeyword("CLASS")
+                SELF:WriteKeyword("CLASS")
             END SWITCH
             SELF:NewLine()
             SELF:EndNode(typeDeclaration)
@@ -2533,7 +2551,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:Space(SELF:policy:SpaceAroundAssignment)
                 SELF:WriteToken(XSRoles.Assign)
                 SELF:Space(SELF:policy:SpaceAroundAssignment)
-                variableInitializer:Initializer:AcceptVisitor(SELF)
+            variableInitializer:Initializer:AcceptVisitor(SELF)
             ENDIF
             SELF:EndNode(variableInitializer)
             
@@ -2602,9 +2620,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     flag := FALSE
                 ELSE
                     //
-                SELF:Comma(node, FALSE)
+                    SELF:Comma(node, FALSE)
                 ENDIF
-            node:AcceptVisitor(SELF)
+                node:AcceptVisitor(SELF)
             NEXT
             
         PROTECTED VIRTUAL METHOD WriteCommaSeparatedListInBrackets(list AS System.Collections.Generic.IEnumerable<Expression>) AS VOID
@@ -2647,7 +2665,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 //
                 SELF:Space(spaceWithin)
                 SELF:WriteCommaSeparatedList(list)
-                SELF:Space(spaceWithin)
+            SELF:Space(spaceWithin)
             ENDIF
             SELF:RBrace()
             
@@ -2741,7 +2759,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF (! privateImplementationType:IsNull)
                 //
                 privateImplementationType:AcceptVisitor(SELF)
-                SELF:WriteToken(XSRoles.Dot)
+            SELF:WriteToken(XSRoles.Dot)
             ENDIF
             
         PROTECTED VIRTUAL METHOD WriteQualifiedIdentifier(identifiers AS System.Collections.Generic.IEnumerable<Identifier>) AS VOID
@@ -2755,9 +2773,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     flag := FALSE
                 ELSE
                     //
-                    SELF:writer:WriteToken(XSRoles.Dot, ".")
+                SELF:writer:WriteToken(XSRoles.Dot, ".")
                 ENDIF
-                SELF:writer:WriteIdentifier(identifier)
+            SELF:writer:WriteIdentifier(identifier)
             NEXT
             
         PROTECTED VIRTUAL METHOD WriteToken(tokenRole AS TokenRole) AS VOID
@@ -2834,6 +2852,33 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             RETURN SELF:system:GetCecil(mbr)
             ENDIF
             RETURN NULL
+
+        PRIVATE METHOD GetCurrentType( annotations AS IEnumerable<OBJECT> ) AS ITYPE
+            LOCAL resolved AS MemberResolveResult
+            LOCAL invocType AS IType
+            //
+            invocType := null
+            FOREACH ann AS OBJECT IN annotations
+                resolved := ann ASTYPE MemberResolveResult
+                IF(resolved != NULL)
+                    invocType:= resolved:@@Member:DeclaringType
+                    EXIT
+                ENDIF
+            NEXT
+            RETURN invocType
+
+        PRIVATE METHOD IsUsingCurrentType( annotations AS IEnumerable<OBJECT> ) AS LOGIC
+            LOCAL invocType AS IType
+            //
+            invocType := SELF:GetCurrentType( annotations )
+            IF ( invocType != NULL )
+                IF ( SELF:currentType != null )
+                    RETURN ( invocType:FullName:CompareTo( SELF:currentType:FullName ) == 0 )
+                ENDIF
+                RETURN FALSE
+            ENDIF
+            RETURN FALSE
+
             
     END CLASS
     
