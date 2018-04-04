@@ -1301,11 +1301,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitIdentifierExpression(identifierExpression AS IdentifierExpression) AS VOID
             //
             SELF:StartNode(identifierExpression)
-            //            
-            IF ( SELF:IsUsingCurrentType(identifierExpression:Annotations) )
-                SELF:WriteKeyword( "SELF" )
-                SELF:WriteToken( "." )
-            ENDIF
+            //          
+            SELF:Prefix( identifierExpression )
             //
             SELF:WriteIdentifier(identifierExpression:IdentifierToken)
             SELF:WriteTypeArguments(identifierExpression:TypeArguments)
@@ -1418,11 +1415,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             LOCAL expression AS MemberReferenceExpression
             //
             SELF:StartNode(invocationExpression)
-            //            
-            IF ( SELF:IsUsingCurrentType(invocationExpression:Annotations) )
-                SELF:WriteKeyword( "SELF" )
-                SELF:WriteToken( "." )
-            ENDIF
+            //           
+            SELF:Prefix( invocationExpression )
             //
             invocationExpression:Target:AcceptVisitor(SELF)
             SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
@@ -1565,7 +1559,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:Space(TRUE)
             methodDeclaration:ReturnType:AcceptVisitor(SELF)
             // Save the current/Declaring type
-            currentType := SELF:GetCurrentType( methodDeclaration:Annotations )
+            currentType := SELF:GetElementType( methodDeclaration )
             //
             SELF:WriteMethodBody(methodDeclaration:Body, SELF:policy:MethodBraceStyle)
             currentType := NULL
@@ -1762,15 +1756,22 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF ( parameterDeclaration:ParameterModifier == ParameterModifier.This)
                 //
                 SELF:WriteKeyword("SELF")
-            SELF:Space(TRUE)
+                SELF:Space(TRUE)
             ENDIF
             //
             IF (! String.IsNullOrEmpty(parameterDeclaration:Name))
                 //
-            SELF:WriteIdentifier(parameterDeclaration:NameToken)
+                SELF:WriteIdentifier(parameterDeclaration:NameToken)
+            ENDIF
+            IF (! parameterDeclaration:DefaultExpression:IsNull)
+                //
+                SELF:Space()
+                SELF:WriteToken(XSRoles.Assign)
+                SELF:Space()
+                parameterDeclaration:DefaultExpression:AcceptVisitor(SELF)
             ENDIF
             //
-            SELF:Space(TRUE)
+            SELF:Space()
             SWITCH parameterDeclaration:ParameterModifier
                 CASE ParameterModifier.Ref
                     //
@@ -1792,16 +1793,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             IF (! parameterDeclaration:@@Type:IsNull .AND. ! String.IsNullOrEmpty(parameterDeclaration:Name))
                 //
-            SELF:Space(TRUE)
+                SELF:Space(TRUE)
             ENDIF
             
-            IF (! parameterDeclaration:DefaultExpression:IsNull)
-                //
-                SELF:Space(SELF:policy:SpaceAroundAssignment)
-                SELF:WriteToken(XSRoles.Assign)
-                SELF:Space(SELF:policy:SpaceAroundAssignment)
-            parameterDeclaration:DefaultExpression:AcceptVisitor(SELF)
-            ENDIF
+            
             SELF:EndNode(parameterDeclaration)
             
         VIRTUAL METHOD VisitParenthesizedExpression(parenthesizedExpression AS ParenthesizedExpression) AS VOID
@@ -2529,6 +2524,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitVariableInitializer(variableInitializer AS VariableInitializer) AS VOID
             //
             SELF:StartNode(variableInitializer)
+            //   
+            SELF:Prefix( variableInitializer )
+            //
             SELF:WriteIdentifier(variableInitializer:NameToken)
             IF (! variableInitializer:Initializer:IsNull)
                 //
@@ -2720,7 +2718,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 LOCAL localVisitor := XSharpLocalVisitor{ SELF:writer, SELF:policy, SELF } AS XSharpLocalVisitor
                 FOREACH statement AS Statement IN body:Statements
                     //
-                statement:AcceptVisitor( localVisitor )
+                    statement:AcceptVisitor( localVisitor )
                 NEXT
                 //
                 IF ( localVisitor:Variables:Count > 0 )
@@ -2730,7 +2728,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:writer:Unindent()
                 // Now, Generate Code
                 SELF:WriteBlock(body, style)
-            SELF:NewLine()
+                SELF:NewLine()
             ENDIF
             
         PROTECTED VIRTUAL METHOD WriteModifiers(modifierTokens AS System.Collections.Generic.IEnumerable<CSharpModifierToken>) AS VOID
@@ -2842,34 +2840,64 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             RETURN NULL
 
-        PRIVATE METHOD GetCurrentType( annotations AS IEnumerable<OBJECT> ) AS ITYPE
-            LOCAL resolved AS MemberResolveResult
-            LOCAL invocType AS IType
+        PRIVATE METHOD GetElementType( element AS IAnnotatable ) AS ITYPE
+            LOCAL eltType AS IType
+            LOCAL entity AS IEntity
             //
-            invocType := null
-            FOREACH ann AS OBJECT IN annotations
+            eltType := null
+            entity := SELF:GetElement( element )
+            IF ( entity != NULL )
+                eltType := entity:DeclaringType
+            ENDIF
+            //
+            RETURN eltType
+
+        PRIVATE METHOD GetElement( element AS IAnnotatable ) AS IEntity
+            LOCAL resolved AS MemberResolveResult
+            LOCAL mbr AS IEntity
+            //
+            mbr := null
+            FOREACH ann AS OBJECT IN element:Annotations
                 resolved := ann ASTYPE MemberResolveResult
                 IF(resolved != NULL)
-                    invocType:= resolved:@@Member:DeclaringType
+                    mbr:= resolved:@@Member
                     EXIT
                 ENDIF
             NEXT
-            RETURN invocType
+            RETURN mbr
 
-        PRIVATE METHOD IsUsingCurrentType( annotations AS IEnumerable<OBJECT> ) AS LOGIC
+
+        PRIVATE METHOD IsDeclaredInCurrentType( element AS IAnnotatable ) AS LOGIC
             LOCAL invocType AS IType
             //
-            invocType := SELF:GetCurrentType( annotations )
+            invocType := SELF:GetElementType( element )
             IF ( invocType != NULL )
                 IF ( SELF:currentType != null )
-                    //RETURN ( invocType:FullName:CompareTo( SELF:currentType:FullName ) == 0 )
-                    RETURN FALSE
+                    RETURN ( invocType:FullName:CompareTo( SELF:currentType:FullName ) == 0 )
                 ENDIF
                 RETURN FALSE
             ENDIF
             RETURN FALSE
 
-            
+        PRIVATE METHOD Prefix( element AS IAnnotatable ) AS VOID
+            LOCAL elt AS IEntity
+            //
+            elt := GetElement( element )
+            IF ( elt != NULL )
+                IF ( elt:IsStatic )
+                    SELF:WriteToken( elt:FullName )
+                    SELF:WriteToken( "." )
+                ELSE
+                    IF ( SELF:IsDeclaredInCurrentType( element ) )
+                        SELF:WriteKeyword( "SELF" )
+                        SELF:WriteToken( ":" )
+                    ENDIF
+                ENDIF
+            ENDIF
+
+
+
+           
     END CLASS
     
 END NAMESPACE 
