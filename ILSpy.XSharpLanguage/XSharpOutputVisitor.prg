@@ -287,6 +287,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:WriteToken(XSRoles.RBrace)
             
+        PROTECTED VIRTUAL METHOD LBracket() AS VOID
+            //
+            SELF:WriteToken(XSRoles.LBracket)
+            
+        PROTECTED VIRTUAL METHOD RBracket() AS VOID
+            //
+            SELF:WriteToken(XSRoles.RBracket)
+
+        PROTECTED VIRTUAL METHOD LChevron() AS VOID
+            //
+            SELF:WriteToken(XSRoles.LChevron)
+            
+        PROTECTED VIRTUAL METHOD RChevron() AS VOID
+            //
+            SELF:WriteToken(XSRoles.RChevron)                        
             
         PRIVATE METHOD MaybeNewLinesAfterUsings(node AS AstNode) AS VOID
             LOCAL nextSibling AS AstNode
@@ -389,7 +404,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 nextLine := BraceStyle.NextLine
             ELSE
                 //
-            nextLine := BraceStyle.EndOfLine
+                nextLine := BraceStyle.EndOfLine
             ENDIF
             SELF:OpenBrace(nextLine)
             SELF:LBrace()
@@ -404,14 +419,15 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //
                     SELF:Comma(node2, TRUE)
                     SELF:WriteToken( ";" )
-                SELF:NewLine()
+                    SELF:NewLine()
                 ENDIF
                 node := node2
-            node2:AcceptVisitor(SELF)
+                node2:AcceptVisitor(SELF)
             NEXT
             IF (node != NULL)
                 //
-            SELF:OptionalComma(node:NextSibling)
+                SELF:OptionalComma(node:NextSibling)
+                SELF:WriteToken( ";" )
             ENDIF
             SELF:NewLine()
             SELF:RBrace()
@@ -547,17 +563,25 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitArrayCreateExpression(arrayCreateExpression AS ArrayCreateExpression) AS VOID
             //
             SELF:StartNode(arrayCreateExpression)
-            SELF:WriteKeyword(ArrayCreateExpression.NewKeywordRole)
-            arrayCreateExpression:@@Type:AcceptVisitor(SELF)
-            IF (arrayCreateExpression:Arguments:Count > 0)
-                //
-            SELF:WriteCommaSeparatedListInBrackets(arrayCreateExpression:Arguments)
+            IF ( arrayCreateExpression:Initializer:IsNull )
+                arrayCreateExpression:@@Type:AcceptVisitor(SELF)
+                IF (arrayCreateExpression:Arguments:Count > 0)
+                    //
+                    SELF:LBracket()
+                    SELF:RBracket()
+                    SELF:WriteCommaSeparatedListInBraces(arrayCreateExpression:Arguments, true)
+                ENDIF
+                FOREACH specifier AS ArraySpecifier IN arrayCreateExpression:AdditionalArraySpecifiers
+                    //
+                    specifier:AcceptVisitor(SELF)
+                NEXT
+            ELSE
+                SELF:LChevron()
+                arrayCreateExpression:@@Type:AcceptVisitor(SELF)
+                SELF:RChevron()
+                SELF:WriteToken( ";" )
+                arrayCreateExpression:Initializer:AcceptVisitor(SELF)
             ENDIF
-            FOREACH specifier AS ArraySpecifier IN arrayCreateExpression:AdditionalArraySpecifiers
-                //
-            specifier:AcceptVisitor(SELF)
-            NEXT
-            arrayCreateExpression:Initializer:AcceptVisitor(SELF)
             SELF:EndNode(arrayCreateExpression)
             
         VIRTUAL METHOD VisitArrayInitializerExpression(arrayInitializerExpression AS ArrayInitializerExpression) AS VOID
@@ -570,7 +594,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 System.Linq.Enumerable.Single<Expression>(arrayInitializerExpression:Elements):AcceptVisitor(SELF)
             ELSE
                 //
-            SELF:PrintInitializerElements(arrayInitializerExpression:Elements)
+                SELF:PrintInitializerElements(arrayInitializerExpression:Elements)
             ENDIF
             SELF:EndNode(arrayInitializerExpression)
             
@@ -653,9 +677,18 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             
         VIRTUAL METHOD VisitBinaryOperatorExpression(binaryOperatorExpression AS BinaryOperatorExpression) AS VOID
             LOCAL spaceAroundBitwiseOperator AS LOGIC
+            LOCAL lGroup AS LOGIC
+            //
+            lGroup := ( binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalAnd ) .OR. ( binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalOr )
             //
             SELF:StartNode(binaryOperatorExpression)
+            IF lGroup
+                SELF:LPar()
+            ENDIF
             binaryOperatorExpression:Left:AcceptVisitor(SELF)
+            IF lGroup
+                SELF:RPar()
+            ENDIF
             SWITCH binaryOperatorExpression:Operator
                 CASE BinaryOperatorType.BitwiseAnd
                 CASE BinaryOperatorType.BitwiseOr
@@ -705,9 +738,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     THROW System.NotSupportedException{"Invalid value for BinaryOperatorType"}
             END SWITCH
             SELF:Space(spaceAroundBitwiseOperator)
-            SELF:WriteToken(BinaryOperatorExpression.GetOperatorRole(binaryOperatorExpression:Operator))
+            IF (binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalAnd )
+                SELF:WriteToken(".AND.")
+            ELSEIF (binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalOr )
+                SELF:WriteToken(".OR.")
+            ELSE
+                SELF:WriteToken(BinaryOperatorExpression.GetOperatorRole(binaryOperatorExpression:Operator))
+            ENDIF
             SELF:Space(spaceAroundBitwiseOperator)
+            IF lGroup
+                SELF:LPar()
+            ENDIF
             binaryOperatorExpression:Right:AcceptVisitor(SELF)
+            IF lGroup
+                SELF:RPar()
+            ENDIF
             SELF:EndNode(binaryOperatorExpression)
             
         VIRTUAL METHOD VisitBlockStatement(blockStatement AS BlockStatement) AS VOID
@@ -1266,14 +1311,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword("TO")
             SELF:Space()
             forStatement:Condition:AcceptVisitor(SELF)
-            SELF:Space()
             IF (System.Linq.Enumerable.Any<Statement>(forStatement:Iterators))
                 //
+                SELF:Space()
                 SELF:WriteKeyword("STEP")
                 SELF:Space()
                 SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
             ENDIF
-            SELF:Space()
             SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement, NewLinePlacement.NewLine)
             SELF:WriteKeyword("NEXT")
             SELF:NewLine()
@@ -1698,7 +1742,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF (useBraces)
                     //
                     SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-                SELF:WriteCommaSeparatedListInBrace((System.Collections.Generic.IEnumerable<AstNode>)objectCreateExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
+                SELF:WriteCommaSeparatedListInBraces((System.Collections.Generic.IEnumerable<AstNode>)objectCreateExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
             ELSE
                 SELF:LBrace()
                 SELF:Space(SELF:policy:SpaceWithinMethodCallParentheses)
@@ -2655,7 +2699,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             SELF:RPar()
             
-        PROTECTED VIRTUAL METHOD WriteCommaSeparatedListInBrace(list AS System.Collections.Generic.IEnumerable<AstNode>, spaceWithin AS LOGIC) AS VOID
+        PROTECTED VIRTUAL METHOD WriteCommaSeparatedListInBraces(list AS System.Collections.Generic.IEnumerable<AstNode>, spaceWithin AS LOGIC) AS VOID
             //
             SELF:LBrace()
             IF (System.Linq.Enumerable.Any<AstNode>(list))
@@ -2749,7 +2793,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             FOREACH token AS CSharpModifierToken IN modifierTokens
                 //
                 SELF:WriteKeyword( XSharpTokenHelper.GetModifierName( token:Modifier ) )
-            SELF:Space(TRUE)
+                SELF:Space(TRUE)
             NEXT
             
         PROTECTED VIRTUAL METHOD WritePrivateImplementationType(privateImplementationType AS AstType) AS VOID

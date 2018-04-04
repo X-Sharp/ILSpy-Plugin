@@ -191,8 +191,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitFixedVariableInitializer(fixedVariableInitializer AS FixedVariableInitializer) AS VOID
             
         VIRTUAL METHOD VisitForeachStatement(foreachStatement AS ForeachStatement) AS VOID
+            SELF:WriteEmbeddedStatement(foreachStatement:EmbeddedStatement)
             
         VIRTUAL METHOD VisitForStatement(forStatement AS ForStatement) AS VOID
+            SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement)
             
         VIRTUAL METHOD VisitGotoCaseStatement(gotoCaseStatement AS GotoCaseStatement) AS VOID
             
@@ -209,7 +211,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 WriteEmbeddedStatement(ifElseStatement:TrueStatement)
             ELSE 
                 WriteEmbeddedStatement(ifElseStatement:TrueStatement)
-            WriteEmbeddedStatement(ifElseStatement:FalseStatement)
+                WriteEmbeddedStatement(ifElseStatement:FalseStatement)
             ENDIF
             
         VIRTUAL METHOD VisitIndexerDeclaration(indexerDeclaration AS IndexerDeclaration) AS VOID

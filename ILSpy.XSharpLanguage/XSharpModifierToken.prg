@@ -44,7 +44,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE Modifiers.Override
                     Result := "override"
                 CASE Modifiers.Readonly
-                    Result := "readonly"
+                    Result := "initonly"
                 CASE Modifiers.Const
                     Result := "const"
                 CASE Modifiers.New
