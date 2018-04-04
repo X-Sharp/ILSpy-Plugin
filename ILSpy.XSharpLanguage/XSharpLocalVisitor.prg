@@ -353,6 +353,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:writer:WriteIdentifier(variableInitializer:NameToken)
             
         VIRTUAL METHOD VisitWhileStatement(whileStatement AS WhileStatement) AS VOID
+        SELF:WriteEmbeddedStatement(whileStatement:EmbeddedStatement)
             
         VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
             
