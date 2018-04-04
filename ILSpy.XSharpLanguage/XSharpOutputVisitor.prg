@@ -2890,7 +2890,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 ELSE
                     IF ( SELF:IsDeclaredInCurrentType( element ) )
                         SELF:WriteKeyword( "SELF" )
-                        SELF:WriteToken( ":" )
+                        SELF:WriteToken( "." )
                     ENDIF
                 ENDIF
             ENDIF
