@@ -2,6 +2,7 @@
 
 
 USING System
+USING System.IO
 USING System.Collections.Generic
 USING System.Linq
 USING System.Text
@@ -198,18 +199,49 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 RETURN NULL
             END SWITCH
             
+            // This is used in the TreeView of the Assembly (Left Window)
         PUBLIC OVERRIDE METHOD FormatMethodName( methd AS MethodDefinition ) AS STRING
             IF (methd == NULL)
             THROW ArgumentNullException{"method"}
             ENDIF
             IF (!methd.IsConstructor)
-                RETURN methd.Name
+            RETURN methd.Name
             ENDIF
             //
             RETURN "Constructor"
-            
-            
         
+        PUBLIC OVERRIDE METHOD FormatTypeName(type AS TypeDefinition ) AS STRING
+            IF (type == NULL)
+            THROW ArgumentNullException{"type"}
+            ENDIF
+            RETURN SELF:TypeToString(ConvertTypeOptions.IncludeTypeParameterDefinitions | ConvertTypeOptions.DoNotUsePrimitiveTypeNames, type, NULL)
+        
+        PRIVATE METHOD TypeToString(options AS ConvertTypeOptions , typeRef AS TypeReference , typeAttributes := NULL AS ICustomAttributeProvider ) AS STRING
+            LOCAL astType AS AstType
+            LOCAL compType AS ComposedType
+            LOCAL sWriter AS StringWriter
+            LOCAL parameterDefinition AS ParameterDefinition
+            //
+            astType := CSharpDecompiler.ConvertType(typeRef, typeAttributes, options)
+            sWriter := StringWriter{}
+            IF (typeRef:IsByReference)
+                parameterDefinition := typeAttributes ASTYPE ParameterDefinition
+                IF ( (parameterDefinition != NULL) .AND. (!parameterDefinition:IsIn .AND. parameterDefinition:IsOut) )
+                    sWriter:Write("out ")
+                ELSE
+                    sWriter:Write("ref ")
+                ENDIF
+                compType := astType ASTYPE ComposedType
+                IF ((compType != null) .AND. (compType:PointerRank > 0))
+                    compType:PointerRank--
+                ENDIF
+            ENDIF
+            astType:AcceptVisitor(XSharpOutputVisitor{sWriter, FormattingOptionsFactory.CreateEmpty(), null})
+            RETURN sWriter:ToString()
+            
+            
+            
+            
     END CLASS
     
     

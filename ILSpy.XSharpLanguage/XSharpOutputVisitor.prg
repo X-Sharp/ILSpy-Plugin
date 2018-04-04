@@ -2523,24 +2523,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:EndNode(usingStatement)
             
         VIRTUAL METHOD VisitVariableDeclarationStatement(variableDeclarationStatement AS VariableDeclarationStatement) AS VOID
-            ////
-            //SELF:StartNode(variableDeclarationStatement)
-            ////
-            //SELF:WriteKeyword( "LOCAL" )
-            //SELF:Space(TRUE)
-            //SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)variableDeclarationStatement:Variables )
-            //SELF:Space(TRUE)
-            //SELF:WriteKeyword( "AS" )
-            //SELF:Space(TRUE)
-            //SELF:WriteModifiers(variableDeclarationStatement:GetChildrenByRole<CSharpModifierToken>(VariableDeclarationStatement.ModifierRole))
-            //SELF:Space(TRUE)
-            //variableDeclarationStatement:@@Type:AcceptVisitor(SELF)
-            ////SELF:Semicolon()
-            //SELF:NewLine()
-            //SELF:EndNode(variableDeclarationStatement)
             // Now that LOCALs are declare on top of Statement
             SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)variableDeclarationStatement:Variables )
-            SELF:NewLine()
             
         VIRTUAL METHOD VisitVariableInitializer(variableInitializer AS VariableInitializer) AS VOID
             //
@@ -2603,7 +2587,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:OpenBrace(style)
             FOREACH statement AS Statement IN blockStatement:Statements
                 //
-            statement:AcceptVisitor(SELF)
+                statement:AcceptVisitor(SELF)
+                IF ( statement IS VariableDeclarationStatement )
+                    SELF:NewLine()
+                ENDIF
             NEXT
             //
             SELF:CloseBrace(style)
@@ -2841,15 +2828,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             LOCAL typeDef AS IType
             LOCAL mbr AS IMember
             //
-            typeDef := sym ASTYPE IType
-            IF (typeDef != NULL)
-                //
-            RETURN SELF:system:GetCecil(typeDef:GetDefinition())
-            ENDIF
-            mbr := sym ASTYPE IMember
-            IF (mbr != NULL)
-                //
-            RETURN SELF:system:GetCecil(mbr)
+            IF (SELF:system != null )
+                typeDef := sym ASTYPE IType
+                IF (typeDef != NULL)
+                    //
+                    RETURN SELF:system:GetCecil(typeDef:GetDefinition())
+                ENDIF
+                mbr := sym ASTYPE IMember
+                IF (mbr != NULL)
+                    //
+                    RETURN SELF:system:GetCecil(mbr)
+                ENDIF
             ENDIF
             RETURN NULL
 
