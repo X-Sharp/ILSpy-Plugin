@@ -796,8 +796,15 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitCheckedStatement(checkedStatement AS CheckedStatement) AS VOID
             //
             SELF:StartNode(checkedStatement)
-            SELF:WriteKeyword(CheckedStatement.CheckedKeywordRole)
+            SELF:WriteKeyword("BEGIN")
+            SELF:Space(TRUE)
+            SELF:WriteKeyword("CHECKED")
+            SELF:Space(TRUE)
+            SELF:NewLine()
             checkedStatement:Body:AcceptVisitor(SELF)
+            SELF:WriteKeyword("END")
+            SELF:Space(TRUE)
+            SELF:WriteKeyword("CHECKED")
             SELF:EndNode(checkedStatement)
             
         PRIVATE METHOD VisitChoice(choice AS Choice) AS VOID
@@ -903,7 +910,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 constructorDeclaration:Initializer:AcceptVisitor(SELF)
             SELF:writer:Unindent()
             ENDIF
+            // Save the current/Declaring type
+            SELF:currentType := SELF:GetElementType( constructorDeclaration )
+            //
             SELF:WriteMethodBody(constructorDeclaration:Body, SELF:policy:ConstructorBraceStyle)
+            SELF:currentType := NULL
             SELF:EndNode(constructorDeclaration)
             
         VIRTUAL METHOD VisitConstructorInitializer(constructorInitializer AS ConstructorInitializer) AS VOID
@@ -1559,10 +1570,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:Space(TRUE)
             methodDeclaration:ReturnType:AcceptVisitor(SELF)
             // Save the current/Declaring type
-            currentType := SELF:GetElementType( methodDeclaration )
+            SELF:currentType := SELF:GetElementType( methodDeclaration )
             //
             SELF:WriteMethodBody(methodDeclaration:Body, SELF:policy:MethodBraceStyle)
-            currentType := NULL
+            SELF:currentType := NULL
             SELF:EndNode(methodDeclaration)
             
         VIRTUAL METHOD VisitNamedArgumentExpression(namedArgumentExpression AS NamedArgumentExpression) AS VOID
@@ -1728,6 +1739,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
             SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)operatorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+
             SELF:WriteMethodBody(operatorDeclaration:Body, SELF:policy:MethodBraceStyle)
             SELF:EndNode(operatorDeclaration)
             
@@ -2711,7 +2723,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //
                 SELF:Semicolon()
             ELSE
-                //
+                
                 SELF:NewLine()
                 SELF:writer:Indent()
                 // First Try to declare all LOCALs
@@ -2729,6 +2741,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 // Now, Generate Code
                 SELF:WriteBlock(body, style)
                 SELF:NewLine()
+
             ENDIF
             
         PROTECTED VIRTUAL METHOD WriteModifiers(modifierTokens AS System.Collections.Generic.IEnumerable<CSharpModifierToken>) AS VOID
@@ -2885,8 +2898,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             elt := GetElement( element )
             IF ( elt != NULL )
                 IF ( elt:IsStatic )
-                    SELF:WriteToken( elt:FullName )
-                    SELF:WriteToken( "." )
+                    //SELF:WriteToken( elt:Name )
+                    //SELF:WriteToken( "." )
                 ELSE
                     IF ( SELF:IsDeclaredInCurrentType( element ) )
                         SELF:WriteKeyword( "SELF" )
