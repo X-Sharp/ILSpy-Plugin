@@ -2862,7 +2862,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             invocType := SELF:GetCurrentType( annotations )
             IF ( invocType != NULL )
                 IF ( SELF:currentType != null )
-                    RETURN ( invocType:FullName:CompareTo( SELF:currentType:FullName ) == 0 )
+                    //RETURN ( invocType:FullName:CompareTo( SELF:currentType:FullName ) == 0 )
+                    RETURN FALSE
                 ENDIF
                 RETURN FALSE
             ENDIF
