@@ -27,7 +27,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebuggerCommand>C:\Users\fabri.FABPORTABLE\Documents\Visual Studio 2017\Projects\ILSpy.XSharpLanguage\ILSpy.XSharpLanguage\bin\Debug\ILSpy.exe</DebuggerCommand>
+    <DebuggerCommand>
+    </DebuggerCommand>
     <DebuggerCommandArguments />
     <DebuggerWorkingDirectory />
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
