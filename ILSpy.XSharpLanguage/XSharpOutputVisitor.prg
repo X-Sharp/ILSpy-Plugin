@@ -110,8 +110,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         PROTECTED VIRTUAL METHOD CloseBrace(style AS BraceStyle) AS VOID
             //
             SWITCH style
-            CASE BraceStyle.DoNotChange
-                CASE BraceStyle.EndOfLine
+                CASE BraceStyle.DoNotChange
+            CASE BraceStyle.EndOfLine
                 CASE BraceStyle.EndOfLineWithoutSpace
                 CASE BraceStyle.NextLine
                     //
@@ -331,7 +331,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         PROTECTED VIRTUAL METHOD OpenBrace(style AS BraceStyle) AS VOID
             //
             SWITCH style
-            CASE BraceStyle.DoNotChange
+                CASE BraceStyle.DoNotChange
                 CASE BraceStyle.EndOfLine
                 CASE BraceStyle.BannerStyle
                     //
@@ -368,7 +368,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 OTHERWISE
                     //
                     THROW System.ArgumentOutOfRangeException{}
-                END SWITCH
+            END SWITCH
             SELF:writer:Indent()
             //SELF:NewLine()
             
@@ -1760,7 +1760,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:EndNode(objectCreateExpression)
             
         VIRTUAL METHOD VisitOperatorDeclaration(operatorDeclaration AS OperatorDeclaration) AS VOID
+            LOCAL needReturnType AS LOGIC
             //
+            needReturnType := FALSE
             SELF:StartNode(operatorDeclaration)
             SELF:WriteAttributes(operatorDeclaration:Attributes)
             SELF:WriteModifiers(operatorDeclaration:ModifierTokens)
@@ -1774,9 +1776,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     SELF:WriteKeyword(OperatorDeclaration.ImplicitRole)
                 ELSE
                     //
-                    operatorDeclaration:ReturnType:AcceptVisitor(SELF)
+                    needReturnType := TRUE
+                    
                 ENDIF
             ENDIF
+            SELF:Space(TRUE)
             SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
             SELF:Space(TRUE)
             IF ((operatorDeclaration:OperatorType == OperatorType.Explicit) .OR. (operatorDeclaration:OperatorType == OperatorType.Implicit))
@@ -1788,7 +1792,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
             SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)operatorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
-            
+            //
+            IF ( needReturnType )
+                SELF:Space(TRUE)
+                SELF:WriteKeyword( "AS" )
+                SELF:Space(TRUE)
+                operatorDeclaration:ReturnType:AcceptVisitor(SELF)
+            ENDIF
+            //
             SELF:WriteMethodBody(operatorDeclaration:Body, SELF:policy:MethodBraceStyle)
             SELF:EndNode(operatorDeclaration)
             
