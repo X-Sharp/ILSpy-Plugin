@@ -24,7 +24,7 @@ USING ICSharpCode.AvalonEdit.Highlighting
 
 
 BEGIN NAMESPACE ILSpy.XSharpLanguage
-    
+
     /// <summary>
     /// The XSharpHighlightingTokenWriter class.
     /// </summary>
@@ -68,12 +68,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         //
         PRIVATE specialTypeNames AS Hashtable
         PRIVATE beginend AS LOGIC
+        PRIVATE xsSettings AS XSharpOptions
         
         // Methods
-        CONSTRUCTOR(decoratedWriter AS TokenWriter, textOutput AS ISmartTextOutput)//Inline call to base() in C#
+        CONSTRUCTOR(decoratedWriter AS TokenWriter, textOutput AS ISmartTextOutput, settings AS XSharpOptions)//Inline call to base() in C#
             SUPER(decoratedWriter)
             LOCAL definition AS IHighlightingDefinition
             //
+            SELF:xsSettings := settings
             SELF:nodeStack := System.Collections.Generic.Stack<AstNode>{}
             SELF:textOutput := textOutput
             definition := HighlightingManager.@@Instance:GetDefinition("C#")
@@ -127,7 +129,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 specialTypeNames["bool"] := "Logic"
                 specialTypeNames["float"] := "real4"
                 specialTypeNames["double"] := "real8"
-            specialTypeNames["decimal"] := "Decimal"
+                specialTypeNames["decimal"] := "Decimal"
             ENDIF
             SELF:beginend := FALSE
             
@@ -144,12 +146,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 parent := SELF:nodeStack:Peek() ASTYPE Identifier
                 IF (parent != NULL)
                     //
-                parent := parent:Parent
+                    parent := parent:Parent
                 ENDIF
                 IF (XSharpHighlightingTokenWriter.IsDefinition(parent))
                     //
-                RETURN AnnotationExtensions.GetSymbol(parent)
-            ENDIF
+                    RETURN AnnotationExtensions.GetSymbol(parent)
+                ENDIF
             ENDIF
             RETURN NULL
             
@@ -163,11 +165,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             sym := AnnotationExtensions.GetSymbol(node)
             IF (((sym == NULL) .AND. (node:Role == Roles.TargetExpression)) .AND. (node:Parent IS InvocationExpression))
                 //
-            sym := AnnotationExtensions.GetSymbol(node:Parent)
+                sym := AnnotationExtensions.GetSymbol(node:Parent)
             ENDIF
             IF ((sym != NULL) .AND. (node:Parent IS ObjectCreateExpression))
                 //
-            sym := AnnotationExtensions.GetSymbol(node:Parent)
+                sym := AnnotationExtensions.GetSymbol(node:Parent)
             ENDIF
             VAR nodeIE := node ASTYPE IdentifierExpression
             IF ((nodeIE != NULL) .AND. (node:Role == Roles.TargetExpression)) 
@@ -178,9 +180,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     declaringType := mbr:DeclaringType
                     IF ((declaringType != NULL) .AND. (declaringType:Kind == TypeKind.Delegate))
                         //
-                    RETURN NULL
+                        RETURN NULL
+                    ENDIF
                 ENDIF
-            ENDIF
             ENDIF
             RETURN sym
             
@@ -188,12 +190,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             IF ((node IS EntityDeclaration))
                 //
-            RETURN TRUE
+                RETURN TRUE
             ENDIF
             IF ((node IS VariableInitializer) .AND. (node:Parent IS FieldDeclaration))
                 //
                 node := node:Parent
-            RETURN TRUE
+                RETURN TRUE
             ENDIF
             RETURN (node IS FixedVariableInitializer)
             
@@ -225,26 +227,26 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 accessor := identifier:Ancestors.OfType<Accessor>().FirstOrDefault()
                 IF (( accessor != NULL) .AND. (accessor:Role != PropertyDeclaration.GetterRole))
                     //
-                color := SELF:valueKeywordColor
-            ENDIF
+                    color := SELF:valueKeywordColor
+                ENDIF
             ENDIF
             currentDefinition := SELF:GetCurrentDefinition()
             IF (currentDefinition != NULL)
                 //
                 definition := currentDefinition ASTYPE ITypeDefinition
                 IF (definition == NULL)
+                    //
+                    mthd := currentDefinition ASTYPE IMethod
+                    IF (mthd != NULL)
                         //
-                        mthd := currentDefinition ASTYPE IMethod
-                        IF (mthd != NULL)
-                                //
-                                method2 := mthd
-                            color := SELF:methodDeclarationColor
-                        ELSE
+                        method2 := mthd
+                        color := SELF:methodDeclarationColor
+                    ELSE
+                        //
+                        fld := currentDefinition ASTYPE IField
+                        IF (fld != NULL)
                             //
-                            fld := currentDefinition ASTYPE IField
-                            IF (fld != NULL)
-                                //
-                                field2 := fld
+                            field2 := fld
                             color := SELF:fieldDeclarationColor
                         ENDIF
                     ENDIF
@@ -266,27 +268,27 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                             color := SELF:delegateTypeColor
                         CASE TypeKind.Enum
                             //
-                        color := SELF:enumerationTypeColor
-                END SWITCH
-            ENDIF
+                            color := SELF:enumerationTypeColor
+                    END SWITCH
+                ENDIF
             ENDIF
             currentMemberReference := SELF:GetCurrentMemberReference()
             IF (currentMemberReference != NULL)
                 //
                 typeDef := currentMemberReference ASTYPE IType
                 IF (typeDef == NULL)
+                    //
+                    method3 := currentMemberReference ASTYPE IMethod
+                    IF (method3 != NULL)
                         //
-                        method3 := currentMemberReference ASTYPE IMethod
-                        IF (method3 != NULL)
-                                //
-                                method4 := method3
-                            color := SELF:methodCallColor
-                        ELSE
+                        method4 := method3
+                        color := SELF:methodCallColor
+                    ELSE
+                        //
+                        field3 := currentMemberReference ASTYPE IField
+                        IF (field3 != NULL)
                             //
-                            field3 := currentMemberReference ASTYPE IField
-                            IF (field3 != NULL)
-                                //
-                                field4 := field3
+                            field4 := field3
                             color := SELF:fieldAccessColor
                         ENDIF
                     ENDIF
@@ -308,18 +310,18 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                             color := SELF:delegateTypeColor
                         CASE TypeKind.Enum
                             //
-                        color := SELF:enumerationTypeColor
-                END SWITCH
-            ENDIF
+                            color := SELF:enumerationTypeColor
+                    END SWITCH
+                ENDIF
             ENDIF
             IF (color != NULL)
                 //
-            SELF:textOutput:BeginSpan(color)
+                SELF:textOutput:BeginSpan(color)
             ENDIF
             SUPER:WriteIdentifier(identifier)
             IF (color != NULL)
                 //
-            SELF:textOutput:EndSpan()
+                SELF:textOutput:EndSpan()
             ENDIF
             
         VIRTUAL METHOD WriteKeyword(role AS Role, keyword AS STRING) AS VOID
@@ -331,7 +333,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "using"
                     IF beginend
                         color := structureKeywordsColor
-                        beginend := false
+                        beginend := FALSE
                     ELSE
                         color := namespaceKeywordsColor
                     ENDIF
@@ -343,14 +345,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "true"
                 CASE "false"
                     color := trueKeywordColor
-                CASE "public"
+            CASE "public"
                 CASE "export"
                 CASE "internal"
                 CASE "protected"
                 CASE "private"
                 CASE "hidden"
                     color := visibilityKeywordsColor
-            CASE "begin"
+                CASE "begin"
                 CASE "end"
                     color := structureKeywordsColor
                     beginend := TRUE
@@ -461,22 +463,25 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "return"
                 CASE "exit"
                     color := gotoKeywordsColor
-            END SWITCH
+                END SWITCH
             //
             LOCAL isAttr AS AttributeSection
             isAttr := SELF:nodeStack.PeekOrDefault<AstNode>() ASTYPE AttributeSection
             IF ( isAttr != NULL )
                 //
-            color := SELF:attributeKeywordsColor
+                color := SELF:attributeKeywordsColor
             ENDIF
             IF (color != NULL)
                 //
-            SELF:textOutput:BeginSpan(color)
+                SELF:textOutput:BeginSpan(color)
+            ENDIF
+            IF ( SELF:xsSettings:UpperKeyword )
+                keyword := keyword:ToUpper()
             ENDIF
             SUPER:WriteKeyword(role, keyword)
             IF (color != NULL)
                 //
-            SELF:textOutput:EndSpan()
+                SELF:textOutput:EndSpan()
             ENDIF
             
         VIRTUAL METHOD WritePrimitiveType(typeDef AS STRING) AS VOID
@@ -490,9 +495,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "logic"
                 CASE "byte"
                 CASE "char"
-                CASE "decimal"
+            CASE "decimal"
                 CASE "double"
-            CASE "real4"
+                CASE "real4"
                 CASE "real8"
                 CASE "enum"
                 CASE "float"
@@ -509,21 +514,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "string"
                 CASE "void"
                     color := referenceTypeKeywordsColor
-            END SWITCH
+                END SWITCH
             IF (color != NULL)
                 //
-            SELF:textOutput:BeginSpan(color)
+                SELF:textOutput:BeginSpan(color)
             ENDIF
             //
             // Convert System Types
             IF (specialTypeNames.Contains(typeDef))
-            typeDef := (STRING)specialTypeNames[typeDef]
+                typeDef := (STRING)specialTypeNames[typeDef]
             END IF
             //
             SUPER:WritePrimitiveType(typeDef)
             IF (color != NULL)
                 //
-            SELF:textOutput:EndSpan()
+                SELF:textOutput:EndSpan()
             ENDIF
             
         VIRTUAL METHOD WritePrimitiveValue(VALUE AS OBJECT,  literalValue := NULL AS STRING) AS VOID
@@ -532,20 +537,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             color := NULL
             IF (VALUE == NULL)
                 //
-            color := SELF:valueKeywordColor
+                color := SELF:valueKeywordColor
             ENDIF
             IF (Object.Equals(TRUE, VALUE) .OR. Object.Equals(FALSE, VALUE))
                 //
-            color := SELF:trueKeywordColor
+                color := SELF:trueKeywordColor
             ENDIF
             IF (color != NULL)
                 //
-            SELF:textOutput:BeginSpan(color)
+                SELF:textOutput:BeginSpan(color)
             ENDIF
             SUPER:WritePrimitiveValue(VALUE, literalValue)
             IF (color != NULL)
                 //
-            SELF:textOutput:EndSpan()
+                SELF:textOutput:EndSpan()
             ENDIF
             
             

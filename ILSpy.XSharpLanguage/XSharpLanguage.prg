@@ -17,17 +17,17 @@ USING ICSharpCode.Decompiler.TypeSystem
 USING Mono.Cecil
 
 BEGIN NAMESPACE ILSpy.XSharpLanguage
-    
+
     [ExportAttribute( TYPEOF(Language) )];
-        PUBLIC CLASS XSharpLanguage INHERIT Language
-        
-        
+    PUBLIC CLASS XSharpLanguage INHERIT Language
+    
+    
         CONSTRUCTOR()
             RETURN
             
         PUBLIC OVERRIDE PROPERTY Name AS STRING
             GET             
-            RETURN "XSharp"
+                RETURN "XSharp"
             END GET
         END PROPERTY
         
@@ -35,13 +35,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         PUBLIC OVERRIDE PROPERTY FileExtension AS STRING
             GET
                 // used in 'Save As' dialog
-            RETURN ".prg"
+                RETURN ".prg"
             END GET
         END PROPERTY
         
         PUBLIC OVERRIDE PROPERTY ProjectFileExtension AS STRING
             GET
-            RETURN ".xsproj"
+                RETURN ".xsproj"
             END GET
         END PROPERTY
         
@@ -54,7 +54,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             definitions := <IMemberDefinition>{methoddef}
             SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
             RETURN
-        
+            
         PUBLIC OVERRIDE METHOD DecompileProperty(propDef AS PropertyDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
             LOCAL decompiler AS CSharpDecompiler
             LOCAL definitions AS IMemberDefinition[]
@@ -63,7 +63,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             decompiler := SELF:CreateDecompiler( propDef:Module, options)
             definitions := <IMemberDefinition>{propDef}
             SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
-        
+            
         PUBLIC OVERRIDE METHOD DecompileField(fieldDef AS FieldDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
             LOCAL decompiler AS CSharpDecompiler
             LOCAL definitions AS IMemberDefinition[]
@@ -72,7 +72,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             decompiler := SELF:CreateDecompiler( fieldDef:Module,  options)
             definitions := <IMemberDefinition>{fieldDef}
             SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
-        
+            
         PUBLIC OVERRIDE  METHOD DecompileType(typeDef AS TypeDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
             LOCAL decompiler AS CSharpDecompiler
             LOCAL definitions AS IMemberDefinition[]
@@ -81,15 +81,15 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             decompiler := SELF:CreateDecompiler(typeDef:Module, options)
             definitions := <IMemberDefinition>{typeDef}
             SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
-        
+            
         PUBLIC OVERRIDE METHOD DecompileEvent(ev AS EventDefinition , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
             LOCAL decompiler AS CSharpDecompiler
             //
-            WriteCommentLine(output, TypeToString(ev.DeclaringType, TRUE, NULL))
-            decompiler := CreateDecompiler(ev.Module, options)
-            WriteCode(output, options.DecompilerSettings, decompiler.Decompile(ev), decompiler.TypeSystem)
+            WriteCommentLine(output, TypeToString(ev:DeclaringType, TRUE, NULL))
+            decompiler := CreateDecompiler(ev:Module, options)
+            WriteCode(output, options:DecompilerSettings, decompiler:Decompile(ev), decompiler:TypeSystem)
             
-        
+            
         PUBLIC OVERRIDE METHOD DecompileAssembly(assembly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
             LOCAL result AS ModuleDefinition
             //LOCAL iLSpyWholeProjectDecompiler AS ILSpyWholeProjectDecompiler
@@ -109,36 +109,39 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF (moduleDefinition:Types:Count > 0)
                 output:Write("// Global type: ")
                 output:WriteReference(moduleDefinition:Types[0]:FullName, moduleDefinition:Types[0], FALSE)
-            output:WriteLine()
+                output:WriteLine()
             ENDIF
             IF (moduleDefinition:EntryPoint != NULL)
                 output:Write("// Entry point: ")
                 output:WriteReference(moduleDefinition:EntryPoint:DeclaringType:FullName + ":" + moduleDefinition:EntryPoint:Name, moduleDefinition:EntryPoint, FALSE)
-            output:WriteLine()
+                output:WriteLine()
             ENDIF
             output:WriteLine("// Architecture: " + GetPlatformDisplayName(moduleDefinition))
             IF ((moduleDefinition:Attributes & ModuleAttributes:ILOnly) == (ModuleAttributes)0)
-            output:WriteLine("// This assembly contains unmanaged code.")
+                output:WriteLine("// This assembly contains unmanaged code.")
             ENDIF
             runtimeDisplayName := GetRuntimeDisplayName(moduleDefinition)
             IF (runtimeDisplayName != NULL)
-            output:WriteLine("// Runtime: " + runtimeDisplayName)
+                output:WriteLine("// Runtime: " + runtimeDisplayName)
             ENDIF
             output:WriteLine()
             BEGIN USING IIF(options:FullDecompilation , NULL , LoadedAssembly:DisableAssemblyLoad())
                 decompiler := CSharpDecompiler{result, options:DecompilerSettings}
                 decompiler:CancellationToken := options:CancellationToken
                 syntax := IIF((!options:FullDecompilation) , decompiler:DecompileModuleAndAssemblyAttributes() , decompiler:DecompileWholeModuleAsSingleFile())
-            WriteCode(output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
+                WriteCode(output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
             END USING
             //ENDIF
             
-        
+            
         PRIVATE METHOD WriteCode(output AS ITextOutput, settings AS DecompilerSettings, syntaxTree AS SyntaxTree, typeSystem AS IDecompilerTypeSystem) AS VOID
             LOCAL visitor AS InsertParenthesesVisitor
             LOCAL writer1 AS TextTokenWriter
             LOCAL decoratedWriter AS TokenWriter
             LOCAL textOutput AS ISmartTextOutput
+            LOCAL xsSettings AS XSharpOptions
+            //
+            xsSettings := XSharpOptionPage.CurrentXSharpSettings
             //
             visitor := InsertParenthesesVisitor{} 
             visitor:InsertParenthesesForReadability:=TRUE
@@ -150,7 +153,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             textOutput := output ASTYPE ISmartTextOutput
             IF (textOutput != NULL)
                 //
-            decoratedWriter := XSharpHighlightingTokenWriter{decoratedWriter, textOutput}
+                decoratedWriter := XSharpHighlightingTokenWriter{decoratedWriter, textOutput, xsSettings }
             ENDIF
             syntaxTree:AcceptVisitor(XSharpOutputVisitor{decoratedWriter, settings:CSharpFormattingOptions, typeSystem })
             
@@ -170,10 +173,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             BEGIN SWITCH architecture
             CASE TargetArchitecture.I386
                 IF ((module.Attributes & ModuleAttributes.Preferred32Bit) == ModuleAttributes.Preferred32Bit)
-                RETURN "AnyCPU (32-bit preferred)"
+                    RETURN "AnyCPU (32-bit preferred)"
                 ENDIF
                 IF ((module.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit)
-                RETURN "x86"
+                    RETURN "x86"
                 ENDIF
                 RETURN "AnyCPU (64-bit preferred)"
             CASE TargetArchitecture.AMD64
@@ -202,20 +205,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             // This is used in the TreeView of the Assembly (Left Window)
         PUBLIC OVERRIDE METHOD FormatMethodName( methd AS MethodDefinition ) AS STRING
             IF (methd == NULL)
-            THROW ArgumentNullException{"method"}
+                THROW ArgumentNullException{"method"}
             ENDIF
             IF (!methd.IsConstructor)
-            RETURN methd.Name
+                RETURN methd.Name
             ENDIF
             //
             RETURN "Constructor"
-        
+            
         PUBLIC OVERRIDE METHOD FormatTypeName(type AS TypeDefinition ) AS STRING
             IF (type == NULL)
-            THROW ArgumentNullException{"type"}
+                THROW ArgumentNullException{"type"}
             ENDIF
             RETURN SELF:TypeToString(ConvertTypeOptions.IncludeTypeParameterDefinitions | ConvertTypeOptions.DoNotUsePrimitiveTypeNames, type, NULL)
-        
+            
         PRIVATE METHOD TypeToString(options AS ConvertTypeOptions , typeRef AS TypeReference , typeAttributes := NULL AS ICustomAttributeProvider ) AS STRING
             LOCAL astType AS AstType
             LOCAL compType AS ComposedType
@@ -232,11 +235,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     sWriter:Write("ref ")
                 ENDIF
                 compType := astType ASTYPE ComposedType
-                IF ((compType != null) .AND. (compType:PointerRank > 0))
+                IF ((compType != NULL) .AND. (compType:PointerRank > 0))
                     compType:PointerRank--
                 ENDIF
             ENDIF
-            astType:AcceptVisitor(XSharpOutputVisitor{sWriter, FormattingOptionsFactory.CreateEmpty(), null})
+            astType:AcceptVisitor(XSharpOutputVisitor{sWriter, FormattingOptionsFactory.CreateEmpty(), NULL})
             RETURN sWriter:ToString()
             
             
