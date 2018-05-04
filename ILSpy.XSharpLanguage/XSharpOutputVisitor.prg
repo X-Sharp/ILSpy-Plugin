@@ -2206,7 +2206,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             FOREACH statement AS Statement IN switchSection:Statements
                 //
-                statement:AcceptVisitor(SELF)
+                IF !( statement IS BreakStatement )
+                    statement:AcceptVisitor(SELF)
+                ENDIF
             NEXT
             IF (SELF:policy:IndentCaseBody .AND. ! flag2)
                 //
