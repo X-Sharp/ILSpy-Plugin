@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices
 // associated with an assembly.
 //
 [assembly: AssemblyTitle("ILSpy.XSharpLanguage")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("XSharp language Decompiler")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("XSharp BV")]
 [assembly: AssemblyProduct("ILSpy.XSharpLanguage")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
@@ -25,4 +25,5 @@ using System.Runtime.CompilerServices
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("1.0.*")]
+[ASSEMBLY: AssemblyVersion("1.0.1.*")]
+
