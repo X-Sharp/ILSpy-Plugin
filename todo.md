@@ -1,2 +1,2 @@
 #To Do
-- [ ] Interpret Clipper Calling convention an put it as a comment on top of METHOD code
+- [ ] Interpret Clipper Calling convention and put it as a comment on top of METHOD code
