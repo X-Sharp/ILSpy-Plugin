@@ -38,6 +38,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         INITONLY PRIVATE system AS IDecompilerTypeSystem
         PRIVATE currentType AS IType
         //
+        PRIVATE inMethodAttributes AS ClipperState
+        PRIVATE isClipper AS LOGIC
+        PRIVATE paramsList AS List<STRING>
+        //
         STATIC INITONLY PRIVATE queryKeywords AS System.Collections.Generic.HashSet<STRING>
         STATIC INITONLY PRIVATE unconditionalKeywords AS System.Collections.Generic.HashSet<STRING>
         STATIC INITONLY PRIVATE maxKeywordLength AS LONG
@@ -84,6 +88,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:writer := writer //InsertSpecialsDecorator{InsertRequiredSpacesDecorator{writer}}
             SELF:policy := formattingPolicy
             SELF:system := typeSystem
+            SELF:inMethodAttributes := ClipperState.None
             
         CONSTRUCTOR(textWriter AS System.IO.TextWriter, formattingPolicy AS CSharpFormattingOptions, typeSystem AS IDecompilerTypeSystem);SUPER()
             //
@@ -100,6 +105,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:writer := TokenWriter.Create(textWriter, formattingPolicy:IndentationString)
             SELF:policy := formattingPolicy
             SELF:system := typeSystem
+            SELF:inMethodAttributes := ClipperState.None
             
         PROTECTED METHOD CanBeConfusedWithObjectInitializer(expr AS Expression) AS LOGIC
             LOCAL expression AS AssignmentExpression
@@ -110,8 +116,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         PROTECTED VIRTUAL METHOD CloseBrace(style AS BraceStyle) AS VOID
             //
             SWITCH style
-                CASE BraceStyle.DoNotChange
-            CASE BraceStyle.EndOfLine
+            CASE BraceStyle.DoNotChange
+                CASE BraceStyle.EndOfLine
                 CASE BraceStyle.EndOfLineWithoutSpace
                 CASE BraceStyle.NextLine
                     //
@@ -634,6 +640,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(attribute)
             attribute:@@Type:AcceptVisitor(SELF)
+            //IF ( attribute:Type:
             IF ((attribute:Arguments:Count != 0) .OR. ! attribute:GetChildByRole<CSharpTokenNode>(XSRoles.LPar):IsNull)
                 //
                 SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
@@ -1594,9 +1601,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:EndNode(memberType)
             
         VIRTUAL METHOD VisitMethodDeclaration(methodDeclaration AS MethodDeclaration) AS VOID
+            // Reset Method Call Type
+            SELF:isClipper := FALSE
             //
             SELF:StartNode(methodDeclaration)
+            SELF:inMethodAttributes := ClipperState.Attribute
+            SELF:paramsList := List<STRING>{}
             SELF:WriteAttributes(methodDeclaration:Attributes)
+            SELF:inMethodAttributes := ClipperState.Code
             SELF:WriteModifiers(methodDeclaration:ModifierTokens)
             SELF:Space(TRUE)
             SELF:WritePrivateImplementationType(methodDeclaration:PrivateImplementationType)
@@ -1617,12 +1629,19 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:Space(TRUE)
             SELF:WriteKeyword("AS", NULL )
             SELF:Space(TRUE)
+            SELF:inMethodAttributes := ClipperState.ReturnType
             methodDeclaration:ReturnType:AcceptVisitor(SELF)
+            //
+            SELF:inMethodAttributes := ClipperState.Code
+            IF ( SELF:isClipper )
+                Self:paramsList:Insert( 0, methodDeclaration:NameToken:Name)
+            ENDIF
             // Save the current/Declaring type
             SELF:currentType := SELF:GetElementType( methodDeclaration )
             //
             SELF:WriteMethodBody(methodDeclaration:Body, SELF:policy:MethodBraceStyle)
             SELF:currentType := NULL
+            SELF:inMethodAttributes := ClipperState.None
             SELF:EndNode(methodDeclaration)
             
         VIRTUAL METHOD VisitNamedArgumentExpression(namedArgumentExpression AS NamedArgumentExpression) AS VOID
@@ -1906,6 +1925,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(primitiveExpression)
             SELF:writer:WritePrimitiveValue(primitiveExpression:Value, primitiveExpression:UnsafeLiteralValue)
+            // Store Parameters Name
+            IF ( SELF:inMethodAttributes == ClipperState.Attribute) .AND. SELF:isClipper
+                SELF:paramsList:Add( primitiveExpression:Value:ToString() )
+            ENDIF
+            //
             SELF:isAfterSpace := FALSE
             SELF:EndNode(primitiveExpression)
             
@@ -1913,6 +1937,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(primitiveType)
             SELF:writer:WritePrimitiveType(primitiveType:Keyword)
+            IF SELF:isClipper .AND. ( SELF:inMethodAttributes==ClipperState.ReturnType )
+                // If so, we have visiting the return Type
+                SELF:paramsList:Insert( 0, primitiveType:Keyword)
+            ENDIF
             SELF:isAfterSpace := FALSE
             SELF:EndNode(primitiveType)
             
@@ -2167,6 +2195,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(simpleType)
             SELF:WriteIdentifier(simpleType:IdentifierToken)
+            // Flag ClipperCallingConvention attribute
+            IF ( SELF:inMethodAttributes == ClipperState.Attribute )
+                IF ( String.Compare( simpleType:Identifier, "clippercallingconvention", TRUE ) == 0 )
+                    SELF:isClipper := TRUE
+                ENDIF
+            ELSE
+                IF SELF:isClipper .AND. ( SELF:inMethodAttributes == ClipperState.ReturnType )
+                    // If so, we have visiting the return Type
+                    SELF:paramsList:Insert( 0, simpleType:Identifier)
+                ENDIF
+            ENDIF
             SELF:WriteTypeArguments(simpleType:TypeArguments)
             SELF:EndNode(simpleType)
             
@@ -2697,6 +2736,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:CloseBrace(style)
             SELF:EndNode(blockStatement)
+
+        PROTECTED VIRTUAL METHOD WriteSingleCommment( comment AS STRING ) AS VOID
+            //
+            SELF:writer:WriteComment( CommentType.SingleLine, comment)
+            SELF:isAtStartOfLine := TRUE
             
         PROTECTED VIRTUAL METHOD WriteCommaSeparatedList(list AS System.Collections.Generic.IEnumerable<AstNode>) AS VOID
             LOCAL flag AS LOGIC
@@ -2810,6 +2854,23 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:isAfterSpace := FALSE
             
         PROTECTED VIRTUAL METHOD WriteMethodBody(body AS BlockStatement, style AS BraceStyle) AS VOID
+            LOCAL cmt := "" AS STRING
+            //
+            IF ( SELF:isClipper ) 
+                // Build Clipper Calling Convention comment
+                IF ( SELF:paramsList:Count >= 2 )
+                    //
+                    cmt := "FUNCTION " + SELF:paramsList[0] + "("
+                    FOR VAR i:=2 TO SELF:paramsList:Count-1
+                        IF ( i>2 )
+                            cmt += ","
+                        ENDIF
+                        cmt += SELF:paramsList[i]
+                    NEXT
+                    cmt += ") AS " + SELF:paramsList[1]
+                    //
+                ENDIF
+            ENDIF
             //
             IF (body:IsNull)
                 //
@@ -2818,6 +2879,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 // Indent code inside Body
                 SELF:NewLine()
                 SELF:writer:Indent()
+                IF ( !STRING.IsNullOrEmpty( cmt ) )
+                    SELF:WriteSingleCommment( cmt )
+                ENDIF
                 // First Try to declare all LOCALs
                 LOCAL localVisitor := XSharpLocalVisitor{ SELF:writer, SELF:policy, SELF } AS XSharpLocalVisitor
                 FOREACH statement AS Statement IN body:Statements
@@ -2826,14 +2890,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 NEXT
                 //
                 IF ( localVisitor:Variables:Count > 0 )
-                    SELF:WriteToken( "//" )
-                    SELF:NewLine()
+                    SELF:WriteSingleCommment( "" )
                 ENDIF
                 SELF:writer:Unindent()
                 // Now, Generate Code
                 SELF:WriteBlock(body, style)
                 SELF:NewLine()
-                
             ENDIF
             
         PROTECTED VIRTUAL METHOD WriteModifiers(modifierTokens AS System.Collections.Generic.IEnumerable<CSharpModifierToken>) AS VOID
@@ -3005,5 +3067,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             
             
     END CLASS
-    
+
+
+
+    ENUM ClipperState
+        MEMBER None
+        MEMBER Attribute
+        MEMBER ReturnType
+        MEMBER Code
+    END ENUM 
 END NAMESPACE 

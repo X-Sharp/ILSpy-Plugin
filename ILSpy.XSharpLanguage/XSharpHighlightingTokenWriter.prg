@@ -65,6 +65,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         PRIVATE valueTypeColor AS HighlightingColor
         PRIVATE valueTypeKeywordsColor AS HighlightingColor
         PRIVATE visibilityKeywordsColor AS HighlightingColor
+        PRIVATE commentColor AS HighlightingColor
         //
         PRIVATE specialTypeNames AS Hashtable
         PRIVATE beginend AS LOGIC
@@ -106,6 +107,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:trueKeywordColor := definition:GetNamedColor("TrueFalse")
             SELF:typeKeywordsColor := definition:GetNamedColor("TypeKeywords")
             SELF:attributeKeywordsColor := definition:GetNamedColor("AttributeKeywords")
+            SELF:commentColor := definition:GetNamedColor("Comment")
             //
             SELF:xsInitialize()
             
@@ -203,6 +205,15 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:nodeStack:Push(node)
             SUPER:StartNode(node)
+            
+            
+        VIRTUAL METHOD WriteComment( cmtType AS CommentType, content AS STRING ) AS VOID
+            //
+            SELF:textOutput:BeginSpan( SELF:commentColor)
+            SUPER:WriteComment( cmtType, content )
+            SELF:textOutput:EndSpan()
+            
+            
             
         VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
             LOCAL color AS HighlightingColor
@@ -342,10 +353,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "self"
                 CASE "super"
                     color := thisKeywordColor
-                CASE "true"
+            CASE "true"
                 CASE "false"
                     color := trueKeywordColor
-            CASE "public"
+                CASE "public"
                 CASE "export"
                 CASE "internal"
                 CASE "protected"
