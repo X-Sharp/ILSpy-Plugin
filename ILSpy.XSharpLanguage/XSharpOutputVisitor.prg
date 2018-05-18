@@ -116,7 +116,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         PROTECTED VIRTUAL METHOD CloseBrace(style AS BraceStyle) AS VOID
             //
             SWITCH style
-            CASE BraceStyle.DoNotChange
+                CASE BraceStyle.DoNotChange
                 CASE BraceStyle.EndOfLine
                 CASE BraceStyle.EndOfLineWithoutSpace
                 CASE BraceStyle.NextLine
@@ -125,7 +125,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //SELF:writer:WriteToken(XSRoles.RBrace, "}")
                     SELF:isAtStartOfLine := FALSE
                     RETURN
-                CASE BraceStyle.NextLineShifted
+            CASE BraceStyle.NextLineShifted
                 CASE BraceStyle.BannerStyle
                     //
                     //SELF:writer:WriteToken(XSRoles.RBrace, "}")
@@ -1634,7 +1634,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:inMethodAttributes := ClipperState.Code
             IF ( SELF:isClipper )
-                Self:paramsList:Insert( 0, methodDeclaration:NameToken:Name)
+                SELF:paramsList:Insert( 0, methodDeclaration:NameToken:Name)
             ENDIF
             // Save the current/Declaring type
             SELF:currentType := SELF:GetElementType( methodDeclaration )
@@ -1946,6 +1946,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             
         VIRTUAL METHOD VisitPropertyDeclaration(propertyDeclaration AS PropertyDeclaration) AS VOID
             LOCAL bodyStarted := FALSE AS LOGIC
+            LOCAL bEmptyGet, bEmptySet AS LOGIC
             //
             SELF:StartNode(propertyDeclaration)
             SELF:WriteAttributes(propertyDeclaration:Attributes)
@@ -1959,6 +1960,28 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:Space(TRUE)
             propertyDeclaration:ReturnType:AcceptVisitor(SELF)
             IF (propertyDeclaration:ExpressionBody:IsNull)
+                // AUTO property ?
+                bEmptySet := FALSE
+                bEmptyGet := FALSE
+                IF ( ( propertyDeclaration:Getter != NULL ) .AND. ( propertyDeclaration:Getter:Role == PropertyDeclaration.GetterRole ) )
+                    IF ( propertyDeclaration:Getter:Body:IsNull )
+                        bEmptyGet := TRUE
+                    ENDIF
+                ELSE
+                    bEmptyGet := TRUE
+                ENDIF
+                IF ( ( propertyDeclaration:Setter != NULL ) .AND. ( propertyDeclaration:Setter:Role == PropertyDeclaration.SetterRole ) )
+                    IF ( propertyDeclaration:Setter:Body:IsNull )
+                        bEmptySet := TRUE
+                    ENDIF
+                ELSE
+                    bEmptySet := TRUE
+                ENDIF
+                IF bEmptyGet .AND. bEmptySet
+                    SELF:Space()
+                    SELF:WriteKeyword("AUTO" )
+                    SELF:Space()
+                ENDIF
                 //
                 IF ( ( propertyDeclaration:Getter != NULL ) .AND. ( propertyDeclaration:Getter:Role == PropertyDeclaration.GetterRole ) )
                     IF ( propertyDeclaration:Getter:Body:IsNull )
@@ -2591,7 +2614,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(undocumentedExpression)
             SWITCH undocumentedExpression:UndocumentedExpressionType
-            CASE UndocumentedExpressionType.ArgListAccess
+                CASE UndocumentedExpressionType.ArgListAccess
                 CASE UndocumentedExpressionType.ArgList
                     //
                     SELF:WriteKeyword(UndocumentedExpression.ArglistKeywordRole)
@@ -2608,7 +2631,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //
                     SELF:WriteKeyword(UndocumentedExpression.MakerefKeywordRole)
                     
-                END SWITCH
+            END SWITCH
             IF (undocumentedExpression:UndocumentedExpressionType != UndocumentedExpressionType.ArgListAccess)
                 //
                 SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
@@ -2736,7 +2759,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:CloseBrace(style)
             SELF:EndNode(blockStatement)
-
+            
         PROTECTED VIRTUAL METHOD WriteSingleCommment( comment AS STRING ) AS VOID
             //
             SELF:writer:WriteComment( CommentType.SingleLine, comment)
@@ -3066,10 +3089,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             
             
             
-    END CLASS
-
-
-
+            END CLASS
+            
+            
+            
     ENUM ClipperState
         MEMBER None
         MEMBER Attribute
