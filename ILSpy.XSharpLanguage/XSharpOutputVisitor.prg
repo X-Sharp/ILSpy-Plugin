@@ -543,14 +543,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:WriteKeyword(AnonymousMethodExpression.AsyncModifierRole)
                 SELF:Space(TRUE)
             ENDIF
-            SELF:WriteKeyword(AnonymousMethodExpression.DelegateKeywordRole)
+            SELF:WriteToken( "{" )
             IF (anonymousMethodExpression:HasParameterList)
                 //
                 SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
                 SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)anonymousMethodExpression:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
             ENDIF
+            SELF:Space(TRUE)
+            SELF:WriteToken(XSRoles.Arrow)
             SELF:WriteBlock(anonymousMethodExpression:Body, SELF:policy:AnonymousMethodBraceStyle)
+            SELF:WriteToken( "}" )
             SELF:EndNode(anonymousMethodExpression)
+
+
+
+
             
         VIRTUAL METHOD VisitAnonymousTypeCreateExpression(anonymousTypeCreateExpression AS AnonymousTypeCreateExpression) AS VOID
             //
