@@ -803,22 +803,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:EndNode(castExpression)
             
         VIRTUAL METHOD VisitCatchClause(catchClause AS CatchClause) AS VOID
-            //
+            // 
             SELF:StartNode(catchClause)
             SELF:WriteKeyword("CATCH")
             IF (! catchClause:@@Type:IsNull)
                 //
-                SELF:Space(SELF:policy:SpaceBeforeCatchParentheses)
-                SELF:LPar()
-                SELF:Space(SELF:policy:SpacesWithinCatchParentheses)
-                catchClause:@@Type:AcceptVisitor(SELF)
+                SELF:Space(TRUE)
                 IF (! String.IsNullOrEmpty(catchClause:VariableName))
                     //
-                    SELF:Space(TRUE)
                     SELF:WriteIdentifier(catchClause:VariableNameToken)
+                    SELF:Space(TRUE)
+                    SELF:WriteKeyword(AsExpression.AsKeywordRole)
+                    SELF:Space(TRUE)
                 ENDIF
+                catchClause:@@Type:AcceptVisitor(SELF)
                 SELF:Space(SELF:policy:SpacesWithinCatchParentheses)
-                SELF:RPar()
             ENDIF
             // No Catch Condition in XSharp, but leave the code generation
             IF (! catchClause:Condition:IsNull)
