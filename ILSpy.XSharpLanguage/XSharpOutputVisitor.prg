@@ -554,10 +554,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteBlock(anonymousMethodExpression:Body, SELF:policy:AnonymousMethodBraceStyle)
             SELF:WriteToken( "}" )
             SELF:EndNode(anonymousMethodExpression)
-
-
-
-
+            
+            
+            
+            
             
         VIRTUAL METHOD VisitAnonymousTypeCreateExpression(anonymousTypeCreateExpression AS AnonymousTypeCreateExpression) AS VOID
             //
@@ -1140,7 +1140,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                         SELF:Space(TRUE)
                         
                         SWITCH operatorType
-                            CASE OperatorType.Explicit
+                        CASE OperatorType.Explicit
                             CASE OperatorType.Implicit
                                 //
                                 documentationReference:ConversionOperatorReturnType:AcceptVisitor(SELF)
@@ -1149,7 +1149,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                                 //
                                 SELF:WriteToken(OperatorDeclaration.GetToken(operatorType), OperatorDeclaration.GetRole(operatorType))
                                 
-                        END SWITCH
+                            END SWITCH
                     ELSE
                         //
                         SELF:WriteIdentifier(documentationReference:GetChildByRole<Identifier>(XSRoles.Identifier))
@@ -2393,6 +2393,31 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword("TRY")
             SELF:NewLine()
             SELF:EndNode(tryCatchStatement)
+            
+        VIRTUAL METHOD VisitTupleExpression(tupleExpression AS TupleExpression ) AS VOID
+            SELF:StartNode(tupleExpression)
+            SELF:LPar()
+            SELF:WriteCommaSeparatedList(tupleExpression:Elements)
+            SELF:RPar()
+            SELF:EndNode(tupleExpression)
+            
+        VIRTUAL METHOD VisitTupleType(tupleType AS TupleAstType ) AS VOID
+            SELF:StartNode(tupleType)
+            SELF:LPar()
+            SELF:WriteCommaSeparatedList(tupleType:Elements)
+            SELF:RPar()
+            SELF:EndNode(tupleType)
+            
+            
+        VIRTUAL METHOD VisitTupleTypeElement(tupleTypeElement AS TupleTypeElement ) AS VOID
+            SELF:StartNode(tupleTypeElement)
+            tupleTypeElement:Type:AcceptVisitor(SELF)
+            IF (!tupleTypeElement:NameToken:IsNull)
+                SELF:Space(TRUE)
+                tupleTypeElement:NameToken:AcceptVisitor(SELF)
+            ENDIF
+            SELF:EndNode(tupleTypeElement)
+            
             
         VIRTUAL METHOD VisitTypeDeclaration(typeDeclaration AS TypeDeclaration) AS VOID
             LOCAL structBraceStyle AS BraceStyle

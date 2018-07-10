@@ -326,6 +326,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         
         VIRTUAL METHOD VisitTryCatchStatement(tryCatchStatement AS TryCatchStatement) AS VOID
         
+        VIRTUAL METHOD VisitTupleExpression(tupleExpression AS TupleExpression ) AS VOID
+            
+        VIRTUAL METHOD VisitTupleType(tupleType AS TupleAstType ) AS VOID
+            
+        VIRTUAL METHOD VisitTupleTypeElement(tupleTypeElement AS TupleTypeElement ) AS VOID
+        
         VIRTUAL METHOD VisitTypeDeclaration(typeDeclaration AS TypeDeclaration) AS VOID
         
         VIRTUAL METHOD VisitTypeOfExpression(typeOfExpression AS TypeOfExpression) AS VOID

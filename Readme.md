@@ -4,6 +4,7 @@ At that level, Create a ILSPY folder, and place there the ILSpy binaries.
 After building, you will have a ILSpy.XSharpLanguage.Plugin.DLL in ILSpy.XSharpLanguage\bin\Debug or Release
 Either run ILSpy in that folder, or copy/paste the file with the ILSpy binaries.
 
+This version has been built against V3.2.x.
 
 This plugin is based on the source code found in ILSpy (http://www.ilspy.net) that provide CSharpLanguage.
 It has been used as base, and some modifications haven been made to support some XSharp construction.
@@ -20,6 +21,7 @@ Lots of things are still to be done, but most is working.
 - Currently, Array access are all zero-based
 - Only dot (.) is used as selector
 - WholeProject decompilation is currently not supported
+- FOR/NEXT is sometimes wrongly generated, and must be WHILE/ENDDO
 
 ### ILSPY Copyright
 Copyright (c) 2011 AlphaSierraPapa for the SharpDevelop Team
