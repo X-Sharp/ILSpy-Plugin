@@ -1071,7 +1071,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:Space(TRUE)
             ENDIF
             //SELF:WriteToken(DestructorDeclaration.TildeRole)
-            parent := (TypeDeclaration)(destructorDeclaration:Parent)
+            parent := destructorDeclaration:Parent ASTYPE TypeDeclaration
             IF ((parent != NULL) .AND. (parent:Name != destructorDeclaration:Name))
                 //
                 SELF:WriteIdentifier((Identifier)parent:NameToken:Clone() )
