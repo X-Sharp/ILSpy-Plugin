@@ -776,9 +776,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:NewLine()
             
         VIRTUAL METHOD VisitBreakStatement(breakStatement AS BreakStatement) AS VOID
-            //
+            // In X#, Keyword is EXIT
             SELF:StartNode(breakStatement)
-            SELF:WriteKeyword("break", BreakStatement.BreakKeywordRole)
+            SELF:WriteKeyword("EXIT", BreakStatement.BreakKeywordRole)
+            SELF:NewLine()
             SELF:Semicolon()
             SELF:EndNode(breakStatement)
             
@@ -1182,6 +1183,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             doWhileStatement:Condition:AcceptVisitor(SELF)
             SELF:Space(SELF:policy:SpacesWithinWhileParentheses)
             SELF:RPar()
+            SELF:NewLine()
             SELF:Semicolon()
             SELF:EndNode(doWhileStatement)
             
