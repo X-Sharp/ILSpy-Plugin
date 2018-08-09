@@ -757,6 +757,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:WriteToken(".AND.")
             ELSEIF (binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalOr )
                 SELF:WriteToken(".OR.")
+            ELSEIF (binaryOperatorExpression:Operator == BinaryOperatorType.NullCoalescing )
+                SELF:WriteToken("DEFAULT")
             ELSE
                 SELF:WriteToken(BinaryOperatorExpression.GetOperatorRole(binaryOperatorExpression:Operator))
             ENDIF
