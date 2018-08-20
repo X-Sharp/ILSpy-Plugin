@@ -1143,7 +1143,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                         SELF:Space(TRUE)
                         
                         SWITCH operatorType
-                        CASE OperatorType.Explicit
+                            CASE OperatorType.Explicit
                             CASE OperatorType.Implicit
                                 //
                                 documentationReference:ConversionOperatorReturnType:AcceptVisitor(SELF)
@@ -1152,7 +1152,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                                 //
                                 SELF:WriteToken(OperatorDeclaration.GetToken(operatorType), OperatorDeclaration.GetRole(operatorType))
                                 
-                            END SWITCH
+                        END SWITCH
                     ELSE
                         //
                         SELF:WriteIdentifier(documentationReference:GetChildByRole<Identifier>(XSRoles.Identifier))
@@ -1321,23 +1321,43 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             
         VIRTUAL METHOD VisitForStatement(forStatement AS ForStatement) AS VOID
             //
+            //            SELF:StartNode(forStatement)
+            //            SELF:WriteKeyword("FOR")
+            //            SELF:Space()
+            //            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Initializers )
+            //            SELF:Space()
+            //            SELF:WriteKeyword("TO")
+            //            SELF:Space()
+            //            forStatement:Condition:AcceptVisitor(SELF)
+            //            IF (System.Linq.Enumerable.Any<Statement>(forStatement:Iterators))
+            //                //
+            //                SELF:Space()
+            //                SELF:WriteKeyword("STEP")
+            //                SELF:Space()
+            //                SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
+            //            ENDIF
+            //            SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+            //            SELF:WriteKeyword("NEXT")
+            //            SELF:NewLine()
+            //            SELF:EndNode(forStatement)
             SELF:StartNode(forStatement)
-            SELF:WriteKeyword("FOR")
-            SELF:Space()
+            SELF:WriteSingleCommment( "Init" )
             SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Initializers )
-            SELF:Space()
-            SELF:WriteKeyword("TO")
+            IF ( !SELF:isAtStartOfLine )
+                SELF:NewLine()
+            ENDIF
+            //
+            SELF:WriteKeyword("WHILE")
             SELF:Space()
             forStatement:Condition:AcceptVisitor(SELF)
-            IF (System.Linq.Enumerable.Any<Statement>(forStatement:Iterators))
-                //
-                SELF:Space()
-                SELF:WriteKeyword("STEP")
-                SELF:Space()
-                SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
-            ENDIF
+            //
             SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement, NewLinePlacement.NewLine)
-            SELF:WriteKeyword("NEXT")
+            //
+            SELF:writer:Indent()
+            SELF:WriteSingleCommment( "Iterators" )
+            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
+            SELF:writer:Unindent()
+            SELF:WriteKeyword("ENDDO")
             SELF:NewLine()
             SELF:EndNode(forStatement)
             
@@ -2490,7 +2510,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     ENDIF
                     IF ( interfaceList:Count > 0 )
                         SELF:Space(TRUE)
-                        SELF:WriteKeyword( "IMPLEMENT" ) 
+                        SELF:WriteKeyword( "IMPLEMENTS" ) 
                         SELF:Space(TRUE)
                         SELF:WriteCommaSeparatedList(interfaceList)
                     ENDIF
@@ -2649,7 +2669,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:StartNode(undocumentedExpression)
             SWITCH undocumentedExpression:UndocumentedExpressionType
-                CASE UndocumentedExpressionType.ArgListAccess
+            CASE UndocumentedExpressionType.ArgListAccess
                 CASE UndocumentedExpressionType.ArgList
                     //
                     SELF:WriteKeyword(UndocumentedExpression.ArglistKeywordRole)
@@ -2666,7 +2686,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     //
                     SELF:WriteKeyword(UndocumentedExpression.MakerefKeywordRole)
                     
-            END SWITCH
+                END SWITCH
             IF (undocumentedExpression:UndocumentedExpressionType != UndocumentedExpressionType.ArgListAccess)
                 //
                 SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
@@ -2727,10 +2747,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(variableInitializer)
             //   
             SELF:Prefix( variableInitializer )
+            SELF:Prefix( variableInitializer )
             //
             SELF:WriteIdentifier(variableInitializer:NameToken)
+            //
             IF (! variableInitializer:Initializer:IsNull)
-                //
                 SELF:Space(SELF:policy:SpaceAroundAssignment)
                 SELF:WriteToken(":=")
                 SELF:Space(SELF:policy:SpaceAroundAssignment)

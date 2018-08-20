@@ -444,7 +444,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "interface"
                 CASE "delegate"
                 CASE "inherit"
-                CASE "implement"
+                CASE "implements"
                     color := referenceTypeKeywordsColor
                 CASE "select"
                 CASE "group"
