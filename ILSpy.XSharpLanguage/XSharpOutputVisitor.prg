@@ -1176,10 +1176,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         VIRTUAL METHOD VisitDoWhileStatement(doWhileStatement AS DoWhileStatement) AS VOID
             //
             SELF:StartNode(doWhileStatement)
-            SELF:WriteKeyword("DO")
+            SELF:WriteKeyword("REPEAT")
             SELF:WriteEmbeddedStatement(doWhileStatement:EmbeddedStatement, SELF:policy:WhileNewLinePlacement)
-            SELF:WriteKeyword("WHILE")
+            SELF:WriteKeyword("UNTIL")
             SELF:Space(SELF:policy:SpaceBeforeWhileParentheses)
+            SELF:WriteKeyword("!")
             SELF:LPar()
             SELF:Space(SELF:policy:SpacesWithinWhileParentheses)
             doWhileStatement:Condition:AcceptVisitor(SELF)
@@ -1447,12 +1448,16 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(indexerDeclaration)
             SELF:WriteAttributes(indexerDeclaration:Attributes)
             SELF:WriteModifiers(indexerDeclaration:ModifierTokens)
-            indexerDeclaration:ReturnType:AcceptVisitor(SELF)
+            SELF:WriteKeyword("PROPERTY" )
             SELF:Space(TRUE)
             SELF:WritePrivateImplementationType(indexerDeclaration:PrivateImplementationType)
-            SELF:WriteKeyword(IndexerDeclaration.ThisKeywordRole)
+            SELF:WriteKeyword("SELF")
             SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
             SELF:WriteCommaSeparatedListInBrackets(indexerDeclaration:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
+            SELF:Space(TRUE)
+            SELF:WriteKeyword("AS", NULL )
+            SELF:Space(TRUE)
+            indexerDeclaration:ReturnType:AcceptVisitor(SELF)
             SELF:OpenBrace(SELF:policy:PropertyBraceStyle)
             FOREACH node AS AstNode IN indexerDeclaration:Children
                 //
@@ -1461,6 +1466,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     node:AcceptVisitor(SELF)
                 ENDIF
             NEXT
+            SELF:WriteKeyword("END" )
+            SELF:Space(TRUE)
+            SELF:WriteKeyword("PROPERTY" )
             SELF:CloseBrace(SELF:policy:PropertyBraceStyle)
             SELF:NewLine()
             SELF:EndNode(indexerDeclaration)
