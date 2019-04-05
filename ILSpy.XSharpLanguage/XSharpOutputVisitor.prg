@@ -3084,12 +3084,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 typeDef := sym ASTYPE IType
                 IF (typeDef != NULL)
                     //
-                    RETURN SELF:system:GetCecil(typeDef:GetDefinition())
+                    RETURN NULL // SELF:system:GetCecil(typeDef:GetDefinition())
                 ENDIF
                 mbr := sym ASTYPE IMember
                 IF (mbr != NULL)
                     //
-                    RETURN SELF:system:GetCecil(mbr)
+                    RETURN NULL //SELF:system:GetCecil(mbr)
                 ENDIF
             ENDIF
             RETURN NULL
