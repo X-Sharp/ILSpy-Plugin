@@ -53,28 +53,28 @@
       <AssemblyName>ICSharpCode.AvalonEdit.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy\ICSharpCode.AvalonEdit.dll</HintPath>
+      <HintPath>..\ILSpy4\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
-    <Reference Include="ICSharpCode.Decompiler, Version=3.1.0.3645, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
+    <Reference Include="ICSharpCode.Decompiler, Version=4.0.1.4530, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
       <Name>ICSharpCode.Decompiler</Name>
       <AssemblyName>ICSharpCode.Decompiler.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy\ICSharpCode.Decompiler.dll</HintPath>
+      <HintPath>..\ILSpy4\ICSharpCode.Decompiler.dll</HintPath>
     </Reference>
-    <Reference Include="ILSpy, Version=3.1.0.3645, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
+    <Reference Include="ILSpy, Version=4.0.1.4530, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
       <Name>ILSpy</Name>
       <AssemblyName>ILSpy.exe</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy\ILSpy.exe</HintPath>
+      <HintPath>..\ILSpy4\ILSpy.exe</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
+    <Reference Include="Mono.Cecil, Version=0.10.1.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
       <Name>Mono.Cecil</Name>
       <AssemblyName>Mono.Cecil.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy\Mono.Cecil.dll</HintPath>
+      <HintPath>..\ILSpy4\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="PresentationCore">
@@ -88,12 +88,12 @@
       <AssemblyName>PresentationFramework.dll</AssemblyName>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>System.Collections.Immutable</Name>
       <AssemblyName>System.Collections.Immutable.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy\System.Collections.Immutable.dll</HintPath>
+      <HintPath>..\ILSpy4\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.ComponentModel.Composition</Name>
@@ -103,6 +103,13 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Reflection.Metadata, Version=1.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Name>System.Reflection.Metadata</Name>
+      <AssemblyName>System.Reflection.Metadata.dll</AssemblyName>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+      <HintPath>..\ILSpy4\System.Reflection.Metadata.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.Xaml</Name>
       <AssemblyName>System.Xaml.dll</AssemblyName>
