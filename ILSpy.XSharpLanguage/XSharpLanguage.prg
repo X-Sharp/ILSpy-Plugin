@@ -113,7 +113,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(evt:MetadataToken), decompiler:TypeSystem)
 			
-		PUBLIC OVERRIDE METHOD DecompileAssembly(asmbly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
+		PUBLIC OVERRIDE METHOD DecompileAssembly(asmbly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS ICSharpCode.Decompiler.Solution.ProjectId
 			//            LOCAL result AS ModuleDefinition
 			//            //LOCAL iLSpyWholeProjectDecompiler AS ILSpyWholeProjectDecompiler
 			//            LOCAL moduleDefinition AS ModuleDefinition
@@ -174,8 +174,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			assembly := asmbly:GetPEFileOrNull()
 			IF ((options:FullDecompilation) .AND. (options:SaveAsProjectDirectory != NULL))
 				prjDecompiler := XSharpWholeProjectDecompiler{asmbly, options}
-				prjDecompiler:DecompileProject(assembly, options:SaveAsProjectDirectory, TextOutputWriter{output}, options:CancellationToken)
-				RETURN
+				RETURN prjDecompiler:DecompileProject(assembly, options:SaveAsProjectDirectory, TextOutputWriter{output}, options:CancellationToken)
 			ENDIF
 			//			SELF:AddReferenceAssemblyWarningMessage(assembly, output)
 			//			SELF:AddReferenceWarningMessage(assembly, output)
@@ -235,7 +234,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler:CancellationToken := options:CancellationToken
 			syntax := IIF((!options:FullDecompilation) , decompiler:DecompileModuleAndAssemblyAttributes() , decompiler:DecompileWholeModuleAsSingleFile())
 			SELF:WriteCode( output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
-			//END USING
+			//
+			RETURN NULL
 			
 			
 		PRIVATE METHOD WriteCode(output AS ITextOutput, settings AS DecompilerSettings, syntaxTree AS SyntaxTree, typeSystem AS IDecompilerTypeSystem) AS VOID
@@ -251,8 +251,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			visitor:InsertParenthesesForReadability:=TRUE
 			syntaxTree:AcceptVisitor(visitor)
 			writer1 := TextTokenWriter{output, settings, typeSystem} 
-			writer1:FoldBraces:=settings:FoldBraces
-			writer1:ExpandMemberDefinitions:=settings:ExpandMemberDefinitions
+			//writer1:FoldBraces:=settings:FoldBraces
+			//writer1:ExpandMemberDefinitions:=settings:ExpandMemberDefinitions
 			decoratedWriter := writer1
 			textOutput := output ASTYPE ISmartTextOutput
 			IF (textOutput != NULL)
@@ -275,41 +275,38 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//            decompiler:AstTransforms:Add( EscapeInvalidIdentifiers{})
 			RETURN decompiler
 			
-		PUBLIC METHOD GetPlatformDisplayName(module AS ModuleDefinition ) AS STRING
-			LOCAL architecture AS TargetArchitecture
+		PUBLIC STATIC METHOD GetPlatformDisplayName(module AS PEFile ) AS STRING
+			LOCAL pEHeaders AS PEHeaders
+			LOCAL machine AS Machine
+			LOCAL characteristics AS Characteristics
+			LOCAL flags AS CorFlags
 			//
-			architecture := module.Architecture
-			BEGIN SWITCH architecture
-			CASE TargetArchitecture.I386
-				IF ((module.Attributes & ModuleAttributes.Preferred32Bit) == ModuleAttributes.Preferred32Bit)
+			pEHeaders := module:Reader:PEHeaders
+			machine := pEHeaders:CoffHeader:Machine
+			characteristics := pEHeaders:CoffHeader:Characteristics
+			flags := pEHeaders:CorHeader:Flags
+			BEGIN SWITCH machine
+			CASE Machine.I386
+				IF ((flags & CorFlags.Prefers32Bit) != 0)
 					RETURN "AnyCPU (32-bit preferred)"
 				ENDIF
-				IF ((module.Attributes & ModuleAttributes.Required32Bit) == ModuleAttributes.Required32Bit)
+				IF ((flags & CorFlags.Requires32Bit) != 0)
+					RETURN "x86"
+				ENDIF
+				IF (((flags & CorFlags.ILOnly) == (CorFlags)0) .AND. ((characteristics & Characteristics.Bit32Machine) != 0))
 					RETURN "x86"
 				ENDIF
 				RETURN "AnyCPU (64-bit preferred)"
-			CASE TargetArchitecture.AMD64
+			CASE Machine.Amd64
 				RETURN "x64"
-			CASE TargetArchitecture.IA64
+			CASE Machine.IA64
 				RETURN "Itanium"
 			OTHERWISE
-				architecture := module.Architecture
-				RETURN architecture.ToString()
+				RETURN machine:ToString()
 			END SWITCH
-			
-		PUBLIC METHOD GetRuntimeDisplayName(module AS ModuleDefinition ) AS STRING
-			BEGIN SWITCH module.Runtime
-			CASE TargetRuntime.Net_1_0
-				RETURN ".NET 1.0"
-			CASE TargetRuntime.Net_1_1
-				RETURN ".NET 1.1"
-			CASE TargetRuntime.Net_2_0
-				RETURN ".NET 2.0"
-			CASE TargetRuntime.Net_4_0
-				RETURN ".NET 4.0"
-			OTHERWISE
-				RETURN NULL
-			END SWITCH
+
+		PUBLIC STATIC METHOD GetRuntimeDisplayName(module AS PEFile ) AS STRING
+			RETURN module:Metadata:MetadataVersion
 			
 		PRIVATE STATIC METHOD CollectFieldsAndCtors(type AS ITypeDefinition , isStatic AS LOGIC ) AS List<EntityHandle>
 			LOCAL list AS List<EntityHandle>

@@ -1594,6 +1594,22 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             SELF:WriteToken( "}" )
             SELF:EndNode(lambdaExpression)
+
+		VIRTUAL METHOD VisitLocalFunctionDeclarationStatement(localFunctionDeclarationStatement AS LocalFunctionDeclarationStatement ) AS VOID
+			SELF:StartNode(localFunctionDeclarationStatement)
+			SELF:WriteModifiers(localFunctionDeclarationStatement:ModifierTokens)
+			localFunctionDeclarationStatement:ReturnType:AcceptVisitor(SELF)
+			SELF:Space()
+			SELF:WriteIdentifier(localFunctionDeclarationStatement:NameToken)
+			SELF:WriteTypeParameters(localFunctionDeclarationStatement:TypeParameters)
+			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
+			SELF:WriteCommaSeparatedListInParenthesis(localFunctionDeclarationStatement:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
+			FOREACH constraint AS Constraint IN localFunctionDeclarationStatement:Constraints 
+				constraint:AcceptVisitor(SELF)
+			NEXT
+			SELF:WriteMethodBody(localFunctionDeclarationStatement:Body, SELF:policy:MethodBraceStyle)
+			SELF:EndNode(localFunctionDeclarationStatement)
+
             
         VIRTUAL METHOD VisitLockStatement(lockStatement AS LockStatement) AS VOID
             //
@@ -1883,7 +1899,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(parameterDeclaration)
             SELF:WriteAttributes(parameterDeclaration:Attributes)
             //
-            IF ( parameterDeclaration:ParameterModifier == ParameterModifier.This)
+            IF ( parameterDeclaration:HasThisModifier )
+				//:ParameterModifier == ParameterModifier.This)
                 //
                 SELF:WriteKeyword("SELF")
                 SELF:Space(TRUE)
