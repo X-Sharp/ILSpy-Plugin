@@ -150,7 +150,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         
         VIRTUAL METHOD VisitConstraint(constraint AS Constraint) AS VOID
         
-        VIRTUAL METHOD VisitConstructorDeclaration(constructorDeclaration AS ConstructorDeclaration) AS VOID
+        VIRTUAL METHOD VisitConstructorDeclaration(ctorDeclaration AS ConstructorDeclaration) AS VOID
         
         VIRTUAL METHOD VisitConstructorInitializer(constructorInitializer AS ConstructorInitializer) AS VOID
         
@@ -182,7 +182,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         
         VIRTUAL METHOD VisitExternAliasDeclaration(externAliasDeclaration AS ExternAliasDeclaration) AS VOID
         
-        VIRTUAL METHOD VisitFieldDeclaration(fieldDeclaration AS FieldDeclaration) AS VOID
+        VIRTUAL METHOD VisitFieldDeclaration(fldDeclaration AS FieldDeclaration) AS VOID
         
         VIRTUAL METHOD VisitFixedFieldDeclaration(fixedFieldDeclaration AS FixedFieldDeclaration) AS VOID
         

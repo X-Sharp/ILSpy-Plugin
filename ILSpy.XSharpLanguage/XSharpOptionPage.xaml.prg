@@ -29,7 +29,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         
         PUBLIC STATIC PROPERTY CurrentXSharpSettings AS XSharpOptions
             GET
-                return LoadXSharpSettings( ILSpySettings.Load())
+                RETURN LoadXSharpSettings( ILSpySettings.Load())
             END GET
         END PROPERTY
         

@@ -12,8 +12,10 @@ USING ICSharpCode.Decompiler.CSharp.Syntax
 USING ICSharpCode.Decompiler.CSharp.Transforms
 USING ICSharpCode.Decompiler.CSharp.OutputVisitor
 USING ICSharpCode.Decompiler.TypeSystem
+USING ICSharpCode.Decompiler.DebugInfo
 USING Mono.Cecil
 USING System.Reflection.Metadata
+USING System.Reflection.PortableExecutable
 
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
@@ -47,7 +49,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		PUBLIC OVERRIDE METHOD DecompileMethod( methoddef AS IMethod, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL assembly AS PEFile
-			
 			LOCAL method2 AS IMethod
 			LOCAL isReferenceType AS LOGIC?
 			LOCAL definitions AS List<EntityHandle>
@@ -56,11 +57,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//
 			assembly := methoddef:ParentModule:PEFile
 			decompiler := SELF:CreateDecompiler( assembly, options)
-			
-			method2 := decompiler:TypeSystem:MainModule:ResolveEntity(methoddef:MetadataToken)
+			// Check if we have a Constructor
+			method2 := decompiler:TypeSystem:MainModule:ResolveEntity(methoddef:MetadataToken) ASTYPE IMethod
 			IF (method2:IsConstructor .AND. method2:DeclaringType:IsReferenceType != FALSE )
 				definitions := CollectFieldsAndCtors(method2:DeclaringTypeDefinition, method2:IsStatic)
-				//decompiler:AstTransforms:Add(SelectCtorTransform{method2})
+				decompiler:AstTransforms:Add(SelectCtorTransform{method2})
 				SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
 				RETURN
 			ENDIF
@@ -69,40 +70,50 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		PUBLIC OVERRIDE METHOD DecompileProperty(propDef AS IProperty, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL decompiler AS CSharpDecompiler
-			LOCAL definitions AS IMemberDefinition[]
+			LOCAL assembly AS PEFile
 			//
+			assembly := propDef:ParentModule:PEFile
+			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCommentLine(output, SELF:TypeToString(propDef:DeclaringType, TRUE))
-			//decompiler := SELF:CreateDecompiler( propDef:Module, options)
-			//definitions := <IMemberDefinition>{propDef}
-			//SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
+			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(propDef:MetadataToken), decompiler:TypeSystem)
 			
 		PUBLIC OVERRIDE METHOD DecompileField(fieldDef AS IField, output AS ITextOutput, options AS DecompilationOptions) AS VOID
+			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
-			LOCAL definitions AS IMemberDefinition[]
+			LOCAL definitions AS List<EntityHandle>
+			LOCAL definition AS IField
 			//
-			SELF:WriteCommentLine(output, SELF:TypeToString(fieldDef:DeclaringType, TRUE))
-			//            decompiler := SELF:CreateDecompiler( fieldDef:Module,  options)
-			//            definitions := <IMemberDefinition>{fieldDef}
-			//            SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
+			assembly := fieldDef:ParentModule:PEFile
+			WriteCommentLine(output, SELF:TypeToString(fieldDef:DeclaringType, TRUE))
+			decompiler := SELF:CreateDecompiler(assembly, options)
+			IF (fieldDef:IsConst)
+				SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(fieldDef:MetadataToken), decompiler:TypeSystem)
+				RETURN
+			ENDIF
+			definitions := CollectFieldsAndCtors(fieldDef:DeclaringTypeDefinition, fieldDef:IsStatic)
+			definition := decompiler:TypeSystem:MainModule:GetDefinition((FieldDefinitionHandle)fieldDef:MetadataToken)
+			decompiler:AstTransforms:Add(SelectFieldTransform{definition})
+			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
 			
 		PUBLIC OVERRIDE  METHOD DecompileType(typeDef AS ITypeDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
-			LOCAL decompiler AS CSharpDecompiler
-			LOCAL definitions AS IMemberDefinition[]
-			//
-			SELF:WriteCommentLine(output, SELF:TypeToString(typeDef, TRUE))
-			//            decompiler := SELF:CreateDecompiler(typeDef:Module, options)
-			//            definitions := <IMemberDefinition>{typeDef}
-			//            SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
-			
-		PUBLIC OVERRIDE METHOD DecompileEvent(ev AS IEvent , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
+			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
 			//
-			WriteCommentLine(output, TypeToString(ev:DeclaringType, TRUE))
-			//            decompiler := CreateDecompiler(ev:Module, options)
-			//            WriteCode(output, options:DecompilerSettings, decompiler:Decompile(ev), decompiler:TypeSystem)
+			assembly := typeDef:ParentModule:PEFile
+			WriteCommentLine(output, SELF:TypeToString(typeDef, TRUE))
+			decompiler := SELF:CreateDecompiler(assembly, options)
+			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(typeDef:MetadataToken), decompiler:TypeSystem)
 			
+		PUBLIC OVERRIDE METHOD DecompileEvent(evt AS IEvent , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
+			LOCAL assembly AS PEFile
+			LOCAL decompiler AS CSharpDecompiler
+			//
+			assembly := evt:ParentModule:PEFile
+			WriteCommentLine(output, SELF:TypeToString(evt:DeclaringType, TRUE))
+			decompiler := SELF:CreateDecompiler(assembly, options)
+			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(evt:MetadataToken), decompiler:TypeSystem)
 			
-		PUBLIC OVERRIDE METHOD DecompileAssembly(assembly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
+		PUBLIC OVERRIDE METHOD DecompileAssembly(asmbly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
 			//            LOCAL result AS ModuleDefinition
 			//            //LOCAL iLSpyWholeProjectDecompiler AS ILSpyWholeProjectDecompiler
 			//            LOCAL moduleDefinition AS ModuleDefinition
@@ -144,6 +155,87 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//                WriteCode(output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
 			//            END USING
 			//            //ENDIF
+			LOCAL assembly AS PEFile
+			LOCAL prjDecompiler AS XSharpWholeProjectDecompiler
+			LOCAL assemblyResolver AS ICSharpCOde.Decompiler.Metadata.IAssemblyResolver
+			LOCAL dcmpTypeSystem AS DecompilerTypeSystem
+			LOCAL tpeDefinition AS ITypeDefinition
+			LOCAL metadata AS MetadataReader
+			LOCAL cHeader AS CorHeader
+			LOCAL methodReference AS EntityHandle
+			LOCAL methodRslvd AS IMethod
+			LOCAL runtimeDisplayName AS STRING
+			LOCAL asmblyDefinition AS System.Reflection.Metadata.AssemblyDefinition
+			LOCAL blbReader AS BlobReader
+			LOCAL debugInfoOrNull AS IDebugInfoProvider
+			LOCAL syntax AS SyntaxTree
+			LOCAL decompiler AS CSharpDecompiler
+			//
+			assembly := asmbly:GetPEFileOrNull()
+			IF ((options:FullDecompilation) .AND. (options:SaveAsProjectDirectory != NULL))
+				prjDecompiler := XSharpWholeProjectDecompiler{asmbly, options}
+				prjDecompiler:DecompileProject(assembly, options:SaveAsProjectDirectory, TextOutputWriter{output}, options:CancellationToken)
+				RETURN
+			ENDIF
+			//			SELF:AddReferenceAssemblyWarningMessage(assembly, output)
+			//			SELF:AddReferenceWarningMessage(assembly, output)
+			output:WriteLine()
+			SUPER:DecompileAssembly(asmbly, output, options)
+			//BEGIN USING IIF(options:FullDecompilation , NULL , LoadedAssembly.DisableAssemblyLoad())
+			assemblyResolver := asmbly:GetAssemblyResolver()
+			dcmpTypeSystem := DecompilerTypeSystem{assembly, assemblyResolver, options:DecompilerSettings}
+			tpeDefinition := dcmpTypeSystem:MainModule:TypeDefinitions:FirstOrDefault()
+			IF (tpeDefinition != NULL)
+				output:Write("// Global type: ")
+				output:WriteReference(tpeDefinition, tpeDefinition:FullName)
+				output:WriteLine()
+			ENDIF
+			metadata := assembly:Metadata
+			cHeader := assembly:Reader:PEHeaders:CorHeader
+			methodReference := MetadataTokenHelpers.EntityHandleOrNil(cHeader:EntryPointTokenOrRelativeVirtualAddress)
+			IF ((!methodReference:IsNil) .AND. (methodReference:Kind == HandleKind.MethodDefinition))
+				methodRslvd := dcmpTypeSystem:MainModule:ResolveMethod(methodReference, DEFAULT(ICSharpCode.Decompiler.TypeSystem.GenericContext))
+				IF (methodRslvd != NULL)
+					output:Write("// Entry point: ")
+					output:WriteReference(methodRslvd, methodRslvd:DeclaringType:FullName + "." + methodRslvd:Name)
+					output:WriteLine()
+				ENDIF
+			ENDIF
+			output:WriteLine("// Architecture: " + Language.GetPlatformDisplayName(assembly))
+			IF ((cHeader:Flags & CorFlags.ILOnly) == (CorFlags)0)
+				output:WriteLine("// This assembly contains unmanaged code.")
+			ENDIF
+			runtimeDisplayName := Language.GetRuntimeDisplayName(assembly)
+			IF (runtimeDisplayName != NULL)
+				output:WriteLine("// Runtime: " + runtimeDisplayName)
+			ENDIF
+			IF ((cHeader:Flags & CorFlags.StrongNameSigned) != 0)
+				output:WriteLine("// This assembly is signed with a strong name key.")
+			ENDIF
+			IF (metadata:IsAssembly)
+				asmblyDefinition := metadata:GetAssemblyDefinition()
+				IF (asmblyDefinition:HashAlgorithm != 0)
+					output:WriteLine("// Hash algorithm: " + asmblyDefinition:HashAlgorithm:ToString():ToUpper())
+				ENDIF
+				IF (!asmblyDefinition:PublicKey:IsNil)
+					output:Write("// Public key: ")
+					blbReader := metadata:GetBlobReader(asmblyDefinition:PublicKey)
+					WHILE blbReader:RemainingBytes > 0
+						output:Write(blbReader:ReadByte():ToString("x"))
+					END WHILE
+					output:WriteLine()
+				ENDIF
+			ENDIF
+			debugInfoOrNull := assembly:GetDebugInfoOrNull()
+			IF (debugInfoOrNull != NULL)
+				output:WriteLine("// Debug info: " + debugInfoOrNull:Description)
+			ENDIF
+			output:WriteLine()
+			decompiler := CSharpDecompiler{dcmpTypeSystem, options:DecompilerSettings}
+			decompiler:CancellationToken := options:CancellationToken
+			syntax := IIF((!options:FullDecompilation) , decompiler:DecompileModuleAndAssemblyAttributes() , decompiler:DecompileWholeModuleAsSingleFile())
+			SELF:WriteCode( output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
+			//END USING
 			
 			
 		PRIVATE METHOD WriteCode(output AS ITextOutput, settings AS DecompilerSettings, syntaxTree AS SyntaxTree, typeSystem AS IDecompilerTypeSystem) AS VOID
@@ -285,9 +377,136 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 			
 			*/
+		END CLASS
+		
+		
+		
+	CLASS SelectCtorTransform IMPLEMENTS IAstTransform
+		PRIVATE INITONLY ctor AS IMethod
+		PRIVATE INITONLY removedSymbols := HashSet<ISymbol>{} AS HashSet<ISymbol>
+		
+		
+		PUBLIC CONSTRUCTOR(ctor AS IMethod )
+			SELF:ctor := ctor
+			
+			
+		PUBLIC METHOD Run(rootNode AS AstNode , context AS TransformContext ) AS VOID
+			LOCAL ctorDeclaration AS ConstructorDeclaration
+			LOCAL currentAstNode AS AstNode
+			LOCAL ctorDeclaration2 AS ConstructorDeclaration
+			LOCAL fldDeclaration AS FieldDeclaration
+			LOCAL fldDeclaration2 AS FieldDeclaration
+			LOCAL ctorDeclaration3 AS ConstructorDeclaration
+			LOCAL currentAstNode2 AS AstNode
+			LOCAL fldDeclaration3 AS FieldDeclaration
+			LOCAL fldDeclaration4 AS FieldDeclaration
+			//
+			ctorDeclaration := NULL
+			FOREACH child AS AstNode IN rootNode:Children 
+				currentAstNode := child
+				IF (currentAstNode != NULL)
+					IF ((ctorDeclaration2 := (currentAstNode ASTYPE ConstructorDeclaration)) == NULL)
+						IF ((fldDeclaration := (currentAstNode ASTYPE FieldDeclaration)) != NULL)
+							fldDeclaration2 := fldDeclaration
+							IF (fldDeclaration2:Variables:All({v AS VariableInitializer => v:Initializer:IsNull}))
+								fldDeclaration2:Remove()
+								SELF:removedSymbols:Add(fldDeclaration2:GetSymbol())
+							ENDIF
+						ENDIF
+					ELSE
+						ctorDeclaration3 := ctorDeclaration2
+						IF (ctorDeclaration3:GetSymbol() == SELF:ctor)
+							ctorDeclaration := ctorDeclaration3
+						ELSE
+							ctorDeclaration3:Remove()
+							SELF:removedSymbols:Add(ctorDeclaration3:GetSymbol())
+						ENDIF
+					ENDIF
+				ENDIF
+			NEXT
+			IF ((ctorDeclaration != NULL) .AND. (ctorDeclaration:Initializer:ConstructorInitializerType == ConstructorInitializerType.This))
+				FOREACH child2 AS AstNode IN rootNode:Children 
+					currentAstNode2 := child2
+					IF ((currentAstNode2 != NULL) .AND. ((fldDeclaration3 := (currentAstNode2 ASTYPE FieldDeclaration)) != NULL))
+						fldDeclaration4 := fldDeclaration3
+						fldDeclaration4:Remove()
+						SELF:removedSymbols:Add(fldDeclaration4:GetSymbol())
+					ENDIF
+				NEXT
+			ENDIF
+			FOREACH child3 AS AstNode IN rootNode:Children 
+				IF ((child3 IS Comment) .AND. (SELF:removedSymbols:Contains(child3:GetSymbol())))
+					child3:Remove()
+				ENDIF
+			NEXT
+			
+			
+			END CLASS
+			
+			
+	CLASS SelectFieldTransform IMPLEMENTS IAstTransform
+		PRIVATE INITONLY fld AS IField
+		
+		PUBLIC CONSTRUCTOR(fld AS IField )
+			SELF:fld := fld
+			
+			
+		PUBLIC METHOD Run(rootNode AS AstNode , context AS TransformContext ) AS VOID
+			LOCAL currentAstNode AS AstNode
+			LOCAL entityDeclaration1 AS EntityDeclaration
+			LOCAL cmt AS Comment
+			LOCAL node AS Comment
+			LOCAL entityDeclaration2 AS EntityDeclaration
+			//
+			FOREACH child AS AstNode IN rootNode:Children 
+				currentAstNode := child
+				IF (currentAstNode != NULL)
+					IF ((entityDeclaration1 := (currentAstNode ASTYPE EntityDeclaration)) == NULL)
+						IF ((cmt := (currentAstNode ASTYPE Comment)) != NULL)
+							node := cmt
+							IF (node:GetSymbol() != SELF:fld)
+								child:Remove()
+							ENDIF
+						ENDIF
+					ELSE
+						entityDeclaration2 := entityDeclaration1
+						IF (child:GetSymbol() != SELF:fld)
+							child:Remove()
+						ENDIF
+					ENDIF
+				ENDIF
+			NEXT
+			
+			
+			END CLASS	
+			
+			
+	CLASS XSharpWholeProjectDecompiler INHERIT WholeProjectDecompiler
+		PRIVATE INITONLY assembly AS LoadedAssembly
+		
+		PRIVATE INITONLY options AS DecompilationOptions
+		
+		PUBLIC CONSTRUCTOR(assembly AS LoadedAssembly , options AS DecompilationOptions )
+			SELF:assembly := assembly
+			SELF:options := options
+			SUPER:Settings := options:DecompilerSettings
+			SUPER:AssemblyResolver := assembly:GetAssemblyResolver()
+			
+			
+		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<Tuple<STRING, STRING>>
+			//
+			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>() 
+				IF (exportedValue:CanHandle(fileName, SELF:options))
+					entryStream:Position := 0L
+					fileName := Path.Combine(targetDirectory, fileName)
+					fileName := exportedValue:WriteResourceToFile(SELF:assembly, fileName, entryStream, SELF:options)
+					RETURN <Tuple<STRING, STRING>>{Tuple.Create(exportedValue:EntryType, fileName) }
+				ENDIF
+			NEXT
+			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)
+			
+			
 	END CLASS
-	
-	
 	
 	
 END NAMESPACE

@@ -628,7 +628,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(asExpression)
             asExpression:Expression:AcceptVisitor(SELF)
             SELF:Space(TRUE)
-            SELF:WriteKeyword(AsExpression.AsKeywordRole)
+            SELF:WriteKeyword("ASTYPE")
             SELF:Space(TRUE)
             asExpression:@@Type:AcceptVisitor(SELF)
             SELF:EndNode(asExpression)
@@ -948,14 +948,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)constraint:BaseTypes )
             SELF:EndNode(constraint)
             
-        VIRTUAL METHOD VisitConstructorDeclaration(constructorDeclaration AS ConstructorDeclaration) AS VOID
+        VIRTUAL METHOD VisitConstructorDeclaration(ctorDeclaration AS ConstructorDeclaration) AS VOID
             LOCAL parent AS TypeDeclaration
             //
-            SELF:StartNode(constructorDeclaration)
-            SELF:WriteAttributes(constructorDeclaration:Attributes)
-            SELF:WriteModifiers(constructorDeclaration:ModifierTokens)
-            parent := constructorDeclaration:Parent ASTYPE TypeDeclaration
-            IF ((parent != NULL) .AND. (parent:Name != constructorDeclaration:Name))
+            SELF:StartNode(ctorDeclaration)
+            SELF:WriteAttributes(ctorDeclaration:Attributes)
+            SELF:WriteModifiers(ctorDeclaration:ModifierTokens)
+            parent := ctorDeclaration:Parent ASTYPE TypeDeclaration
+            IF ((parent != NULL) .AND. (parent:Name != ctorDeclaration:Name))
                 //
                 SELF:WriteIdentifier((Identifier)parent:NameToken:Clone() )
             ELSE
@@ -963,21 +963,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 SELF:WriteKeyword("CONSTRUCTOR")
             ENDIF
             SELF:Space(SELF:policy:SpaceBeforeConstructorDeclarationParentheses)
-            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)constructorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
-            IF (! constructorDeclaration:Initializer:IsNull)
+            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)ctorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+            IF (! ctorDeclaration:Initializer:IsNull)
                 // Continue on Next Line
                 SELF:WriteToken(XSRoles.Semicolon)
                 SELF:NewLine()
                 SELF:writer:Indent()
-                constructorDeclaration:Initializer:AcceptVisitor(SELF)
+                ctorDeclaration:Initializer:AcceptVisitor(SELF)
                 SELF:writer:Unindent()
             ENDIF
             // Save the current/Declaring type
-            SELF:currentType := SELF:GetElementType( constructorDeclaration )
+            SELF:currentType := SELF:GetElementType( ctorDeclaration )
             //
-            SELF:WriteMethodBody(constructorDeclaration:Body, SELF:policy:ConstructorBraceStyle)
+            SELF:WriteMethodBody(ctorDeclaration:Body, SELF:policy:ConstructorBraceStyle)
             SELF:currentType := NULL
-            SELF:EndNode(constructorDeclaration)
+            SELF:EndNode(ctorDeclaration)
             
         VIRTUAL METHOD VisitConstructorInitializer(constructorInitializer AS ConstructorInitializer) AS VOID
             //
@@ -1244,19 +1244,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:Semicolon()
             SELF:EndNode(externAliasDeclaration)
             
-        VIRTUAL METHOD VisitFieldDeclaration(fieldDeclaration AS FieldDeclaration) AS VOID
+        VIRTUAL METHOD VisitFieldDeclaration(fldDeclaration AS FieldDeclaration) AS VOID
             //
-            SELF:StartNode(fieldDeclaration)
-            SELF:WriteAttributes(fieldDeclaration:Attributes)
-            SELF:WriteModifiers(fieldDeclaration:ModifierTokens)
+            SELF:StartNode(fldDeclaration)
+            SELF:WriteAttributes(fldDeclaration:Attributes)
+            SELF:WriteModifiers(fldDeclaration:ModifierTokens)
             SELF:Space(TRUE)
-            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)fieldDeclaration:Variables )
+            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)fldDeclaration:Variables )
             SELF:Space(TRUE)
             SELF:WriteKeyword("AS" )
             SELF:Space(TRUE)
-            fieldDeclaration:ReturnType:AcceptVisitor(SELF)
+            fldDeclaration:ReturnType:AcceptVisitor(SELF)
             SELF:Semicolon()
-            SELF:EndNode(fieldDeclaration)
+			SELF:NewLine()
+            SELF:EndNode(fldDeclaration)
             
         VIRTUAL METHOD VisitFixedFieldDeclaration(fixedFieldDeclaration AS FixedFieldDeclaration) AS VOID
             //
@@ -1538,7 +1539,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(isExpression)
             isExpression:Expression:AcceptVisitor(SELF)
             SELF:Space(TRUE)
-            SELF:WriteKeyword("ASTYPE")
+            SELF:WriteKeyword("IS")
             SELF:Space(TRUE)
             isExpression:@@Type:AcceptVisitor(SELF)
             SELF:EndNode(isExpression)
