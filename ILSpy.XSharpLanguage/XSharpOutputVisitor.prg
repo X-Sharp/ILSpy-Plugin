@@ -943,7 +943,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword(XSRoles.WhereKeyword)
             constraint:TypeParameter:AcceptVisitor(SELF)
             SELF:Space(TRUE)
-            SELF:WriteToken(".")
+            SELF:WriteKeyword("IS")
             SELF:Space(TRUE)
             SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)constraint:BaseTypes )
             SELF:EndNode(constraint)
