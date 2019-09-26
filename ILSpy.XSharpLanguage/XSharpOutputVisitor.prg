@@ -60,7 +60,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             "object",         "of",            "or",            "out",          "packed",         "procedure",    "ptr",            "property", ;
             "raise",          "record",        "repeat",        "set",          "then",  ;
             "to",             "try",           "type",          "unit",         "until",          "using",          "var",           "while",;
-            "with",           "xor",            "return",        "sequence",     "super";
+            "with",           "xor",            "return",        "sequence",     "super",         "func";
             }
             //
             XSharpOutputVisitor.unconditionalKeywords := HashSet<STRING>{ keywords }
@@ -941,6 +941,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:StartNode(constraint)
             SELF:Space(TRUE)
             SELF:WriteKeyword(XSRoles.WhereKeyword)
+			SELF:Space(TRUE)
             constraint:TypeParameter:AcceptVisitor(SELF)
             SELF:Space(TRUE)
             SELF:WriteKeyword("IS")
