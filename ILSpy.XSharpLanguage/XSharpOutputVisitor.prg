@@ -1676,16 +1676,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteTypeParameters(methodDeclaration:TypeParameters)
             SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
             SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)methodDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
-            FOREACH constraint AS Constraint IN methodDeclaration:Constraints
-                //
-                constraint:AcceptVisitor(SELF)
-            NEXT
             //
             SELF:Space(TRUE)
             SELF:WriteKeyword("AS", NULL )
             SELF:Space(TRUE)
             SELF:inMethodAttributes := ClipperState.ReturnType
             methodDeclaration:ReturnType:AcceptVisitor(SELF)
+			//
+			FOREACH constraint AS Constraint IN methodDeclaration:Constraints
+                //
+                constraint:AcceptVisitor(SELF)
+            NEXT
             //
             SELF:inMethodAttributes := ClipperState.Code
             IF ( SELF:isClipper )
