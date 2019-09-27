@@ -329,6 +329,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:BeginSpan(color)
 			ENDIF
+			//
+			IF ( XSharpOutputVisitor.IsKeyword( identifier:Name, identifier ) )
+				SELF:textOutput:Write("@@")
+			ENDIF
+			//
 			SUPER:WriteIdentifier(identifier)
 			IF (color != NULL)
 				//

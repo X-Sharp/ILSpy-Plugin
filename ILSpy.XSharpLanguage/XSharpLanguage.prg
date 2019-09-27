@@ -269,7 +269,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler := CSharpDecompiler{module, module:GetAssemblyResolver(), options:DecompilerSettings}
 			decompiler:CancellationToken := options:CancellationToken
 			decompiler:DebugInfoProvider := module:GetDebugInfoOrNull()
-			WHILE ( decompiler.AstTransforms.Count > INT64.MaxValue )
+			WHILE ( decompiler.AstTransforms.Count > INT32.MaxValue )
 				decompiler:AstTransforms:RemoveAt(decompiler:AstTransforms:Count - 1)
 			ENDDO
 			//            decompiler:AstTransforms:Add( EscapeInvalidIdentifiers{})
