@@ -275,38 +275,38 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//            decompiler:AstTransforms:Add( EscapeInvalidIdentifiers{})
 			RETURN decompiler
 			
-		PUBLIC STATIC METHOD GetPlatformDisplayName(module AS PEFile ) AS STRING
-			LOCAL pEHeaders AS PEHeaders
-			LOCAL machine AS Machine
-			LOCAL characteristics AS Characteristics
-			LOCAL flags AS CorFlags
-			//
-			pEHeaders := module:Reader:PEHeaders
-			machine := pEHeaders:CoffHeader:Machine
-			characteristics := pEHeaders:CoffHeader:Characteristics
-			flags := pEHeaders:CorHeader:Flags
-			BEGIN SWITCH machine
-			CASE Machine.I386
-				IF ((flags & CorFlags.Prefers32Bit) != 0)
-					RETURN "AnyCPU (32-bit preferred)"
-				ENDIF
-				IF ((flags & CorFlags.Requires32Bit) != 0)
-					RETURN "x86"
-				ENDIF
-				IF (((flags & CorFlags.ILOnly) == (CorFlags)0) .AND. ((characteristics & Characteristics.Bit32Machine) != 0))
-					RETURN "x86"
-				ENDIF
-				RETURN "AnyCPU (64-bit preferred)"
-			CASE Machine.Amd64
-				RETURN "x64"
-			CASE Machine.IA64
-				RETURN "Itanium"
-			OTHERWISE
-				RETURN machine:ToString()
-			END SWITCH
+//		PUBLIC STATIC METHOD GetPlatformDisplayName(module AS PEFile ) AS STRING
+//			LOCAL pEHeaders AS PEHeaders
+//			LOCAL machine AS Machine
+//			LOCAL characteristics AS Characteristics
+//			LOCAL flags AS CorFlags
+//			//
+//			pEHeaders := module:Reader:PEHeaders
+//			machine := pEHeaders:CoffHeader:Machine
+//			characteristics := pEHeaders:CoffHeader:Characteristics
+//			flags := pEHeaders:CorHeader:Flags
+//			BEGIN SWITCH machine
+//			CASE Machine.I386
+//				IF ((flags & CorFlags.Prefers32Bit) != 0)
+//					RETURN "AnyCPU (32-bit preferred)"
+//				ENDIF
+//				IF ((flags & CorFlags.Requires32Bit) != 0)
+//					RETURN "x86"
+//				ENDIF
+//				IF (((flags & CorFlags.ILOnly) == (CorFlags)0) .AND. ((characteristics & Characteristics.Bit32Machine) != 0))
+//					RETURN "x86"
+//				ENDIF
+//				RETURN "AnyCPU (64-bit preferred)"
+//			CASE Machine.Amd64
+//				RETURN "x64"
+//			CASE Machine.IA64
+//				RETURN "Itanium"
+//			OTHERWISE
+//				RETURN machine:ToString()
+//			END SWITCH
 
-		PUBLIC STATIC METHOD GetRuntimeDisplayName(module AS PEFile ) AS STRING
-			RETURN module:Metadata:MetadataVersion
+		//PUBLIC STATIC METHOD GetRuntimeDisplayName(module AS PEFile ) AS STRING
+		//	RETURN module:Metadata:MetadataVersion
 			
 		PRIVATE STATIC METHOD CollectFieldsAndCtors(type AS ITypeDefinition , isStatic AS LOGIC ) AS List<EntityHandle>
 			LOCAL list AS List<EntityHandle>

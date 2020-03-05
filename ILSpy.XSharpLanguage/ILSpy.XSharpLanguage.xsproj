@@ -7,7 +7,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ILSpy.XSharpLanguage</RootNamespace>
     <AssemblyName>ILSpy.XSharpLanguage.Plugin</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <Name>ILSpy.XSharpLanguage</Name>
     <Nologo>true</Nologo>
     <GenerateFullPaths>true</GenerateFullPaths>
@@ -21,6 +21,7 @@
     <Includepaths />
     <Nostandarddefs />
     <TargetFrameworkProfile />
+    <NoWin32Manifest>False</NoWin32Manifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" Label="Configuration">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -48,6 +49,11 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\XSharp\XSharp.targets" />
   <ItemGroup>
+    <Reference Include="Accessibility, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <Name>Accessibility</Name>
+      <AssemblyName>Accessibility.dll</AssemblyName>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="ICSharpCode.AvalonEdit, Version=6.0.253.0, Culture=neutral, PublicKeyToken=9cc39be672370310">
       <Name>ICSharpCode.AvalonEdit</Name>
       <AssemblyName>ICSharpCode.AvalonEdit.dll</AssemblyName>
