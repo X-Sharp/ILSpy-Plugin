@@ -32,7 +32,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebuggerCommand>$(SolutionDir)\ILSpy4\ILSpy.exe</DebuggerCommand>
+    <DebuggerCommand>$(SolutionDir)\ILSpy5\ILSpy.exe</DebuggerCommand>
     <DebuggerCommandArguments />
     <DebuggerWorkingDirectory />
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
