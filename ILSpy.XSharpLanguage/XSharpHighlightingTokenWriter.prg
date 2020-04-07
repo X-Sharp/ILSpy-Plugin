@@ -26,7 +26,7 @@ USING ICSharpCode.AvalonEdit.Highlighting
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 	/// <summary>
-	/// The XSharpHighlightingTokenWriter class.
+		/// The XSharpHighlightingTokenWriter class.
 	/// </summary>
 	
 	
@@ -134,12 +134,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				specialTypeNames["decimal"] := "Decimal"
 			ENDIF
 			SELF:beginend := FALSE
-			
+		
 		VIRTUAL METHOD EndNode(node AS AstNode) AS VOID
 			//
 			SUPER:EndNode(node)
 			SELF:nodeStack:Pop()
-			
+		
 		PRIVATE METHOD GetCurrentDefinition() AS ISymbol
 			LOCAL parent AS AstNode
 			//
@@ -156,7 +156,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ENDIF
 			ENDIF
 			RETURN NULL
-			
+		
 		PRIVATE METHOD GetCurrentMemberReference() AS ISymbol
 			LOCAL mbr AS IMember
 			LOCAL node AS AstNode
@@ -187,7 +187,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ENDIF
 			ENDIF
 			RETURN sym
-			
+		
 		PRIVATE STATIC METHOD IsDefinition(node REF AstNode) AS LOGIC
 			//
 			IF ((node IS EntityDeclaration))
@@ -200,13 +200,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				RETURN TRUE
 			ENDIF
 			RETURN (node IS FixedVariableInitializer)
-			
+		
 		VIRTUAL METHOD StartNode(node AS AstNode) AS VOID
 			//
 			SELF:nodeStack:Push(node)
 			SUPER:StartNode(node)
 			
-			
+		
 		VIRTUAL METHOD WriteComment( cmtType AS CommentType, content AS STRING ) AS VOID
 			//
 			SELF:textOutput:BeginSpan( SELF:commentColor)
@@ -214,7 +214,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:textOutput:EndSpan()
 			
 			
-			
+		
 		VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
 			LOCAL color AS HighlightingColor
 			LOCAL accessor AS Accessor
@@ -339,7 +339,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-			
+		
 		VIRTUAL METHOD WriteKeyword(role AS Role, keyword AS STRING) AS VOID
 			LOCAL color AS HighlightingColor
 			//
@@ -361,7 +361,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "true"
 				CASE "false"
 					color := trueKeywordColor
-			CASE "public"
+				CASE "public"
 				CASE "export"
 				CASE "internal"
 				CASE "protected"
@@ -394,6 +394,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "await"
 				CASE "method"
 				CASE "property"
+				CASE "event"
 				CASE "member"
 				CASE "constructor"
 				CASE "destructor"
@@ -425,8 +426,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "remove"
 					color := accessorKeywordsColor
 				CASE "abstract"
-				CASE "initonly"
-				CASE "event"
+				CASE "initonly"				
 				CASE "extern"
 				CASE "override"
 				CASE "readonly"
@@ -480,7 +480,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "return"
 				CASE "exit"
 					color := gotoKeywordsColor
-				END SWITCH
+			END SWITCH
 			//
 			LOCAL isAttr AS AttributeSection
 			isAttr := SELF:nodeStack.PeekOrDefault<AstNode>() ASTYPE AttributeSection
@@ -500,7 +500,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-			
+		
 		VIRTUAL METHOD WritePrimitiveType(typeDef AS STRING) AS VOID
 			LOCAL color AS HighlightingColor
 			//
@@ -512,7 +512,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "logic"
 				CASE "byte"
 				CASE "char"
-			CASE "decimal"
+				CASE "decimal"
 				CASE "double"
 				CASE "real4"
 				CASE "real8"
@@ -531,7 +531,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "string"
 				CASE "void"
 					color := referenceTypeKeywordsColor
-				END SWITCH
+			END SWITCH
 			IF (color != NULL)
 				//
 				SELF:textOutput:BeginSpan(color)
@@ -547,7 +547,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-			
+		
 		VIRTUAL METHOD WritePrimitiveValue(VALUE AS OBJECT,  literalValue := NULL AS STRING) AS VOID
 			LOCAL color AS HighlightingColor
 			//
@@ -570,6 +570,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:textOutput:EndSpan()
 			ENDIF
 			
-			
+		
 	END CLASS
 END NAMESPACE // ILSpy.XSharpLanguage
