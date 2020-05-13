@@ -400,9 +400,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "destructor"
 					color := structureKeywordsColor
 				CASE "where"
-					color := queryKeywordsColor
+					color := structureKeywordsColor
 				CASE "in"
-					color := queryKeywordsColor
+					color := structureKeywordsColor
 				CASE "as"
 				CASE "astype"
 				CASE "local"
@@ -419,7 +419,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "finally"
 					color := exceptionKeywordsColor
 				CASE "when"
-					color := queryKeywordsColor
+					color := structureKeywordsColor
 				CASE "get"
 				CASE "set"
 				CASE "add"
@@ -464,7 +464,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "join"
 				CASE "on"
 				CASE "equals"
-					color := queryKeywordsColor
+					color := structureKeywordsColor
 				CASE "explicit"
 				CASE "implicit"
 				CASE "operator"

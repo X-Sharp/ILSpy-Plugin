@@ -2150,6 +2150,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					//
 					IF (! (clause IS QueryContinuationClause))
 						//
+						SELF:WriteToken( ";" )
 						SELF:NewLine()
 					ENDIF
 				ENDIF
