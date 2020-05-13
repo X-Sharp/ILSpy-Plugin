@@ -1064,7 +1064,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteAttributes(delegateDeclaration:Attributes)
 			SELF:WriteModifiers(delegateDeclaration:ModifierTokens)
 			SELF:WriteKeyword(XSRoles.DelegateKeyword)
-			delegateDeclaration:ReturnType:AcceptVisitor(SELF)
 			SELF:Space(TRUE)
 			SELF:WriteIdentifier(delegateDeclaration:NameToken)
 			SELF:WriteTypeParameters(delegateDeclaration:TypeParameters)
@@ -1074,6 +1073,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				constraint:AcceptVisitor(SELF)
 			NEXT
+			SELF:Space(TRUE)
+			SELF:WriteKeyword("AS", NULL )
+			SELF:Space(TRUE)
+			delegateDeclaration:ReturnType:AcceptVisitor(SELF)
 			SELF:Semicolon()
 			SELF:EndNode(delegateDeclaration)
 		
