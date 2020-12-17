@@ -967,7 +967,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)ctorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
 			IF (! ctorDeclaration:Initializer:IsNull)
 				// Continue on Next Line
-				SELF:WriteToken(XSRoles.Semicolon)
+				// Yes, but not in XSharp
+				// SELF:WriteToken(XSRoles.Semicolon)
 				SELF:NewLine()
 				SELF:writer:Indent()
 				ctorDeclaration:Initializer:AcceptVisitor(SELF)
@@ -989,7 +990,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:WriteKeyword("SELF")
 			ELSE
 				//
-				SELF:WriteKeyword(ConstructorInitializer.BaseKeywordRole)
+				SELF:WriteKeyword("SUPER")
+				//SELF:WriteKeyword(ConstructorInitializer.BaseKeywordRole)
 			ENDIF
 			SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
 			SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)constructorInitializer:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
