@@ -564,6 +564,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:BeginSpan(color)
 			ENDIF
+			// Indicate to XSharp to keep the String as it is
+			IF ( VALUE IS STRING )
+				SUPER:WritePrimitiveValue( NULL, "e" )
+			ENDIF
 			SUPER:WritePrimitiveValue(VALUE, literalValue)
 			IF (color != NULL)
 				//
