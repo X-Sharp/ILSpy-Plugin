@@ -1912,11 +1912,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitOutVarDeclarationExpression(outVarDeclarationExpression AS OutVarDeclarationExpression) AS VOID
 			//
 			SELF:StartNode(outVarDeclarationExpression)
+			SELF:Space(TRUE)
 			SELF:WriteKeyword("OUT")
 			SELF:Space(TRUE)
-			outVarDeclarationExpression:@@Type:AcceptVisitor(SELF)
-			SELF:Space(TRUE)
 			outVarDeclarationExpression:Variable:AcceptVisitor(SELF)
+			SELF:Space(TRUE)
+			
 			SELF:EndNode(outVarDeclarationExpression)
 		
 		VIRTUAL METHOD VisitParameterDeclaration(parameterDeclaration AS ParameterDeclaration) AS VOID
@@ -3014,7 +3015,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					SELF:WriteSingleCommment( cmt )
 				ENDIF
 				// First Try to declare all LOCALs
-				LOCAL localVisitor := XSharpLocalVisitor{ SELF:writer, SELF:policy, SELF } AS XSharpLocalVisitor
+				LOCAL localVisitor := XSharpLocalVisitor{ SELF:writer, SELF:policy, SELF, SELF:system } AS XSharpLocalVisitor
 				FOREACH statement AS Statement IN body:Statements
 					//
 					statement:AcceptVisitor( localVisitor )

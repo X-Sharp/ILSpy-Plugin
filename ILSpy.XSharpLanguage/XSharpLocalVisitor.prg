@@ -30,15 +30,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		INITONLY PROTECTED writer AS TokenWriter
 		INITONLY PROTECTED policy AS CSharpFormattingOptions
 		INITONLY PRIVATE stdout AS XSharpOutputVisitor
+		INITONLY PRIVATE system AS IDecompilerTypeSystem
 		//
 		PRIVATE varList AS List<STRING>
 		
 		
-		CONSTRUCTOR(writer AS TokenWriter, formattingPolicy AS CSharpFormattingOptions, outVisitor AS XSharpOutputVisitor);SUPER()
+		CONSTRUCTOR(writer AS TokenWriter, formattingPolicy AS CSharpFormattingOptions, outVisitor AS XSharpOutputVisitor, typeSystem AS IDecompilerTypeSystem);SUPER()
 			//
 			SELF:writer := writer 
 			SELF:policy := formattingPolicy
 			SELF:stdout := outVisitor
+			SELF:system := typeSystem
 			//
 			varList := List<STRING>{}
 			
@@ -75,6 +77,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			NEXT
 			//
 			
+		PROTECTED VIRTUAL METHOD WriteCommaSeparatedListInParenthesis(list AS System.Collections.Generic.IEnumerable<AstNode>, spaceWithin AS LOGIC) AS VOID
+			//
+			IF (System.Linq.Enumerable.Any<AstNode>(list))
+				//
+				SELF:WriteCommaSeparatedList(list)
+			ENDIF
+			
+			
 		PROTECTED VIRTUAL METHOD WriteCommaSeparatedList(list AS System.Collections.Generic.IEnumerable<AstNode>) AS VOID
 			LOCAL flag AS LOGIC
 			//
@@ -86,7 +96,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					flag := FALSE
 				ELSE
 					//
-					SELF:writer:WriteToken( XSRoles.Comma, ",")
+					//SELF:writer:WriteToken( XSRoles.Comma, ",")
 				ENDIF
 				node:AcceptVisitor(SELF)
 			NEXT
@@ -208,6 +218,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitIdentifierExpression(identifierExpression AS IdentifierExpression) AS VOID
 		
 		VIRTUAL METHOD VisitIfElseStatement(ifElseStatement AS IfElseStatement) AS VOID
+			ifElseStatement:Condition:AcceptVisitor(SELF)
 			IF (ifElseStatement:FalseStatement:IsNull)
 				WriteEmbeddedStatement(ifElseStatement:TrueStatement)
 			ELSE 
@@ -226,6 +237,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitInterpolation(interpolation AS Interpolation) AS VOID
 		
 		VIRTUAL METHOD VisitInvocationExpression(invocationExpression AS InvocationExpression) AS VOID
+			SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)invocationExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
 		
 		VIRTUAL METHOD VisitIsExpression(isExpression AS IsExpression) AS VOID
 		
@@ -258,6 +270,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitOperatorDeclaration(operatorDeclaration AS OperatorDeclaration) AS VOID
 		
 		VIRTUAL METHOD VisitOutVarDeclarationExpression(outVarDeclarationExpression AS OutVarDeclarationExpression) AS VOID
+			SELF:writer:WriteKeyword( NULL, "LOCAL")
+			SELF:writer:Space()
+			outVarDeclarationExpression:Variable:AcceptVisitor(SELF)
+			SELF:writer:Space()
+			SELF:writer:WriteKeyword( NULL, "AS" )
+			SELF:writer:Space()
+			outVarDeclarationExpression:@@Type:AcceptVisitor(SELF)
+			SELF:writer:NewLine()
 		
 		VIRTUAL METHOD VisitParameterDeclaration(parameterDeclaration AS ParameterDeclaration) AS VOID
 		
@@ -272,6 +292,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitPrimitiveExpression(primitiveExpression AS PrimitiveExpression) AS VOID
 		
 		VIRTUAL METHOD VisitPrimitiveType(primitiveType AS PrimitiveType) AS VOID
+			//
+			SELF:writer:WritePrimitiveType(primitiveType:Keyword)
 		
 		VIRTUAL METHOD VisitPropertyDeclaration(propertyDeclaration AS PropertyDeclaration) AS VOID
 		
@@ -297,7 +319,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		
 		VIRTUAL METHOD VisitReturnStatement(returnStatement AS ReturnStatement) AS VOID
 		
-		VIRTUAL METHOD VisitSimpleType(simpleType AS SimpleType) AS VOID
+		VIRTUAL METHOD VisitSimpleType(simpleType AS SimpleType) AS VOID			//
+			SELF:WriteIdentifier(simpleType:IdentifierToken)
 		
 		VIRTUAL METHOD VisitSizeOfExpression(sizeOfExpression AS SizeOfExpression) AS VOID
 		
@@ -327,6 +350,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitThrowStatement(throwStatement AS ThrowStatement) AS VOID
 		
 		VIRTUAL METHOD VisitTryCatchStatement(tryCatchStatement AS TryCatchStatement) AS VOID
+			//
+			SELF:WriteBlock(tryCatchStatement:TryBlock)
+			IF (! tryCatchStatement:FinallyBlock:IsNull)
+				SELF:WriteBlock(tryCatchStatement:FinallyBlock)
+			ENDIF
 		
 		VIRTUAL METHOD VisitTupleExpression(tupleExpression AS TupleExpression ) AS VOID
 		
@@ -343,6 +371,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitTypeReferenceExpression(typeReferenceExpression AS TypeReferenceExpression) AS VOID
 		
 		VIRTUAL METHOD VisitUnaryOperatorExpression(unaryOperatorExpression AS UnaryOperatorExpression) AS VOID
+			unaryOperatorExpression:Expression:AcceptVisitor(SELF)
 		
 		VIRTUAL METHOD VisitUncheckedExpression(uncheckedExpression AS UncheckedExpression) AS VOID
 		
@@ -379,7 +408,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				statement:AcceptVisitor( SELF )
 			NEXT
 			//
-			
+
 		PROTECTED VIRTUAL METHOD WriteEmbeddedStatement(embeddedStatement AS Statement) AS VOID
 			LOCAL blockStatement AS BlockStatement
 			//
@@ -397,6 +426,89 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					embeddedStatement:AcceptVisitor(SELF)
 				ENDIF
 			ENDIF
+			
+		PROTECTED VIRTUAL METHOD WriteTypeArguments(typeArguments AS System.Collections.Generic.IEnumerable<AstType>) AS VOID
+			//
+			IF (System.Linq.Enumerable.Any<AstType>(typeArguments))
+				//
+				SELF:WriteToken(XSRoles.LChevron)
+				SELF:WriteCommaSeparatedList(typeArguments)
+				SELF:WriteToken(XSRoles.RChevron)
+			ENDIF
+			
+		PROTECTED VIRTUAL METHOD WriteToken(tokenRole AS TokenRole) AS VOID
+			//
+			SELF:WriteToken(tokenRole:Token, tokenRole)
+		
+		PROTECTED VIRTUAL METHOD WriteToken(token AS STRING) AS VOID
+			//
+			SELF:WriteToken(token, NULL)
+		
+		PROTECTED VIRTUAL METHOD WriteToken(token AS STRING, tokenRole AS Role) AS VOID
+			//
+			SELF:writer:WriteToken(tokenRole, token)
+			
+		PROTECTED VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
+			//
+			VAR mbr := GetMemberReference( identifier )
+			IF (mbr != NULL) 
+				LOCAL cecil AS MemberReference
+				cecil := SymbolToCecil(mbr)
+				
+			ENDIF
+			//
+			SELF:writer:WriteIdentifier(identifier)
+		
+		PROTECTED VIRTUAL METHOD WriteIdentifier(identifier AS STRING) AS VOID
+			//
+			AstType.Create(identifier):AcceptVisitor(SELF)
+			
+		PRIVATE METHOD GetMemberReference( node AS AstNode ) AS ISymbol
+			LOCAL mbr AS IMember
+			LOCAL sym AS ISymbol
+			LOCAL declaringType AS IType
+			//
+			sym := node.GetSymbol()
+			IF (((sym == NULL) .AND. (node:Role == Roles.TargetExpression)) .AND. (node:Parent IS InvocationExpression))
+				//
+				sym := AnnotationExtensions.GetSymbol(node:Parent)
+			ENDIF
+			IF (((sym != NULL) .AND. (node:Role == Roles.Type)) .AND. (node:Parent IS ObjectCreateExpression))
+				//
+				sym := node:Parent.GetSymbol()
+			ENDIF
+			IF ((node IS IdentifierExpression) .AND. (node:Role == Roles.TargetExpression)) .AND. ((node:Parent IS InvocationExpression))
+				mbr := sym ASTYPE IMember
+				IF (mbr != NULL )
+					//
+					declaringType := mbr:DeclaringType
+					IF ((declaringType != NULL) .AND. (declaringType:Kind == TypeKind.Delegate))
+						//
+						RETURN NULL
+					ENDIF
+				ENDIF
+			ENDIF
+			RETURN sym
+		
+		PRIVATE METHOD SymbolToCecil( sym AS ISymbol) AS MemberReference
+			LOCAL typeDef AS IType
+			LOCAL mbr AS IMember
+			//
+			IF (SELF:system != NULL )
+				typeDef := sym ASTYPE IType
+				IF (typeDef != NULL)
+					//
+					RETURN NULL // SELF:system:GetCecil(typeDef:GetDefinition())
+				ENDIF
+				mbr := sym ASTYPE IMember
+				IF (mbr != NULL)
+					//
+					RETURN NULL //SELF:system:GetCecil(mbr)
+				ENDIF
+			ENDIF
+			RETURN NULL
+			
+			
 			
 		PUBLIC PROPERTY Variables AS List<STRING>
 		GET
