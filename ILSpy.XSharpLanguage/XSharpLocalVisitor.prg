@@ -159,6 +159,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitCSharpTokenNode(cSharpTokenNode AS CSharpTokenNode) AS VOID
 		
 		VIRTUAL METHOD VisitCustomEventDeclaration(customEventDeclaration AS CustomEventDeclaration) AS VOID
+			
+		VIRTUAL METHOD VisitDeclarationExpression( declarationExpression AS DeclarationExpression ) AS VOID
 		
 		VIRTUAL METHOD VisitDefaultValueExpression(defaultValueExpression AS DefaultValueExpression) AS VOID
 		
@@ -196,6 +198,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitForStatement(forStatement AS ForStatement) AS VOID
 			SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Initializers )
 			SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement)
+			
+		VIRTUAL METHOD VisitFunctionPointerType( functionPointerType AS FunctionPointerAstType ) AS VOID			
 			
 		VIRTUAL METHOD VisitGotoCaseStatement(gotoCaseStatement AS GotoCaseStatement) AS VOID
 		
@@ -249,7 +253,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		
 		VIRTUAL METHOD VisitNamespaceDeclaration(namespaceDeclaration AS NamespaceDeclaration) AS VOID
 		
-		VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
+		//VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
 		
 		VIRTUAL METHOD VisitNullReferenceExpression(nullReferenceExpression AS NullReferenceExpression) AS VOID
 		
@@ -302,6 +306,16 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitSizeOfExpression(sizeOfExpression AS SizeOfExpression) AS VOID
 		
 		VIRTUAL METHOD VisitStackAllocExpression(stackAllocExpression AS StackAllocExpression) AS VOID
+			
+		VIRTUAL METHOD VisitSwitchExpression( switchExpression AS SwitchExpression ) AS VOID
+			switchExpression:Expression:AcceptVisitor(SELF)
+			FOREACH  node AS AstNode IN switchExpression.SwitchSections
+				node.AcceptVisitor(SELF)
+			NEXT
+			
+		VIRTUAL METHOD VisitSwitchExpressionSection( switchExpressionSection AS SwitchExpressionSection) AS VOID
+			switchExpressionSection:Pattern:AcceptVisitor(SELF)
+			switchExpressionSection.Body:AcceptVisitor(SELF)
 		
 		VIRTUAL METHOD VisitSwitchSection(switchSection AS SwitchSection) AS VOID
 			FOREACH statement AS Statement IN switchSection:Statements
@@ -318,7 +332,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		VIRTUAL METHOD VisitSyntaxTree(syntaxTree AS SyntaxTree) AS VOID
 		
-		VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
+		//VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
 		
 		VIRTUAL METHOD VisitThisReferenceExpression(thisReferenceExpression AS ThisReferenceExpression) AS VOID
 		
@@ -366,7 +380,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitWhileStatement(whileStatement AS WhileStatement) AS VOID
 			SELF:WriteEmbeddedStatement(whileStatement:EmbeddedStatement)
 			
-		VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
+		//VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
 		
 		VIRTUAL METHOD VisitYieldBreakStatement(yieldBreakStatement AS YieldBreakStatement) AS VOID
 		

@@ -57,7 +57,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             LOCAL s := XSharpOptions{ e } AS XSharpOptions
             //
             SELF:DataContext := s
-            
+			
+		PUBLIC METHOD LoadDefaults( ) AS VOID
+			// Create without params, so ... default value
+            LOCAL s := XSharpOptions{ } AS XSharpOptions
+            //
+            SELF:DataContext := s
             
         PUBLIC METHOD Save( root AS XElement ) AS VOID
             LOCAL s := (XSharpOptions)SELF:DataContext AS XSharpOptions

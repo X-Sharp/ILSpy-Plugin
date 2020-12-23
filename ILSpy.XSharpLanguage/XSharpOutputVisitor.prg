@@ -1036,7 +1036,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				IF ((node:Role == CustomEventDeclaration.AddAccessorRole) .OR. (node:Role == CustomEventDeclaration.RemoveAccessorRole))
 					//
 					node:AcceptVisitor(SELF)
-					bodyStarted = TRUE
+					bodyStarted := TRUE
 				ENDIF
 			NEXT
 			SELF:CloseBrace(SELF:policy:EventBraceStyle)
@@ -1048,6 +1048,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			SELF:NewLine()			
 			SELF:EndNode(customEventDeclaration)
+			
+		VIRTUAL METHOD VisitDeclarationExpression( declarationExpression AS DeclarationExpression ) AS VOID
+			SELF:StartNode(declarationExpression)
+			declarationExpression:Type:AcceptVisitor(SELF)
+			SELF:Space()
+			declarationExpression:Designation:AcceptVisitor(SELF)
+			SELF:EndNode(declarationExpression)
 		
 		VIRTUAL METHOD VisitDefaultValueExpression(defaultValueExpression AS DefaultValueExpression) AS VOID
 			//
@@ -1386,6 +1393,23 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteKeyword("ENDDO")
 			SELF:NewLine()
 			SELF:EndNode(forStatement)
+			
+		VIRTUAL METHOD VisitFunctionPointerType( functionPointerType AS FunctionPointerAstType ) AS VOID
+			SELF:StartNode(functionPointerType)
+			SELF:WriteKeyword(Roles.DelegateKeyword)
+			SELF:WriteToken(FunctionPointerAstType.PointerRole)
+			IF (!functionPointerType:CallingConvention:IsNull)
+				SELF:Space()
+				SELF:WriteKeyword("unmanaged")
+				SELF:WriteToken(Roles.LBracket)
+				functionPointerType:CallingConvention:AcceptVisitor(SELF)
+				SELF:WriteToken(Roles.RBracket)
+			ENDIF
+			//SELF:WriteToken(Roles.LChevron)
+			SELF:WriteCommaSeparatedList(;
+				functionPointerType:Parameters:Concat<AstNode>(NEW[] { functionPointerType.ReturnType }))
+			//SELF:WriteToken(Roles.RChevron)
+			SELF:EndNode(functionPointerType)
 		
 		VIRTUAL METHOD VisitGotoCaseStatement(gotoCaseStatement AS GotoCaseStatement) AS VOID
 			//
@@ -1770,7 +1794,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:NewLine()
 			SELF:EndNode(namespaceDeclaration)
 		
-		VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
+		//VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
 			
 		
 		PRIVATE METHOD VisitNodeInPattern(childNode AS INode) AS VOID
@@ -2334,6 +2358,27 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			list := <Expression>{stackAllocExpression:CountExpression}
 			SELF:WriteCommaSeparatedListInBrackets(list)
 			SELF:EndNode(stackAllocExpression)
+			
+		VIRTUAL METHOD VisitSwitchExpression( switchExpression AS SwitchExpression ) AS VOID
+			SELF:StartNode(switchExpression)
+			switchExpression:Expression:AcceptVisitor(SELF)
+			SELF:Space()
+			SELF:WriteKeyword(SwitchExpression.SwitchKeywordRole)
+			FOREACH  node AS AstNode IN switchExpression.SwitchSections
+				node.AcceptVisitor(SELF)
+				SELF:Comma(node)
+				SELF:NewLine()
+			NEXT
+			SELF:EndNode(switchExpression)			
+			
+		VIRTUAL METHOD VisitSwitchExpressionSection( switchExpressionSection AS SwitchExpressionSection) AS VOID
+			SELF:StartNode(switchExpressionSection)
+			switchExpressionSection:Pattern:AcceptVisitor(SELF)
+			SELF:Space()
+			SELF:WriteToken(Roles.Arrow)
+			SELF:Space()
+			switchExpressionSection.Body:AcceptVisitor(SELF)
+			SELF:EndNode(switchExpressionSection)
 		
 		VIRTUAL METHOD VisitSwitchSection(switchSection AS SwitchSection) AS VOID
 			LOCAL flag AS LOGIC
@@ -2407,7 +2452,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:MaybeNewLinesAfterUsings(node)
 			NEXT
 		
-		VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
+		//VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
 			
 		
 		VIRTUAL METHOD VisitThisReferenceExpression(thisReferenceExpression AS ThisReferenceExpression) AS VOID
@@ -2825,7 +2870,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:NewLine()
 			SELF:EndNode(whileStatement)
 		
-		VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
+		//VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
 			
 		
 		VIRTUAL METHOD VisitYieldBreakStatement(yieldBreakStatement AS YieldBreakStatement) AS VOID

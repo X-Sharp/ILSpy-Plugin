@@ -16,6 +16,7 @@ USING ICSharpCode.Decompiler.DebugInfo
 USING Mono.Cecil
 USING System.Reflection.Metadata
 USING System.Reflection.PortableExecutable
+USING ICSharpCode.Decompiler.CSharp.ProjectDecompiler
 
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
@@ -490,14 +491,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SUPER:AssemblyResolver := assembly:GetAssemblyResolver()
 			
 			
-		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<Tuple<STRING, STRING>>
+		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ValueTuple<STRING, STRING>>
 			//
 			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>() 
 				IF (exportedValue:CanHandle(fileName, SELF:options))
 					entryStream:Position := 0L
 					fileName := Path.Combine(targetDirectory, fileName)
 					fileName := exportedValue:WriteResourceToFile(SELF:assembly, fileName, entryStream, SELF:options)
-					RETURN <Tuple<STRING, STRING>>{Tuple.Create(exportedValue:EntryType, fileName) }
+					RETURN ValueTuple<STRING, STRING>{ ValueTuple.Create(exportedValue:EntryType, fileName) }
 				ENDIF
 			NEXT
 			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)

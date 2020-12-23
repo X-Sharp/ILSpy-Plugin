@@ -48,7 +48,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         STATIC INITONLY PUBLIC DoubleColon := TokenRole{"::"} AS TokenRole
         STATIC INITONLY PUBLIC EmbeddedStatement := Role<Statement>{"EmbeddedStatement", Statement.Null} AS Role<Statement>
         STATIC INITONLY PUBLIC EnumKeyword := TokenRole{"enum"} AS TokenRole
-        STATIC INITONLY PUBLIC Error := Role<ErrorNode>{"Error"} AS Role<ErrorNode>
+        //STATIC INITONLY PUBLIC Error := Role<ErrorNode>{"Error"} AS Role<ErrorNode>
         STATIC INITONLY PUBLIC Expression := Role<Expression>{"Expression", Expression.Null} AS Role<Expression>
         STATIC INITONLY PUBLIC ExternKeyword := TokenRole{"extern"} AS TokenRole
         STATIC INITONLY PUBLIC Identifier := Role<Identifier>{"Identifier", Identifier.Null} AS Role<Identifier>
@@ -58,7 +58,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         STATIC INITONLY PUBLIC LChevron := TokenRole{"<"} AS TokenRole
         STATIC INITONLY PUBLIC LPar := TokenRole{"("} AS TokenRole
         STATIC INITONLY PUBLIC NamespaceKeyword := TokenRole{"namespace"} AS TokenRole
-        STATIC INITONLY PUBLIC NewLine := Role<NewLineNode>{"NewLine"} AS Role<NewLineNode>
+        //STATIC INITONLY PUBLIC NewLine := Role<NewLineNode>{"NewLine"} AS Role<NewLineNode>
         STATIC INITONLY PUBLIC Parameter := Role<ParameterDeclaration>{"Parameter"} AS Role<ParameterDeclaration>
         STATIC INITONLY PUBLIC PreProcessorDirective := Role<PreProcessorDirective>{"PreProcessorDirective"} AS Role<PreProcessorDirective>
         STATIC INITONLY PUBLIC RBrace := TokenRole{"}"} AS TokenRole
@@ -69,14 +69,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         STATIC INITONLY PUBLIC Semicolon := TokenRole{";"} AS TokenRole
         STATIC INITONLY PUBLIC StructKeyword := TokenRole{"struct"} AS TokenRole
         STATIC INITONLY PUBLIC TargetExpression := Role<Expression>{"Target", Expression.Null} AS Role<Expression>
-        STATIC INITONLY PUBLIC Text := Role<TextNode>{"Text"} AS Role<TextNode>
+        //STATIC INITONLY PUBLIC Text := Role<TextNode>{"Text"} AS Role<TextNode>
         STATIC INITONLY PUBLIC @@Type := Role<AstType>{"Type", AstType.Null} AS Role<AstType>
         STATIC INITONLY PUBLIC TypeArgument := Role<AstType>{"TypeArgument", AstType.Null} AS Role<AstType>
         STATIC INITONLY PUBLIC TypeMemberRole := Role<EntityDeclaration>{"TypeMember"} AS Role<EntityDeclaration>
         STATIC INITONLY PUBLIC TypeParameter := Role<TypeParameterDeclaration>{"TypeParameter"} AS Role<TypeParameterDeclaration>
         STATIC INITONLY PUBLIC Variable := Role<VariableInitializer>{"Variable", VariableInitializer.Null} AS Role<VariableInitializer>
         STATIC INITONLY PUBLIC WhereKeyword := TokenRole{"where"} AS TokenRole
-        STATIC INITONLY PUBLIC Whitespace := Role<WhitespaceNode>{"Whitespace"} AS Role<WhitespaceNode>
+        //STATIC INITONLY PUBLIC Whitespace := Role<WhitespaceNode>{"Whitespace"} AS Role<WhitespaceNode>
 
     END CLASS
 

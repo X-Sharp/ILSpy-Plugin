@@ -31,7 +31,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebuggerCommand>$(SolutionDir)\ILSpy5\ILSpy.exe</DebuggerCommand>
+    <DebuggerCommand>$(SolutionDir)\ILSpy6\ILSpy.exe</DebuggerCommand>
     <DebuggerCommandArguments />
     <DebuggerWorkingDirectory />
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
@@ -58,21 +58,21 @@
       <AssemblyName>ICSharpCode.AvalonEdit.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy5\ICSharpCode.AvalonEdit.dll</HintPath>
+      <HintPath>..\ILSpy6\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.Decompiler, Version=5.0.0.5124, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
       <Name>ICSharpCode.Decompiler</Name>
       <AssemblyName>ICSharpCode.Decompiler.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy5\ICSharpCode.Decompiler.dll</HintPath>
+      <HintPath>..\ILSpy6\ICSharpCode.Decompiler.dll</HintPath>
     </Reference>
     <Reference Include="ILSpy, Version=5.0.0.5124, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
       <Name>ILSpy</Name>
       <AssemblyName>ILSpy.exe</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy5\ILSpy.exe</HintPath>
+      <HintPath>..\ILSpy6\ILSpy.exe</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Composition, Version=15.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>Microsoft.VisualStudio.Composition</Name>
@@ -93,7 +93,7 @@
       <AssemblyName>Mono.Cecil.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy5\Mono.Cecil.dll</HintPath>
+      <HintPath>..\ILSpy6\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="PresentationCore">
@@ -112,7 +112,7 @@
       <AssemblyName>System.Collections.Immutable.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy5\System.Collections.Immutable.dll</HintPath>
+      <HintPath>..\ILSpy6\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.ComponentModel.Composition</Name>
@@ -224,7 +224,7 @@
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PreBuildEvent />
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\ILSpy5"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\ILSpy6"</PostBuildEvent>
     <RunPostBuildEvent />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
