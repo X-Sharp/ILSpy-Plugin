@@ -1867,12 +1867,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteModifiers(operatorDeclaration:ModifierTokens)
 			IF (operatorDeclaration:OperatorType == OperatorType.Explicit)
 				//
-				SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
+				//SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
 			ELSE
 				//
 				IF (operatorDeclaration:OperatorType == OperatorType.Implicit)
 					//
-					SELF:WriteKeyword(OperatorDeclaration.ImplicitRole)
+					//SELF:WriteKeyword(OperatorDeclaration.ImplicitRole)
 				ELSE
 					//
 					needReturnType := TRUE
@@ -1900,6 +1900,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			//
 			SELF:WriteMethodBody(operatorDeclaration:Body, SELF:policy:MethodBraceStyle)
+			//
+			SELF:WriteKeyword( "END" )
+			SELF:Space(TRUE)
+			SELF:WriteKeyword( "OPERATOR" )
+			SELF:NewLine()
 			SELF:EndNode(operatorDeclaration)
 		
 		PRIVATE METHOD VisitOptionalNode(optionalNode AS OptionalNode) AS VOID
