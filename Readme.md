@@ -6,7 +6,7 @@ Either run ILSpy in that folder, or copy/paste the file with the ILSpy binaries.
 
 This version has been built against V5.x
 
-This plugin is based on the source code found in ILSpy (http://www.ilspy.net) that provide CSharpLanguage.
+This plugin is based on the source code found in ILSpy (https://github.com/icsharpcode/ILSpy) that provide CSharpLanguage.
 It has been used as base, and some modifications haven been made to support some XSharp construction.
 
 The generated code is following the XSharp Core Dialect.
