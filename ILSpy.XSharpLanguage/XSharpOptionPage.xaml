@@ -9,6 +9,7 @@
     <Grid Margin="10">
         <StackPanel>
             <CheckBox IsChecked="{Binding UpperKeyword}">Output Keywords in Uppercase</CheckBox>
+            <CheckBox IsChecked="{Binding IfStatement}">Surround IF statement with parenthesis</CheckBox>
         </StackPanel>
     </Grid>
 </UserControl>

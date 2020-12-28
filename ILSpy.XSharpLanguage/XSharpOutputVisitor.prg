@@ -1435,16 +1435,25 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:RPar()
 		
 		VIRTUAL METHOD VisitIfElseStatement(ifElseStatement AS IfElseStatement) AS VOID
+			LOCAL addParenthesis AS LOGIC
+			addParenthesis = FALSE
 			//
 			SELF:StartNode(ifElseStatement)
 			//SELF:WriteKeyword(IfElseStatement.IfKeywordRole)
 			SELF:WriteKeyword("IF")
 			SELF:Space(SELF:policy:SpaceBeforeIfParentheses)
-			SELF:LPar()
+			IF SELF:writer IS XSharpHighlightingTokenWriter
+				addParenthesis := ((XSharpHighlightingTokenWriter)SELF:writer):Settings:IfStatement
+			ENDIF
+			IF addParenthesis
+				SELF:LPar()
+			ENDIF
 			SELF:Space(SELF:policy:SpacesWithinIfParentheses)
 			ifElseStatement:Condition:AcceptVisitor(SELF)
 			SELF:Space(SELF:policy:SpacesWithinIfParentheses)
-			SELF:RPar()
+			IF addParenthesis
+				SELF:RPar()
+			ENDIF			
 			IF (ifElseStatement:FalseStatement:IsNull)
 				//
 				SELF:WriteEmbeddedStatement(ifElseStatement:TrueStatement, NewLinePlacement.SameLine)
