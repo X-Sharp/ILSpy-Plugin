@@ -1699,12 +1699,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:inMethodAttributes := ClipperState.Code
 			SELF:WriteModifiers(methodDeclaration:ModifierTokens)
 			SELF:Space(TRUE)
-			SELF:WritePrivateImplementationType(methodDeclaration:PrivateImplementationType)
-			SELF:Space(TRUE)
 			//
 			SELF:WriteKeyword("METHOD", NULL )
 			SELF:Space(TRUE)
 			//
+            SELF:WritePrivateImplementationType(methodDeclaration:PrivateImplementationType)
 			SELF:WriteIdentifier(methodDeclaration:NameToken)
 			SELF:WriteTypeParameters(methodDeclaration:TypeParameters)
 			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
