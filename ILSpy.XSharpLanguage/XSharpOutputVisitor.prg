@@ -2380,8 +2380,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitSwitchStatement(switchStatement AS SwitchStatement) AS VOID
 			//
 			SELF:StartNode(switchStatement)
-			SELF:WriteKeyword("BEGIN")
-			SELF:Space(TRUE)
 			SELF:WriteKeyword("SWITCH")
 			SELF:Space(TRUE)
 			switchStatement:Expression:AcceptVisitor(SELF)
