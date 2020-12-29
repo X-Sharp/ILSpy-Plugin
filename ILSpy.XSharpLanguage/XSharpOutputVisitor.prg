@@ -1460,7 +1460,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		
 		VIRTUAL METHOD VisitIfElseStatement(ifElseStatement AS IfElseStatement) AS VOID
 			LOCAL addParenthesis AS LOGIC
-			addParenthesis = FALSE
+			addParenthesis := FALSE
 			//
 			SELF:StartNode(ifElseStatement)
 			//SELF:WriteKeyword(IfElseStatement.IfKeywordRole)
