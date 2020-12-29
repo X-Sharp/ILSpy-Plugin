@@ -71,6 +71,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		PRIVATE beginend AS LOGIC
 		PRIVATE xsSettings AS XSharpOptions
 		
+		PUBLIC PROPERTY Settings AS XSharpOptions GET SELF:xsSettings
+		
 		// Methods
 		CONSTRUCTOR(decoratedWriter AS TokenWriter, textOutput AS ISmartTextOutput, settings AS XSharpOptions)//Inline call to base() in C#
 			SUPER(decoratedWriter)

@@ -1459,16 +1459,25 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:RPar()
 		
 		VIRTUAL METHOD VisitIfElseStatement(ifElseStatement AS IfElseStatement) AS VOID
+			LOCAL addParenthesis AS LOGIC
+			addParenthesis = FALSE
 			//
 			SELF:StartNode(ifElseStatement)
 			//SELF:WriteKeyword(IfElseStatement.IfKeywordRole)
 			SELF:WriteKeyword("IF")
 			SELF:Space(SELF:policy:SpaceBeforeIfParentheses)
-			SELF:LPar()
+			IF SELF:writer IS XSharpHighlightingTokenWriter
+				addParenthesis := ((XSharpHighlightingTokenWriter)SELF:writer):Settings:IfStatement
+			ENDIF
+			IF addParenthesis
+				SELF:LPar()
+			ENDIF
 			SELF:Space(SELF:policy:SpacesWithinIfParentheses)
 			ifElseStatement:Condition:AcceptVisitor(SELF)
 			SELF:Space(SELF:policy:SpacesWithinIfParentheses)
-			SELF:RPar()
+			IF addParenthesis
+				SELF:RPar()
+			ENDIF			
 			IF (ifElseStatement:FalseStatement:IsNull)
 				//
 				SELF:WriteEmbeddedStatement(ifElseStatement:TrueStatement, NewLinePlacement.SameLine)
@@ -1714,12 +1723,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:inMethodAttributes := ClipperState.Code
 			SELF:WriteModifiers(methodDeclaration:ModifierTokens)
 			SELF:Space(TRUE)
-			SELF:WritePrivateImplementationType(methodDeclaration:PrivateImplementationType)
-			SELF:Space(TRUE)
 			//
 			SELF:WriteKeyword("METHOD", NULL )
 			SELF:Space(TRUE)
 			//
+            SELF:WritePrivateImplementationType(methodDeclaration:PrivateImplementationType)
 			SELF:WriteIdentifier(methodDeclaration:NameToken)
 			SELF:WriteTypeParameters(methodDeclaration:TypeParameters)
 			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
@@ -1889,6 +1897,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:StartNode(operatorDeclaration)
 			SELF:WriteAttributes(operatorDeclaration:Attributes)
 			SELF:WriteModifiers(operatorDeclaration:ModifierTokens)
+			//
+			SELF:Space(TRUE)
+			SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
+			SELF:Space(TRUE)
+			//
 			IF (operatorDeclaration:OperatorType == OperatorType.Explicit)
 				//
 				SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
@@ -1900,30 +1913,26 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ELSE
 					//
 					needReturnType := TRUE
-					
 				ENDIF
 			ENDIF
-			SELF:Space(TRUE)
-			SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
-			SELF:Space(TRUE)
-			IF ((operatorDeclaration:OperatorType == OperatorType.Explicit) .OR. (operatorDeclaration:OperatorType == OperatorType.Implicit))
-				//
-				operatorDeclaration:ReturnType:AcceptVisitor(SELF)
-			ELSE
+			IF needReturnType
 				//
 				SELF:WriteToken(OperatorDeclaration.GetToken(operatorDeclaration:OperatorType), OperatorDeclaration.GetRole(operatorDeclaration:OperatorType))
 			ENDIF
 			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
 			SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)operatorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
 			//
-			IF ( needReturnType )
-				SELF:Space(TRUE)
-				SELF:WriteKeyword( "AS" )
-				SELF:Space(TRUE)
-				operatorDeclaration:ReturnType:AcceptVisitor(SELF)
-			ENDIF
+			SELF:Space(TRUE)
+			SELF:WriteKeyword( "AS" )
+			SELF:Space(TRUE)
+			operatorDeclaration:ReturnType:AcceptVisitor(SELF)
 			//
 			SELF:WriteMethodBody(operatorDeclaration:Body, SELF:policy:MethodBraceStyle)
+			//
+			SELF:WriteKeyword( "END" )
+			SELF:Space(TRUE)
+			SELF:WriteKeyword( "OPERATOR" )
+			SELF:NewLine()
 			SELF:EndNode(operatorDeclaration)
 		
 		PRIVATE METHOD VisitOptionalNode(optionalNode AS OptionalNode) AS VOID
@@ -1936,11 +1945,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitOutVarDeclarationExpression(outVarDeclarationExpression AS OutVarDeclarationExpression) AS VOID
 			//
 			SELF:StartNode(outVarDeclarationExpression)
+			SELF:Space(TRUE)
 			SELF:WriteKeyword("OUT")
 			SELF:Space(TRUE)
-			outVarDeclarationExpression:@@Type:AcceptVisitor(SELF)
-			SELF:Space(TRUE)
 			outVarDeclarationExpression:Variable:AcceptVisitor(SELF)
+			SELF:Space(TRUE)
+			
 			SELF:EndNode(outVarDeclarationExpression)
 		
 		VIRTUAL METHOD VisitParameterDeclaration(parameterDeclaration AS ParameterDeclaration) AS VOID
@@ -2419,8 +2429,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitSwitchStatement(switchStatement AS SwitchStatement) AS VOID
 			//
 			SELF:StartNode(switchStatement)
-			SELF:WriteKeyword("BEGIN")
-			SELF:Space(TRUE)
 			SELF:WriteKeyword("SWITCH")
 			SELF:Space(TRUE)
 			switchStatement:Expression:AcceptVisitor(SELF)
@@ -3059,7 +3067,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					SELF:WriteSingleCommment( cmt )
 				ENDIF
 				// First Try to declare all LOCALs
-				LOCAL localVisitor := XSharpLocalVisitor{ SELF:writer, SELF:policy, SELF } AS XSharpLocalVisitor
+				LOCAL localVisitor := XSharpLocalVisitor{ SELF:writer, SELF:policy, SELF, SELF:system } AS XSharpLocalVisitor
 				FOREACH statement AS Statement IN body:Statements
 					//
 					statement:AcceptVisitor( localVisitor )

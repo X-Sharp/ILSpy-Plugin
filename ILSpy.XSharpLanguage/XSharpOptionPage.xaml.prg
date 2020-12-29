@@ -69,6 +69,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             // Save the options back into XML:
             LOCAL section := XElement{ns + "Options"} AS XElement
             section:SetAttributeValue("upperkeyword", s:UpperKeyword)
+			section:SetAttributeValue("ifstatement", s:IfStatement)
             // Replace the existing section in the settings file, or add a new section,
             // if required.
             LOCAL existingElement := root:Element(ns + "Options") AS XElement
@@ -84,9 +85,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
     PUBLIC CLASS XSharpOptions INHERIT INotifyPropertyChanged
     
         PRIVATE _upperkeyword AS LOGIC
+		PRIVATE _ifstatement AS LOGIC
         
         PUBLIC CONSTRUCTOR()
             SELF:_upperkeyword := TRUE
+			SELF:_ifstatement = TRUE
             
         PUBLIC CONSTRUCTOR( e AS XElement )
             LOCAL attr AS XAttribute
@@ -102,6 +105,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 ENDIF
             ENDIF
             //
+            attr := e:Attribute("ifstatement")
+            IF ( attr != NULL )
+                LOCAL val := attr:Value AS STRING
+                LOCAL bVal := TRUE AS LOGIC
+                IF Boolean.TryParse( val, bVal )
+                    SELF:_ifstatement := bVal
+                ELSE
+                    SELF:_ifstatement := TRUE
+                ENDIF
+            ENDIF
+            //			
             
             
         PUBLIC PROPERTY UpperKeyword AS LOGIC
@@ -115,7 +129,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                     OnPropertyChanged("UpperKeyword")
                 ENDIF
             END SET
-        END PROPERTY
+		END PROPERTY
+		
+        PUBLIC PROPERTY IfStatement AS LOGIC
+            GET
+            RETURN _ifstatement
+            END GET
+            
+            SET 
+                IF (_ifstatement != VALUE) 
+                    _ifstatement := VALUE
+                    OnPropertyChanged("IfStatement")
+                ENDIF
+            END SET
+        END PROPERTY		
         
         PUBLIC EVENT PropertyChanged AS PropertyChangedEventHandler
         
