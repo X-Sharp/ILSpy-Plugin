@@ -74,12 +74,12 @@
       <Private>True</Private>
       <HintPath>..\ILSpy6\ILSpy.exe</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Composition, Version=15.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="Microsoft.VisualStudio.Composition, Version=16.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>Microsoft.VisualStudio.Composition</Name>
       <AssemblyName>Microsoft.VisualStudio.Composition.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\packages\Microsoft.VisualStudio.Composition.15.5.23\lib\net45\Microsoft.VisualStudio.Composition.dll</HintPath>
+      <HintPath>..\ILSpy6\Microsoft.VisualStudio.Composition.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Validation, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>Microsoft.VisualStudio.Validation</Name>
@@ -157,19 +157,19 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Reflection.Metadata, Version=1.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="System.Reflection.Metadata, Version=1.4.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>System.Reflection.Metadata</Name>
       <AssemblyName>System.Reflection.Metadata.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy4\System.Reflection.Metadata.dll</HintPath>
+      <HintPath>..\ILSpy6\System.Reflection.Metadata.dll</HintPath>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.24.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>System.Threading.Tasks.Dataflow</Name>
       <AssemblyName>System.Threading.Tasks.Dataflow.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\packages\System.Threading.Tasks.Dataflow.4.5.24\lib\portable-net45+win8+wpa81\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <HintPath>..\ILSpy6\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
     <Reference Include="System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.Xaml</Name>

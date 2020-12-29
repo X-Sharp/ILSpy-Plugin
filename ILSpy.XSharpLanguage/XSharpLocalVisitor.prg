@@ -286,6 +286,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitParameterDeclaration(parameterDeclaration AS ParameterDeclaration) AS VOID
 		
 		VIRTUAL METHOD VisitParenthesizedExpression(parenthesizedExpression AS ParenthesizedExpression) AS VOID
+			
+		VIRTUAL METHOD VisitParenthesizedVariableDesignation( parenthesizedVariableDesignation AS ParenthesizedVariableDesignation ) AS VOID			
 		
 		VIRTUAL METHOD VisitPatternPlaceholder(placeholder AS AstNode, pattern AS Pattern) AS VOID
 		
@@ -325,6 +327,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		
 		VIRTUAL METHOD VisitSimpleType(simpleType AS SimpleType) AS VOID			//
 			SELF:WriteIdentifier(simpleType:IdentifierToken)
+			
+		VIRTUAL METHOD VisitSingleVariableDesignation( singleVariableDesignation AS SingleVariableDesignation ) AS VOID		
 		
 		VIRTUAL METHOD VisitSizeOfExpression(sizeOfExpression AS SizeOfExpression) AS VOID
 		
@@ -332,13 +336,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		VIRTUAL METHOD VisitSwitchExpression( switchExpression AS SwitchExpression ) AS VOID
 			switchExpression:Expression:AcceptVisitor(SELF)
-			FOREACH  node AS AstNode IN switchExpression.SwitchSections
+			FOREACH  node AS AstNode IN switchExpression:SwitchSections
 				node.AcceptVisitor(SELF)
 			NEXT
 			
 		VIRTUAL METHOD VisitSwitchExpressionSection( switchExpressionSection AS SwitchExpressionSection) AS VOID
 			switchExpressionSection:Pattern:AcceptVisitor(SELF)
-			switchExpressionSection.Body:AcceptVisitor(SELF)
+			switchExpressionSection:Body:AcceptVisitor(SELF)
 		
 		VIRTUAL METHOD VisitSwitchSection(switchSection AS SwitchSection) AS VOID
 			FOREACH statement AS Statement IN switchSection:Statements

@@ -550,7 +550,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:textOutput:EndSpan()
 			ENDIF
 		
-		VIRTUAL METHOD WritePrimitiveValue(VALUE AS OBJECT,  literalValue := NULL AS STRING) AS VOID
+		VIRTUAL METHOD WritePrimitiveValue(VALUE AS OBJECT, format := LiteralFormat.None AS LiteralFormat ) AS VOID
 			LOCAL color AS HighlightingColor
 			//
 			color := NULL
@@ -568,9 +568,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			// Indicate to XSharp to keep the String as it is
 			IF ( VALUE IS STRING )
-				SUPER:WritePrimitiveValue( NULL, "e" )
+				SUPER:WritePrimitiveValue( "e" )
 			ENDIF
-			SUPER:WritePrimitiveValue(VALUE, literalValue)
+			SUPER:WritePrimitiveValue(VALUE )
 			IF (color != NULL)
 				//
 				SELF:textOutput:EndSpan()

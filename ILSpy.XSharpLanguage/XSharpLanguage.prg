@@ -481,14 +481,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 	CLASS XSharpWholeProjectDecompiler INHERIT WholeProjectDecompiler
 		PRIVATE INITONLY assembly AS LoadedAssembly
-		
 		PRIVATE INITONLY options AS DecompilationOptions
 		
 		PUBLIC CONSTRUCTOR(assembly AS LoadedAssembly , options AS DecompilationOptions )
+			SUPER(options:DecompilerSettings, assembly:GetAssemblyResolver(), assembly:GetDebugInfoOrNull() )
 			SELF:assembly := assembly
 			SELF:options := options
-			SUPER:Settings := options:DecompilerSettings
-			SUPER:AssemblyResolver := assembly:GetAssemblyResolver()
 			
 			
 		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ValueTuple<STRING, STRING>>
@@ -498,7 +496,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					entryStream:Position := 0L
 					fileName := Path.Combine(targetDirectory, fileName)
 					fileName := exportedValue:WriteResourceToFile(SELF:assembly, fileName, entryStream, SELF:options)
-					RETURN ValueTuple<STRING, STRING>{ ValueTuple.Create(exportedValue:EntryType, fileName) }
+					RETURN <ValueTuple<STRING, STRING>>{ ValueTuple.Create<STRING, STRING>(exportedValue:EntryType, fileName) }
 				ENDIF
 			NEXT
 			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)

@@ -314,10 +314,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL i AS LONG
 			//
 			nextSibling := node:NextSibling
-			WHILE (((nextSibling IS WhitespaceNode) .OR. (nextSibling IS NewLineNode)))
-				//
-				nextSibling := nextSibling:NextSibling
-			ENDDO
+//			WHILE (((nextSibling IS WhitespaceNode) .OR. (nextSibling IS NewLineNode)))
+//				//
+//				nextSibling := nextSibling:NextSibling
+//			ENDDO
 			IF (((node IS UsingDeclaration) .OR. (node IS UsingAliasDeclaration)) .AND. (! (nextSibling IS UsingDeclaration) .AND. ! (nextSibling IS UsingAliasDeclaration)))
 				//
 				i := 0
@@ -1337,7 +1337,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:StartNode(foreachStatement)
 			SELF:WriteKeyword("FOREACH")
 			SELF:Space()
-			SELF:WriteIdentifier(foreachStatement:VariableNameToken)
+			//SELF:WriteIdentifier(foreachStatement:VariableNameToken)
+			foreachStatement:VariableDesignation:AcceptVisitor(SELF)
 			SELF:Space()
 			SELF:WriteKeyword("AS")
 			SELF:Space()
@@ -1407,7 +1408,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			//SELF:WriteToken(Roles.LChevron)
 			SELF:WriteCommaSeparatedList(;
-				functionPointerType:Parameters:Concat<AstNode>(NEW[] { functionPointerType.ReturnType }))
+				functionPointerType:Parameters:Concat<AstNode>(<AstNode>{ functionPointerType:ReturnType }))
 			//SELF:WriteToken(Roles.RChevron)
 			SELF:EndNode(functionPointerType)
 		
@@ -1554,7 +1555,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitInterpolatedStringText(interpolatedStringText AS InterpolatedStringText) AS VOID
 			//
 			SELF:StartNode(interpolatedStringText)
-			SELF:writer:WritePrimitiveValue("", TextWriterTokenWriter.ConvertString(interpolatedStringText:Text))
+			SELF:writer:WritePrimitiveValue(TextWriterTokenWriter.ConvertString(interpolatedStringText:Text))
 			SELF:EndNode(interpolatedStringText)
 		
 		VIRTUAL METHOD VisitInterpolation(interpolation AS Interpolation) AS VOID
@@ -1565,7 +1566,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			IF (interpolation:Suffix != NULL)
 				//
 				SELF:writer:WriteToken(NULL, ":")
-				SELF:writer:WritePrimitiveValue("", interpolation:Suffix)
+				SELF:writer:WritePrimitiveValue( interpolation:Suffix)
 			ENDIF
 			SELF:writer:WriteToken(Interpolation.RBrace, "}")
 			SELF:EndNode(interpolation)
@@ -1654,17 +1655,18 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		VIRTUAL METHOD VisitLocalFunctionDeclarationStatement(localFunctionDeclarationStatement AS LocalFunctionDeclarationStatement ) AS VOID
 			SELF:StartNode(localFunctionDeclarationStatement)
-			SELF:WriteModifiers(localFunctionDeclarationStatement:ModifierTokens)
-			localFunctionDeclarationStatement:ReturnType:AcceptVisitor(SELF)
-			SELF:Space()
-			SELF:WriteIdentifier(localFunctionDeclarationStatement:NameToken)
-			SELF:WriteTypeParameters(localFunctionDeclarationStatement:TypeParameters)
-			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-			SELF:WriteCommaSeparatedListInParenthesis(localFunctionDeclarationStatement:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
-			FOREACH constraint AS Constraint IN localFunctionDeclarationStatement:Constraints 
-				constraint:AcceptVisitor(SELF)
-			NEXT
-			SELF:WriteMethodBody(localFunctionDeclarationStatement:Body, SELF:policy:MethodBraceStyle)
+//			SELF:WriteModifiers(localFunctionDeclarationStatement:ModifierTokens)
+//			localFunctionDeclarationStatement:ReturnType:AcceptVisitor(SELF)
+//			SELF:Space()
+//			SELF:WriteIdentifier(localFunctionDeclarationStatement:NameToken)
+//			SELF:WriteTypeParameters(localFunctionDeclarationStatement:TypeParameters)
+//			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
+//			SELF:WriteCommaSeparatedListInParenthesis(localFunctionDeclarationStatement:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
+//			FOREACH constraint AS Constraint IN localFunctionDeclarationStatement:Constraints 
+//				constraint:AcceptVisitor(SELF)
+//			NEXT
+//			SELF:WriteMethodBody(localFunctionDeclarationStatement:Body, SELF:policy:MethodBraceStyle)
+			localFunctionDeclarationStatement:Declaration:AcceptVisitor(SELF)
 			SELF:EndNode(localFunctionDeclarationStatement)
 			
 		
@@ -1860,7 +1862,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitNullReferenceExpression(nullReferenceExpression AS NullReferenceExpression) AS VOID
 			//
 			SELF:StartNode(nullReferenceExpression)
-			SELF:writer:WritePrimitiveValue(NULL, NULL)
+			SELF:writer:WritePrimitiveValue(NULL)
 			SELF:isAfterSpace := FALSE
 			SELF:EndNode(nullReferenceExpression)
 		
@@ -2014,6 +2016,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:Space(SELF:policy:SpacesWithinParentheses)
 			SELF:RPar()
 			SELF:EndNode(parenthesizedExpression)
+			
+		VIRTUAL METHOD VisitParenthesizedVariableDesignation( parenthesizedVariableDesignation AS ParenthesizedVariableDesignation ) AS VOID
 		
 		VIRTUAL METHOD VisitPatternPlaceholder(placeholder AS AstNode, pattern AS Pattern) AS VOID
 			//
@@ -2039,12 +2043,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitPrimitiveExpression(primitiveExpression AS PrimitiveExpression) AS VOID
 			//
 			SELF:StartNode(primitiveExpression)
-			SELF:writer:WritePrimitiveValue(primitiveExpression:Value, primitiveExpression:UnsafeLiteralValue)
-			// Store Parameters Name
-			IF ( SELF:inMethodAttributes == ClipperState.Attribute) .AND. SELF:isClipper
-				SELF:paramsList:Add( primitiveExpression:Value:ToString() )
-			ENDIF
-			//
+//			SELF:writer:WritePrimitiveValue(primitiveExpression:Value, primitiveExpression:UnsafeLiteralValue)
+//			// Store Parameters Name
+//			IF ( SELF:inMethodAttributes == ClipperState.Attribute) .AND. SELF:isClipper
+//				SELF:paramsList:Add( primitiveExpression:Value:ToString() )
+//			ENDIF
+//			//
+			SELF:writer:WritePrimitiveValue(primitiveExpression:Value, primitiveExpression:Format )
 			SELF:isAfterSpace := FALSE
 			SELF:EndNode(primitiveExpression)
 		
@@ -2347,6 +2352,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			SELF:WriteTypeArguments(simpleType:TypeArguments)
 			SELF:EndNode(simpleType)
+			
+		VIRTUAL METHOD VisitSingleVariableDesignation( singleVariableDesignation AS SingleVariableDesignation ) AS VOID					
 		
 		VIRTUAL METHOD VisitSizeOfExpression(sizeOfExpression AS SizeOfExpression) AS VOID
 			//
@@ -2374,7 +2381,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			switchExpression:Expression:AcceptVisitor(SELF)
 			SELF:Space()
 			SELF:WriteKeyword(SwitchExpression.SwitchKeywordRole)
-			FOREACH  node AS AstNode IN switchExpression.SwitchSections
+			FOREACH  node AS AstNode IN switchExpression:SwitchSections
 				node.AcceptVisitor(SELF)
 				SELF:Comma(node)
 				SELF:NewLine()
@@ -2387,7 +2394,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:Space()
 			SELF:WriteToken(Roles.Arrow)
 			SELF:Space()
-			switchExpressionSection.Body:AcceptVisitor(SELF)
+			switchExpressionSection:Body:AcceptVisitor(SELF)
 			SELF:EndNode(switchExpressionSection)
 		
 		VIRTUAL METHOD VisitSwitchSection(switchSection AS SwitchSection) AS VOID
