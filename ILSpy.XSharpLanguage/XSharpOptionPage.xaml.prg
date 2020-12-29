@@ -84,7 +84,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         
         PUBLIC CONSTRUCTOR()
             SELF:_upperkeyword := TRUE
-			SELF:_ifstatement = TRUE
+			SELF:_ifstatement := TRUE
             
         PUBLIC CONSTRUCTOR( e AS XElement )
             LOCAL attr AS XAttribute

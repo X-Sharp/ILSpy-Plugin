@@ -1036,7 +1036,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				IF ((node:Role == CustomEventDeclaration.AddAccessorRole) .OR. (node:Role == CustomEventDeclaration.RemoveAccessorRole))
 					//
 					node:AcceptVisitor(SELF)
-					bodyStarted = TRUE
+					bodyStarted := TRUE
 				ENDIF
 			NEXT
 			SELF:CloseBrace(SELF:policy:EventBraceStyle)
@@ -1436,7 +1436,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		
 		VIRTUAL METHOD VisitIfElseStatement(ifElseStatement AS IfElseStatement) AS VOID
 			LOCAL addParenthesis AS LOGIC
-			addParenthesis = FALSE
+			addParenthesis := FALSE
 			//
 			SELF:StartNode(ifElseStatement)
 			//SELF:WriteKeyword(IfElseStatement.IfKeywordRole)
