@@ -1873,39 +1873,35 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:StartNode(operatorDeclaration)
 			SELF:WriteAttributes(operatorDeclaration:Attributes)
 			SELF:WriteModifiers(operatorDeclaration:ModifierTokens)
+			//
+			SELF:Space(TRUE)
+			SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
+			SELF:Space(TRUE)
+			//
 			IF (operatorDeclaration:OperatorType == OperatorType.Explicit)
 				//
-				//SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
+				SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
 			ELSE
 				//
 				IF (operatorDeclaration:OperatorType == OperatorType.Implicit)
 					//
-					//SELF:WriteKeyword(OperatorDeclaration.ImplicitRole)
+					SELF:WriteKeyword(OperatorDeclaration.ImplicitRole)
 				ELSE
 					//
 					needReturnType := TRUE
-					
 				ENDIF
 			ENDIF
-			SELF:Space(TRUE)
-			SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
-			SELF:Space(TRUE)
-			IF ((operatorDeclaration:OperatorType == OperatorType.Explicit) .OR. (operatorDeclaration:OperatorType == OperatorType.Implicit))
-				//
-				operatorDeclaration:ReturnType:AcceptVisitor(SELF)
-			ELSE
+			IF needReturnType
 				//
 				SELF:WriteToken(OperatorDeclaration.GetToken(operatorDeclaration:OperatorType), OperatorDeclaration.GetRole(operatorDeclaration:OperatorType))
 			ENDIF
 			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
 			SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)operatorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
 			//
-			IF ( needReturnType )
-				SELF:Space(TRUE)
-				SELF:WriteKeyword( "AS" )
-				SELF:Space(TRUE)
-				operatorDeclaration:ReturnType:AcceptVisitor(SELF)
-			ENDIF
+			SELF:Space(TRUE)
+			SELF:WriteKeyword( "AS" )
+			SELF:Space(TRUE)
+			operatorDeclaration:ReturnType:AcceptVisitor(SELF)
 			//
 			SELF:WriteMethodBody(operatorDeclaration:Body, SELF:policy:MethodBraceStyle)
 			//
