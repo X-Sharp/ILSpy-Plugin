@@ -568,7 +568,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			// Indicate to XSharp to keep the String as it is
 			IF ( VALUE IS STRING )
-				SUPER:WritePrimitiveValue( "e" )
+				SUPER:WriteInterpolatedText("e")
+				//SUPER:WritePrimitiveValue( "e", LiteralFormat.)
 			ENDIF
 			SUPER:WritePrimitiveValue(VALUE )
 			IF (color != NULL)
