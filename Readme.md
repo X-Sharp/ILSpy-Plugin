@@ -15,7 +15,9 @@ Lots of things are still to be done, but most is working.
 
 ### Features
 - LOCAL variables are all defined on top of statement blocks.
-- Option page : set casing for Keywords
+- Option page : 
+-- set casing for Keywords
+-- put parenthesis around IF condition
 
 ### Warnings
 - Currently, Array access are all zero-based
