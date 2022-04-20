@@ -481,6 +481,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "yield"
 				CASE "return"
 				CASE "exit"
+				case "loop"
 					color := gotoKeywordsColor
 			END SWITCH
 			//

@@ -1000,8 +1000,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		VIRTUAL METHOD VisitContinueStatement(continueStatement AS ContinueStatement) AS VOID
 			//
 			SELF:StartNode(continueStatement)
-			SELF:WriteKeyword("continue", ContinueStatement.ContinueKeywordRole)
-			SELF:Semicolon()
+			SELF:WriteKeyword("Loop", ContinueStatement.ContinueKeywordRole)
+			SELF:NewLine()
 			SELF:EndNode(continueStatement)
 		
 		VIRTUAL METHOD VisitCSharpTokenNode(cSharpTokenNode AS CSharpTokenNode) AS VOID
