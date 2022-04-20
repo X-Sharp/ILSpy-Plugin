@@ -30,27 +30,27 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		CONSTRUCTOR()
 			RETURN
 		
-			PUBLIC OVERRIDE PROPERTY Name AS STRING
+		PUBLIC OVERRIDE PROPERTY Name AS STRING
 			GET             
 				RETURN "XSharp"
 			END GET
-			END PROPERTY
+		END PROPERTY
 		
 		
-			PUBLIC OVERRIDE PROPERTY FileExtension AS STRING
+		PUBLIC OVERRIDE PROPERTY FileExtension AS STRING
 			GET
 				// used in 'Save As' dialog
 				RETURN ".prg"
 			END GET
-			END PROPERTY
+		END PROPERTY
 		
-			PUBLIC OVERRIDE PROPERTY ProjectFileExtension AS STRING
+		PUBLIC OVERRIDE PROPERTY ProjectFileExtension AS STRING
 			GET
 				RETURN ".xsproj"
 			END GET
-			END PROPERTY
+		END PROPERTY
 		
-			PUBLIC OVERRIDE METHOD DecompileMethod( methoddef AS IMethod, output AS ITextOutput, options AS DecompilationOptions) AS VOID
+		PUBLIC OVERRIDE METHOD DecompileMethod( methoddef AS IMethod, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL assembly AS PEFile
 			LOCAL method2 AS IMethod
@@ -72,7 +72,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(methoddef:MetadataToken), decompiler:TypeSystem)
 			RETURN
 		
-			PUBLIC OVERRIDE METHOD DecompileProperty(propDef AS IProperty, output AS ITextOutput, options AS DecompilationOptions) AS VOID
+		PUBLIC OVERRIDE METHOD DecompileProperty(propDef AS IProperty, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL assembly AS PEFile
 			//
@@ -81,7 +81,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteCommentLine(output, SELF:TypeToString(propDef:DeclaringType, TRUE))
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(propDef:MetadataToken), decompiler:TypeSystem)
 		
-			PUBLIC OVERRIDE METHOD DecompileField(fieldDef AS IField, output AS ITextOutput, options AS DecompilationOptions) AS VOID
+		PUBLIC OVERRIDE METHOD DecompileField(fieldDef AS IField, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL definitions AS List<EntityHandle>
@@ -99,7 +99,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler:AstTransforms:Add(SelectFieldTransform{definition})
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
 		
-			PUBLIC OVERRIDE  METHOD DecompileType(typeDef AS ITypeDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
+		PUBLIC OVERRIDE  METHOD DecompileType(typeDef AS ITypeDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
 			//
@@ -108,7 +108,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(typeDef:MetadataToken), decompiler:TypeSystem)
 		
-			PUBLIC OVERRIDE METHOD DecompileEvent(evt AS IEvent , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
+		PUBLIC OVERRIDE METHOD DecompileEvent(evt AS IEvent , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
 			//
@@ -117,7 +117,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(evt:MetadataToken), decompiler:TypeSystem)
 		
-			PUBLIC OVERRIDE METHOD DecompileAssembly(asmbly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS ICSharpCode.Decompiler.Solution.ProjectId
+		PUBLIC OVERRIDE METHOD DecompileAssembly(asmbly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS ICSharpCode.Decompiler.Solution.ProjectId
 			//            LOCAL result AS ModuleDefinition
 			//            //LOCAL iLSpyWholeProjectDecompiler AS ILSpyWholeProjectDecompiler
 			//            LOCAL moduleDefinition AS ModuleDefinition
@@ -492,7 +492,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:options := options
 		
 		
-			PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ValueTuple<STRING, STRING>>
+		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ValueTuple<STRING, STRING>>
 			//
 			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>() 
 				IF (exportedValue:CanHandle(fileName, SELF:options))
@@ -504,19 +504,20 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			NEXT
 			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)
 		
-		
+		/*
+
 		PUBLIC METHOD DecompileProject(moduleDefinition AS PEFile , targetDirectory AS STRING , projectFileWriter AS TextWriter , cancellationToken := DEFAULT(CancellationToken) AS CancellationToken ) AS ProjectId
 			LOCAL list AS List<Tuple<STRING, STRING>>
 			//
 			IF string.IsNullOrEmpty(targetDirectory)
-				THROW InvalidOperationException{e"Must set TargetDirectory"}
+				THROW InvalidOperationException{"Must set TargetDirectory"}
 			ENDIF
 			SELF:targetDirectory := targetDirectory
 			SELF:directories:Clear()
-			list := Enumerable.ToList<Tuple<STRING, STRING>>(SELF:xsWriteCodeFilesInProject(moduleDefinition, cancellationToken))
+			list := SELF:xsWriteCodeFilesInProject(moduleDefinition, cancellationToken)):ToList()
 			list:AddRange(SELF:WriteResourceFilesInProject(moduleDefinition))
 			IF SELF:StrongNameKeyFile != NULL
-				@@File.Copy(SELF:StrongNameKeyFile, Path.Combine(targetDirectory, Path.GetFileName(SELF:StrongNameKeyFile)))
+				File.Copy(SELF:StrongNameKeyFile, Path.Combine(targetDirectory, Path.GetFileName(SELF:StrongNameKeyFile)))
 			ENDIF
 			RETURN SELF:WriteProjectFile(projectFileWriter, list, moduleDefinition)			
 		
@@ -556,7 +557,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				syntaxTree:AcceptVisitor(CSharpOutputVisitor{(TextWriter)(OBJECT)val2, SELF:settings:CSharpFormattingOptions})
 					
 			CATCH ex AS Exception WHEN ((!(ex IS OperationCanceledException)) .AND. (!(ex IS DecompilerException)))
-				THROW DecompilerException{module, "Error decompiling for '" + @@file:get_Key() + e"'", ex}
+				THROW DecompilerException{module, "Error decompiling for '" + @@file:get_Key() + "'", ex}
 				
 			FINALLY
 				((IDisposable)val2)?:Dispose()
@@ -564,7 +565,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			})
 			RETURN Enumerable.Concat<Tuple<STRING, STRING>>(Enumerable.Select<IGrouping<STRING, TypeDefinitionHandle>, Tuple<STRING, STRING>>((IEnumerable<IGrouping<STRING, TypeDefinitionHandle>>)list, (@@Func<IGrouping<STRING, TypeDefinitionHandle>, Tuple<STRING, STRING>>)({f AS IGrouping<STRING, TypeDefinitionHandle> => Tuple.Create(e"Compile", f:get_Key())})), SELF:WriteAssemblyInfo(ts, cancellationToken))
 			
-			
+			*/
+
 	END CLASS
 		
 		
