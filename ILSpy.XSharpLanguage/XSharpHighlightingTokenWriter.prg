@@ -568,16 +568,24 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:textOutput:BeginSpan(color)
 			ENDIF
 			// Indicate to XSharp to keep the String as it is
-			IF ( VALUE IS STRING )
-				SUPER:WriteInterpolatedText("e")
-				//SUPER:WritePrimitiveValue( "e", LiteralFormat.)
+			IF ( VALUE IS STRING VAR sValue)
+            IF StringNeedsEscape(sValue)
+					SUPER:WritePrimitiveValue( "e" )
+            ENDIF
 			ENDIF
 			SUPER:WritePrimitiveValue(VALUE )
 			IF (color != NULL)
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-			
+				
+		PRIVATE METHOD StringNeedsEscape(sString AS STRING) AS LOGIC
+         FOREACH VAR c IN sString
+            IF c < 32 .OR. c > 127 
+               RETURN TRUE
+            ENDIF
+         NEXT
+         RETURN FALSE
 		
 	END CLASS
 END NAMESPACE // ILSpy.XSharpLanguage

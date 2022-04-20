@@ -4,7 +4,7 @@ At that level, Create a ILSPY folder, and place there the ILSpy binaries.
 After building, you will have a ILSpy.XSharpLanguage.Plugin.DLL in ILSpy.XSharpLanguage\bin\Debug or Release
 Either run ILSpy in that folder, or copy/paste the file with the ILSpy binaries.
 
-The first version was been built against V5.x
+This version has been built against V6.x
 
 This plugin is based on the source code found in ILSpy (https://github.com/icsharpcode/ILSpy) that provide CSharpLanguage.
 It has been used as base, and some modifications haven been made to support some XSharp construction.
@@ -15,7 +15,9 @@ Lots of things are still to be done, but most is working.
 
 ### Features
 - LOCAL variables are all defined on top of statement blocks.
-- Option page : set casing for Keywords
+- Option page : 
+- - set casing for Keywords
+- - put parenthesis around IF condition
 
 ### Warnings
 - Currently, Array access are all zero-based
