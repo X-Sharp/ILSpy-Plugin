@@ -2361,7 +2361,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteTypeArguments(simpleType:TypeArguments)
 			SELF:EndNode(simpleType)
 			
-		VIRTUAL METHOD VisitSingleVariableDesignation( singleVariableDesignation AS SingleVariableDesignation ) AS VOID					
+		VIRTUAL METHOD VisitSingleVariableDesignation( singleVariableDesignation AS SingleVariableDesignation ) AS VOID
+			SELF:StartNode(singleVariableDesignation)
+			SELF:WriteIdentifier(singleVariableDesignation:IdentifierToken)
+			SELF:EndNode(singleVariableDesignation)
+		
 		
 		VIRTUAL METHOD VisitSizeOfExpression(sizeOfExpression AS SizeOfExpression) AS VOID
 			//
