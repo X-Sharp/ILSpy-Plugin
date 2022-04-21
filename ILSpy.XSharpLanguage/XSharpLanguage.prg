@@ -69,6 +69,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
 				RETURN
 			ENDIF
+			//
+			// Set Decompiler Settings to be sure that we produce X# compatible code
+			options:DecompilerSettings:SwitchExpressions := FALSE
+			//
+			//
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(methoddef:MetadataToken), decompiler:TypeSystem)
 			RETURN
 		
