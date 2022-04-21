@@ -570,7 +570,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			// Indicate to XSharp to keep the String as it is
 			IF ( VALUE IS STRING VAR sValue)
             IF StringNeedsEscape(sValue)
-					SUPER:WritePrimitiveValue( "e" )
+					SUPER:WriteInterpolatedText( "e" )
             ENDIF
 			ENDIF
 			SUPER:WritePrimitiveValue(VALUE )
