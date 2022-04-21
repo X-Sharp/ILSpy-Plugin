@@ -743,9 +743,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					spaceAroundBitwiseOperator := SELF:policy:SpaceAroundShiftOperator
 					
 				CASE BinaryOperatorType.NullCoalescing
+				CASE BinaryOperatorType.IsPattern
 					//
 					spaceAroundBitwiseOperator := TRUE
-					
+				CASE BinaryOperatorType.Range
+					//
+					spaceAroundBitwiseOperator := FALSE
 				OTHERWISE
 					//
 					THROW System.NotSupportedException{"Invalid value for BinaryOperatorType"}
