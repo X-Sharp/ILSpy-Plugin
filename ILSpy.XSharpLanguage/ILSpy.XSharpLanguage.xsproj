@@ -31,7 +31,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebuggerCommand>$(SolutionDir)\ILSpy6\ILSpy.exe</DebuggerCommand>
+    <DebuggerCommand>$(SolutionDir)\ILSpy7\ILSpy.exe</DebuggerCommand>
     <DebuggerCommandArguments />
     <DebuggerWorkingDirectory />
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
@@ -59,42 +59,42 @@
       <AssemblyName>ICSharpCode.AvalonEdit.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\ICSharpCode.AvalonEdit.dll</HintPath>
+      <HintPath>..\ilspy7\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
     <Reference Include="ICSharpCode.Decompiler, Version=5.0.0.5124, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
       <Name>ICSharpCode.Decompiler</Name>
       <AssemblyName>ICSharpCode.Decompiler.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\ICSharpCode.Decompiler.dll</HintPath>
+      <HintPath>..\ilspy7\ICSharpCode.Decompiler.dll</HintPath>
     </Reference>
     <Reference Include="ILSpy, Version=5.0.0.5124, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
       <Name>ILSpy</Name>
       <AssemblyName>ILSpy.exe</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\ILSpy.exe</HintPath>
+      <HintPath>..\ilspy7\ILSpy.exe</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Composition, Version=16.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>Microsoft.VisualStudio.Composition</Name>
       <AssemblyName>Microsoft.VisualStudio.Composition.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\Microsoft.VisualStudio.Composition.dll</HintPath>
+      <HintPath>..\ilspy7\Microsoft.VisualStudio.Composition.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Validation, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>Microsoft.VisualStudio.Validation</Name>
       <AssemblyName>Microsoft.VisualStudio.Validation.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\packages\Microsoft.VisualStudio.Validation.15.0.82\lib\net45\Microsoft.VisualStudio.Validation.dll</HintPath>
+      <HintPath>..\ilspy7\Microsoft.VisualStudio.Validation.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
       <Name>Mono.Cecil</Name>
       <AssemblyName>Mono.Cecil.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\Mono.Cecil.dll</HintPath>
+      <HintPath>..\ilspy7\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="PresentationCore">
@@ -113,7 +113,7 @@
       <AssemblyName>System.Collections.Immutable.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\System.Collections.Immutable.dll</HintPath>
+      <HintPath>..\ilspy7\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.ComponentModel.Composition</Name>
@@ -163,14 +163,14 @@
       <AssemblyName>System.Reflection.Metadata.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\System.Reflection.Metadata.dll</HintPath>
+      <HintPath>..\ilspy7\System.Reflection.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>System.Threading.Tasks.Dataflow</Name>
       <AssemblyName>System.Threading.Tasks.Dataflow.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ILSpy6\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <HintPath>..\ilspy7\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
     <Reference Include="System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.Xaml</Name>
@@ -225,7 +225,7 @@
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PreBuildEvent />
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\ILSpy6"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\ilspy7"</PostBuildEvent>
     <RunPostBuildEvent />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">

@@ -481,13 +481,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 	END CLASS	
 	
-	
+
 	CLASS XSharpWholeProjectDecompiler INHERIT WholeProjectDecompiler
 		PRIVATE INITONLY assembly AS LoadedAssembly
 		PRIVATE INITONLY options AS DecompilationOptions
 		
 		PUBLIC CONSTRUCTOR(assembly AS LoadedAssembly , options AS DecompilationOptions )
-			SUPER(options:DecompilerSettings, assembly:GetAssemblyResolver(), assembly:GetDebugInfoOrNull() )
+			SUPER(options:DecompilerSettings, assembly:GetAssemblyResolver(), assembly:GetAssemblyReferenceClassifier(), assembly:GetDebugInfoOrNull())
 			SELF:assembly := assembly
 			SELF:options := options
 		
@@ -505,7 +505,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)
 		
 		/*
-
 		PUBLIC METHOD DecompileProject(moduleDefinition AS PEFile , targetDirectory AS STRING , projectFileWriter AS TextWriter , cancellationToken := DEFAULT(CancellationToken) AS CancellationToken ) AS ProjectId
 			LOCAL list AS List<Tuple<STRING, STRING>>
 			//
@@ -566,7 +565,6 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			RETURN Enumerable.Concat<Tuple<STRING, STRING>>(Enumerable.Select<IGrouping<STRING, TypeDefinitionHandle>, Tuple<STRING, STRING>>((IEnumerable<IGrouping<STRING, TypeDefinitionHandle>>)list, (@@Func<IGrouping<STRING, TypeDefinitionHandle>, Tuple<STRING, STRING>>)({f AS IGrouping<STRING, TypeDefinitionHandle> => Tuple.Create(e"Compile", f:get_Key())})), SELF:WriteAssemblyInfo(ts, cancellationToken))
 			
 			*/
-
 	END CLASS
 		
 		

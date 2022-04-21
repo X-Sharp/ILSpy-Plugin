@@ -244,6 +244,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)invocationExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
 		
 		VIRTUAL METHOD VisitIsExpression(isExpression AS IsExpression) AS VOID
+
+		VIRTUAL METHOD VisitInvocationType( invocationType AS InvocationAstType ) AS VOID
 		
 		VIRTUAL METHOD VisitLabelStatement(labelStatement AS LabelStatement) AS VOID
 		
@@ -265,7 +267,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		
 		VIRTUAL METHOD VisitNamespaceDeclaration(namespaceDeclaration AS NamespaceDeclaration) AS VOID
 		
-		//VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
+			//VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
 		
 		VIRTUAL METHOD VisitNullReferenceExpression(nullReferenceExpression AS NullReferenceExpression) AS VOID
 		
@@ -359,7 +361,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		VIRTUAL METHOD VisitSyntaxTree(syntaxTree AS SyntaxTree) AS VOID
 		
-		//VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
+			//VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
 		
 		VIRTUAL METHOD VisitThisReferenceExpression(thisReferenceExpression AS ThisReferenceExpression) AS VOID
 		
@@ -412,8 +414,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		VIRTUAL METHOD VisitWhileStatement(whileStatement AS WhileStatement) AS VOID
 			SELF:WriteEmbeddedStatement(whileStatement:EmbeddedStatement)
+
+		VIRTUAL METHOD VisitWithInitializerExpression( withInitializerExpression AS WithInitializerExpression ) AS VOID
+		
 			
-		//VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
+			//VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
 		
 		VIRTUAL METHOD VisitYieldBreakStatement(yieldBreakStatement AS YieldBreakStatement) AS VOID
 		
@@ -468,12 +473,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 		PROTECTED VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
 			//
-			VAR mbr := GetMemberReference( identifier )
-			IF (mbr != NULL) 
-				LOCAL cecil AS MemberReference
-				cecil := SymbolToCecil(mbr)
-				
-			ENDIF
+//			VAR mbr := GetMemberReference( identifier )
+//			IF (mbr != NULL) 
+//				LOCAL cecil AS MemberReference
+//				cecil := SymbolToCecil(mbr)
+//				
+//			ENDIF
 			//
 			SELF:writer:WriteIdentifier(identifier)
 		
@@ -529,10 +534,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			
 			
 		PUBLIC PROPERTY Variables AS List<STRING>
-		GET
-		RETURN SELF:varList
-	END GET
-	END PROPERTY
+			GET
+				RETURN SELF:varList
+			END GET
+		END PROPERTY
 	
 	END CLASS
 END NAMESPACE // ILSpy.XSharpLanguage

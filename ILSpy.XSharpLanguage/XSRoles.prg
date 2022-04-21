@@ -32,16 +32,16 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         STATIC INITONLY PUBLIC Argument := Role<Expression>{"Argument", Expression.Null} AS Role<Expression>
         STATIC INITONLY PUBLIC Arrow := TokenRole{"=>"} AS TokenRole
         STATIC INITONLY PUBLIC @@Assign := TokenRole{":="} AS TokenRole
-        STATIC INITONLY PUBLIC Attribute := Role<ICSharpCode.Decompiler.CSharp.Syntax.Attribute>{"Attribute"} AS Role<ICSharpCode.Decompiler.CSharp.Syntax.Attribute>
+        STATIC INITONLY PUBLIC Attribute := Role<ICSharpCode.Decompiler.CSharp.Syntax.Attribute>{"Attribute", NULL} AS Role<ICSharpCode.Decompiler.CSharp.Syntax.Attribute>
         STATIC INITONLY PUBLIC AttributeTargetRole := Role<CSharpTokenNode>{"AttributeTarget", CSharpTokenNode.Null} AS Role<CSharpTokenNode>
         STATIC INITONLY PUBLIC BaseType := Role<AstType>{"BaseType", AstType.Null} AS Role<AstType>
         STATIC INITONLY PUBLIC Body := Role<BlockStatement>{"Body", BlockStatement.Null} AS Role<BlockStatement>
         STATIC INITONLY PUBLIC ClassKeyword := TokenRole{"class"} AS TokenRole
         STATIC INITONLY PUBLIC Colon := TokenRole{":"} AS TokenRole
         STATIC INITONLY PUBLIC Comma := TokenRole{","} AS TokenRole
-        STATIC INITONLY PUBLIC Comment := Role<Comment>{"Comment"} AS Role<Comment>
+        STATIC INITONLY PUBLIC Comment := Role<Comment>{"Comment", NULL} AS Role<Comment>
         STATIC INITONLY PUBLIC Condition := Role<Expression>{"Condition", Expression.Null} AS Role<Expression>
-        STATIC INITONLY PUBLIC Constraint := Role<Constraint>{"Constraint"} AS Role<Constraint>
+        STATIC INITONLY PUBLIC Constraint := Role<Constraint>{"Constraint", NULL} AS Role<Constraint>
         STATIC INITONLY PUBLIC ConstraintTypeParameter := Role<SimpleType>{"TypeParameter", SimpleType.Null} AS Role<SimpleType>
         STATIC INITONLY PUBLIC DelegateKeyword := TokenRole{"delegate"} AS TokenRole
         STATIC INITONLY PUBLIC Dot := TokenRole{"."} AS TokenRole
@@ -59,8 +59,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         STATIC INITONLY PUBLIC LPar := TokenRole{"("} AS TokenRole
         STATIC INITONLY PUBLIC NamespaceKeyword := TokenRole{"namespace"} AS TokenRole
         //STATIC INITONLY PUBLIC NewLine := Role<NewLineNode>{"NewLine"} AS Role<NewLineNode>
-        STATIC INITONLY PUBLIC Parameter := Role<ParameterDeclaration>{"Parameter"} AS Role<ParameterDeclaration>
-        STATIC INITONLY PUBLIC PreProcessorDirective := Role<PreProcessorDirective>{"PreProcessorDirective"} AS Role<PreProcessorDirective>
+        STATIC INITONLY PUBLIC Parameter := Role<ParameterDeclaration>{"Parameter", NULL} AS Role<ParameterDeclaration>
+        STATIC INITONLY PUBLIC PreProcessorDirective := Role<PreProcessorDirective>{"PreProcessorDirective", NULL} AS Role<PreProcessorDirective>
         STATIC INITONLY PUBLIC RBrace := TokenRole{"}"} AS TokenRole
         STATIC INITONLY PUBLIC RBracket := TokenRole{"]"} AS TokenRole
         STATIC INITONLY PUBLIC RChevron := TokenRole{">"} AS TokenRole
@@ -72,8 +72,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         //STATIC INITONLY PUBLIC Text := Role<TextNode>{"Text"} AS Role<TextNode>
         STATIC INITONLY PUBLIC @@Type := Role<AstType>{"Type", AstType.Null} AS Role<AstType>
         STATIC INITONLY PUBLIC TypeArgument := Role<AstType>{"TypeArgument", AstType.Null} AS Role<AstType>
-        STATIC INITONLY PUBLIC TypeMemberRole := Role<EntityDeclaration>{"TypeMember"} AS Role<EntityDeclaration>
-        STATIC INITONLY PUBLIC TypeParameter := Role<TypeParameterDeclaration>{"TypeParameter"} AS Role<TypeParameterDeclaration>
+        STATIC INITONLY PUBLIC TypeMemberRole := Role<EntityDeclaration>{"TypeMember", NULL} AS Role<EntityDeclaration>
+        STATIC INITONLY PUBLIC TypeParameter := Role<TypeParameterDeclaration>{"TypeParameter", null} AS Role<TypeParameterDeclaration>
         STATIC INITONLY PUBLIC Variable := Role<VariableInitializer>{"Variable", VariableInitializer.Null} AS Role<VariableInitializer>
         STATIC INITONLY PUBLIC WhereKeyword := TokenRole{"where"} AS TokenRole
         //STATIC INITONLY PUBLIC Whitespace := Role<WhitespaceNode>{"Whitespace"} AS Role<WhitespaceNode>
