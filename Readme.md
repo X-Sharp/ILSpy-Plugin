@@ -4,7 +4,7 @@ At that level, Create a ILSPY folder, and place there the ILSpy binaries.
 After building, you will have a ILSpy.XSharpLanguage.Plugin.DLL in ILSpy.XSharpLanguage\bin\Debug or Release
 Either run ILSpy in that folder, or copy/paste the file with the ILSpy binaries.
 
-This version has been built against V6.x
+This version has been built against V7.x
 
 This plugin is based on the source code found in ILSpy (https://github.com/icsharpcode/ILSpy) that provide CSharpLanguage.
 It has been used as base, and some modifications haven been made to support some XSharp construction.
