@@ -26,7 +26,7 @@ USING ICSharpCode.AvalonEdit.Highlighting
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 	/// <summary>
-		/// The XSharpHighlightingTokenWriter class.
+	/// The XSharpHighlightingTokenWriter class.
 	/// </summary>
 	
 	
@@ -481,7 +481,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "yield"
 				CASE "return"
 				CASE "exit"
-				case "loop"
+				CASE "loop"
 					color := gotoKeywordsColor
 			END SWITCH
 			//
@@ -569,23 +569,23 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			// Indicate to XSharp to keep the String as it is
 			IF ( VALUE IS STRING VAR sValue)
-            IF StringNeedsEscape(sValue)
-					SUPER:WritePrimitiveValue( "e" )
-            ENDIF
+				IF StringNeedsEscape(sValue)
+					SUPER:WriteInterpolatedText( "e" )
+				ENDIF
 			ENDIF
-			SUPER:WritePrimitiveValue(VALUE )
+			SUPER:WritePrimitiveValue(VALUE)
 			IF (color != NULL)
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
 				
 		PRIVATE METHOD StringNeedsEscape(sString AS STRING) AS LOGIC
-         FOREACH VAR c IN sString
-            IF c < 32 .OR. c > 127 
-               RETURN TRUE
-            ENDIF
-         NEXT
-         RETURN FALSE
+			FOREACH VAR c IN sString
+				IF c < 32 .OR. c > 127 
+					RETURN TRUE
+				ENDIF
+			NEXT
+			RETURN FALSE
 		
 	END CLASS
 END NAMESPACE // ILSpy.XSharpLanguage
