@@ -25,31 +25,31 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 	[ExportAttribute( TYPEOF(Language) )];
 	PUBLIC CLASS XSharpLanguage INHERIT Language
-		
-		
+
+
 		CONSTRUCTOR()
 			RETURN
-		
+
 		PUBLIC OVERRIDE PROPERTY Name AS STRING
-			GET             
+			GET
 				RETURN "XSharp"
 			END GET
 		END PROPERTY
-		
-		
+
+
 		PUBLIC OVERRIDE PROPERTY FileExtension AS STRING
 			GET
 				// used in 'Save As' dialog
 				RETURN ".prg"
 			END GET
 		END PROPERTY
-		
+
 		PUBLIC OVERRIDE PROPERTY ProjectFileExtension AS STRING
 			GET
 				RETURN ".xsproj"
 			END GET
 		END PROPERTY
-		
+
 		PUBLIC OVERRIDE METHOD DecompileMethod( methoddef AS IMethod, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL assembly AS PEFile
@@ -76,7 +76,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(methoddef:MetadataToken), decompiler:TypeSystem)
 			RETURN
-		
+
 		PUBLIC OVERRIDE METHOD DecompileProperty(propDef AS IProperty, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL assembly AS PEFile
@@ -85,7 +85,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCommentLine(output, SELF:TypeToString(propDef:DeclaringType, TRUE))
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(propDef:MetadataToken), decompiler:TypeSystem)
-		
+
 		PUBLIC OVERRIDE METHOD DecompileField(fieldDef AS IField, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
@@ -103,7 +103,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			definition := decompiler:TypeSystem:MainModule:GetDefinition((FieldDefinitionHandle)fieldDef:MetadataToken)
 			decompiler:AstTransforms:Add(SelectFieldTransform{definition})
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(definitions), decompiler:TypeSystem)
-		
+
 		PUBLIC OVERRIDE  METHOD DecompileType(typeDef AS ITypeDefinition, output AS ITextOutput, options AS DecompilationOptions) AS VOID
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
@@ -112,7 +112,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			WriteCommentLine(output, SELF:TypeToString(typeDef, TRUE))
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(typeDef:MetadataToken), decompiler:TypeSystem)
-		
+
 		PUBLIC OVERRIDE METHOD DecompileEvent(evt AS IEvent , output AS ITextOutput , options AS DecompilationOptions ) AS VOID
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
@@ -121,7 +121,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			WriteCommentLine(output, SELF:TypeToString(evt:DeclaringType, TRUE))
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(evt:MetadataToken), decompiler:TypeSystem)
-		
+
 		PUBLIC OVERRIDE METHOD DecompileAssembly(asmbly AS LoadedAssembly , output AS ITextOutput , options AS DecompilationOptions ) AS ICSharpCode.Decompiler.Solution.ProjectId
 			//            LOCAL result AS ModuleDefinition
 			//            //LOCAL iLSpyWholeProjectDecompiler AS ILSpyWholeProjectDecompiler
@@ -166,7 +166,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//            //ENDIF
 			LOCAL assembly AS PEFile
 			LOCAL prjDecompiler AS XSharpWholeProjectDecompiler
-			LOCAL assemblyResolver AS ICSharpCOde.Decompiler.Metadata.IAssemblyResolver
+			LOCAL assemblyResolver AS ICSharpCode.Decompiler.Metadata.IAssemblyResolver
 			LOCAL dcmpTypeSystem AS DecompilerTypeSystem
 			LOCAL tpeDefinition AS ITypeDefinition
 			LOCAL metadata AS MetadataReader
@@ -245,8 +245,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:WriteCode( output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
 			//
 			RETURN NULL
-		
-		
+
+
 		PRIVATE METHOD WriteCode(output AS ITextOutput, settings AS DecompilerSettings, syntaxTree AS SyntaxTree, typeSystem AS IDecompilerTypeSystem) AS VOID
 			LOCAL visitor AS InsertParenthesesVisitor
 			LOCAL writer1 AS TextTokenWriter
@@ -256,10 +256,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//
 			xsSettings := XSharpOptionPage.CurrentXSharpSettings
 			//
-			visitor := InsertParenthesesVisitor{} 
+			visitor := InsertParenthesesVisitor{}
 			visitor:InsertParenthesesForReadability:=TRUE
 			syntaxTree:AcceptVisitor(visitor)
-			writer1 := TextTokenWriter{output, settings, typeSystem} 
+			writer1 := TextTokenWriter{output, settings, typeSystem}
 			//writer1:FoldBraces:=settings:FoldBraces
 			//writer1:ExpandMemberDefinitions:=settings:ExpandMemberDefinitions
 			decoratedWriter := writer1
@@ -269,21 +269,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				decoratedWriter := XSharpHighlightingTokenWriter{decoratedWriter, textOutput, xsSettings }
 			ENDIF
 			syntaxTree:AcceptVisitor(XSharpOutputVisitor{decoratedWriter, settings:CSharpFormattingOptions, typeSystem })
-		
-		
-		
+
+
+
 		PRIVATE METHOD CreateDecompiler(module AS PEFile, options AS DecompilationOptions ) AS CSharpDecompiler
 			LOCAL decompiler AS CSharpDecompiler
 			//
 			decompiler := CSharpDecompiler{module, module:GetAssemblyResolver(), options:DecompilerSettings}
 			decompiler:CancellationToken := options:CancellationToken
 			decompiler:DebugInfoProvider := module:GetDebugInfoOrNull()
-			WHILE ( decompiler.AstTransforms.Count > INT32.MaxValue )
+			WHILE ( decompiler:AstTransforms:Count > Int32.MaxValue )
 				decompiler:AstTransforms:RemoveAt(decompiler:AstTransforms:Count - 1)
 			ENDDO
 			//            decompiler:AstTransforms:Add( EscapeInvalidIdentifiers{})
 			RETURN decompiler
-		
+
 			//		PUBLIC STATIC METHOD GetPlatformDisplayName(module AS PEFile ) AS STRING
 			//			LOCAL pEHeaders AS PEHeaders
 			//			LOCAL machine AS Machine
@@ -313,30 +313,30 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//			OTHERWISE
 			//				RETURN machine:ToString()
 			//			END SWITCH
-		
+
 			//PUBLIC STATIC METHOD GetRuntimeDisplayName(module AS PEFile ) AS STRING
 			//	RETURN module:Metadata:MetadataVersion
-		
+
 		PRIVATE STATIC METHOD CollectFieldsAndCtors(type AS ITypeDefinition , isStatic AS LOGIC ) AS List<EntityHandle>
 			LOCAL list AS List<EntityHandle>
 			LOCAL metadataToken AS EntityHandle
 			//
 			list := List<EntityHandle>{}
 			//metadataToken
-			FOREACH ivarFIELD AS IField IN type:Fields 
+			FOREACH ivarFIELD AS IField IN type:Fields
 				metadataToken := ivarFIELD:MetadataToken
 				IF ((!metadataToken:IsNil) .AND. (ivarFIELD:IsStatic == isStatic))
 					list:Add(ivarFIELD:MetadataToken)
 				ENDIF
 			NEXT
-			FOREACH iVarMETHOD AS IMethod IN type:Methods 
+			FOREACH iVarMETHOD AS IMethod IN type:Methods
 				metadataToken := iVarMETHOD:MetadataToken
 				IF (((!metadataToken:IsNil) .AND. (iVarMETHOD:IsConstructor)) .AND. (iVarMETHOD:IsStatic == isStatic))
 					list:Add(iVarMETHOD:MetadataToken)
 				ENDIF
 			NEXT
 			RETURN list
-			
+
 			// This is used in the TreeView of the Assembly (Left Window)
 			/*
 			PUBLIC OVERRIDE METHOD FormatMethodName( methd AS MethodDefinition ) AS STRING
@@ -348,14 +348,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			//
 			RETURN "Constructor"
-			
+
 			PUBLIC OVERRIDE METHOD FormatTypeName(type AS TypeDefinition ) AS STRING
 			IF (type == NULL)
 			THROW ArgumentNullException{"type"}
 			ENDIF
 			RETURN type.Name
 			RETURN SELF:ConvertTypeToString(ConvertTypeOptions.IncludeTypeParameterDefinitions | ConvertTypeOptions.DoNotUsePrimitiveTypeNames, type, NULL)
-			
+
 			PRIVATE METHOD ConvertTypeToString(options AS ConvertTypeOptions , typeRef AS TypeReference , typeAttributes := NULL AS ICustomAttributeProvider ) AS STRING
 			LOCAL astType AS AstType
 			LOCAL compType AS ComposedType
@@ -378,24 +378,24 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			astType:AcceptVisitor(XSharpOutputVisitor{sWriter, FormattingOptionsFactory.CreateEmpty(), NULL})
 			RETURN sWriter:ToString()
-			
-			
-			
-			
+
+
+
+
 			*/
 	END CLASS
-	
-	
-	
+
+
+
 	CLASS SelectCtorTransform IMPLEMENTS IAstTransform
 		PRIVATE INITONLY ctor AS IMethod
 		PRIVATE INITONLY removedSymbols := HashSet<ISymbol>{} AS HashSet<ISymbol>
-		
-		
+
+
 		PUBLIC CONSTRUCTOR(ctor AS IMethod )
 			SELF:ctor := ctor
-		
-		
+
+
 		PUBLIC METHOD Run(rootNode AS AstNode , context AS TransformContext ) AS VOID
 			LOCAL ctorDeclaration AS ConstructorDeclaration
 			LOCAL currentAstNode AS AstNode
@@ -408,7 +408,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL fldDeclaration4 AS FieldDeclaration
 			//
 			ctorDeclaration := NULL
-			FOREACH child AS AstNode IN rootNode:Children 
+			FOREACH child AS AstNode IN rootNode:Children
 				currentAstNode := child
 				IF (currentAstNode != NULL)
 					IF ((ctorDeclaration2 := (currentAstNode ASTYPE ConstructorDeclaration)) == NULL)
@@ -431,7 +431,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ENDIF
 			NEXT
 			IF ((ctorDeclaration != NULL) .AND. (ctorDeclaration:Initializer:ConstructorInitializerType == ConstructorInitializerType.This))
-				FOREACH child2 AS AstNode IN rootNode:Children 
+				FOREACH child2 AS AstNode IN rootNode:Children
 					currentAstNode2 := child2
 					IF ((currentAstNode2 != NULL) .AND. ((fldDeclaration3 := (currentAstNode2 ASTYPE FieldDeclaration)) != NULL))
 						fldDeclaration4 := fldDeclaration3
@@ -440,23 +440,23 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					ENDIF
 				NEXT
 			ENDIF
-			FOREACH child3 AS AstNode IN rootNode:Children 
+			FOREACH child3 AS AstNode IN rootNode:Children
 				IF ((child3 IS Comment) .AND. (SELF:removedSymbols:Contains(child3:GetSymbol())))
 					child3:Remove()
 				ENDIF
 			NEXT
-			
-			
+
+
 	END CLASS
-	
-	
+
+
 	CLASS SelectFieldTransform IMPLEMENTS IAstTransform
 		PRIVATE INITONLY fld AS IField
-		
+
 		PUBLIC CONSTRUCTOR(fld AS IField )
 			SELF:fld := fld
-		
-		
+
+
 		PUBLIC METHOD Run(rootNode AS AstNode , context AS TransformContext ) AS VOID
 			LOCAL currentAstNode AS AstNode
 			LOCAL entityDeclaration1 AS EntityDeclaration
@@ -464,7 +464,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL node AS Comment
 			LOCAL entityDeclaration2 AS EntityDeclaration
 			//
-			FOREACH child AS AstNode IN rootNode:Children 
+			FOREACH child AS AstNode IN rootNode:Children
 				currentAstNode := child
 				IF (currentAstNode != NULL)
 					IF ((entityDeclaration1 := (currentAstNode ASTYPE EntityDeclaration)) == NULL)
@@ -482,33 +482,33 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					ENDIF
 				ENDIF
 			NEXT
-			
-			
-	END CLASS	
-	
+
+
+	END CLASS
+
 
 	CLASS XSharpWholeProjectDecompiler INHERIT WholeProjectDecompiler
 		PRIVATE INITONLY assembly AS LoadedAssembly
 		PRIVATE INITONLY options AS DecompilationOptions
-		
+
 		PUBLIC CONSTRUCTOR(assembly AS LoadedAssembly , options AS DecompilationOptions )
 			SUPER(options:DecompilerSettings, assembly:GetAssemblyResolver(), assembly:GetAssemblyReferenceClassifier(), assembly:GetDebugInfoOrNull())
 			SELF:assembly := assembly
 			SELF:options := options
-		
-		
+
+
 		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ValueTuple<STRING, STRING>>
 			//
-			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>() 
+			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>()
 				IF (exportedValue:CanHandle(fileName, SELF:options))
 					entryStream:Position := 0L
-					fileName := Path.Combine(targetDirectory, fileName)
+					fileName := Path.Combine(TargetDirectory, fileName)
 					fileName := exportedValue:WriteResourceToFile(SELF:assembly, fileName, entryStream, SELF:options)
 					RETURN <ValueTuple<STRING, STRING>>{ ValueTuple.Create<STRING, STRING>(exportedValue:EntryType, fileName) }
 				ENDIF
 			NEXT
 			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)
-		
+
 		/*
 		PUBLIC METHOD DecompileProject(moduleDefinition AS PEFile , targetDirectory AS STRING , projectFileWriter AS TextWriter , cancellationToken := DEFAULT(CancellationToken) AS CancellationToken ) AS ProjectId
 			LOCAL list AS List<Tuple<STRING, STRING>>
@@ -523,9 +523,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			IF SELF:StrongNameKeyFile != NULL
 				File.Copy(SELF:StrongNameKeyFile, Path.Combine(targetDirectory, Path.GetFileName(SELF:StrongNameKeyFile)))
 			ENDIF
-			RETURN SELF:WriteProjectFile(projectFileWriter, list, moduleDefinition)			
-		
-		
+			RETURN SELF:WriteProjectFile(projectFileWriter, list, moduleDefinition)
+
+
 		PRIVATE METHOD xsWriteCodeFilesInProject(module AS PEFile , cancellationToken AS CancellationToken ) AS IEnumerable<Tuple<STRING, STRING>>
 			LOCAL metadata AS MetadataReader
 			LOCAL list AS List<IGrouping<STRING, TypeDefinitionHandle>>
@@ -559,18 +559,18 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				cSharpDecompiler:CancellationToken := cancellationToken
 				syntaxTree := cSharpDecompiler:DecompileTypes(Enumerable.ToArray<TypeDefinitionHandle>((IEnumerable<TypeDefinitionHandle>)@@file))
 				syntaxTree:AcceptVisitor(CSharpOutputVisitor{(TextWriter)(OBJECT)val2, SELF:settings:CSharpFormattingOptions})
-					
+
 			CATCH ex AS Exception WHEN ((!(ex IS OperationCanceledException)) .AND. (!(ex IS DecompilerException)))
 				THROW DecompilerException{module, "Error decompiling for '" + @@file:get_Key() + "'", ex}
-				
+
 			FINALLY
 				((IDisposable)val2)?:Dispose()
 			END TRY
 			})
 			RETURN Enumerable.Concat<Tuple<STRING, STRING>>(Enumerable.Select<IGrouping<STRING, TypeDefinitionHandle>, Tuple<STRING, STRING>>((IEnumerable<IGrouping<STRING, TypeDefinitionHandle>>)list, (@@Func<IGrouping<STRING, TypeDefinitionHandle>, Tuple<STRING, STRING>>)({f AS IGrouping<STRING, TypeDefinitionHandle> => Tuple.Create(e"Compile", f:get_Key())})), SELF:WriteAssemblyInfo(ts, cancellationToken))
-			
+
 			*/
 	END CLASS
-		
-		
+
+
 END NAMESPACE

@@ -16,11 +16,12 @@
     <StartupObject />
     <ApplicationIcon />
     <VulcanCompatibleResources>False</VulcanCompatibleResources>
-    <XSharpProjectversion>2.11.0.1</XSharpProjectversion>
     <Includepaths />
     <Nostandarddefs />
     <TargetFrameworkProfile />
     <NoWin32Manifest>False</NoWin32Manifest>
+    <NamedArgs>True</NamedArgs>
+    <CS>True</CS>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" Label="Configuration">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,8 +35,10 @@
     <DebuggerCommand>$(SolutionDir)\ILSpy7\ILSpy.exe</DebuggerCommand>
     <DebuggerCommandArguments />
     <DebuggerWorkingDirectory />
-    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <CommandLineOption>/allowdot-</CommandLineOption>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" Label="Configuration">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -46,6 +49,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <CommandLineOption>/allowdot-</CommandLineOption>
+    <WarningsAsErrors />
   </PropertyGroup>
   <Import Project="$(XSharpMsBuildDir)\XSharp.targets" />
   <ItemGroup>
@@ -82,13 +88,6 @@
       <Private>True</Private>
       <HintPath>..\ilspy7\Microsoft.VisualStudio.Composition.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Validation, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>Microsoft.VisualStudio.Validation</Name>
-      <AssemblyName>Microsoft.VisualStudio.Validation.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\Microsoft.VisualStudio.Validation.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
       <Name>Mono.Cecil</Name>
       <AssemblyName>Mono.Cecil.dll</AssemblyName>
@@ -108,13 +107,6 @@
       <AssemblyName>PresentationFramework.dll</AssemblyName>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Collections.Immutable</Name>
-      <AssemblyName>System.Collections.Immutable.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\System.Collections.Immutable.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.ComponentModel.Composition</Name>
       <AssemblyName>System.ComponentModel.Composition.dll</AssemblyName>
@@ -158,19 +150,12 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Reflection.Metadata, Version=1.4.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="System.Reflection.Metadata, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Name>System.Reflection.Metadata</Name>
       <AssemblyName>System.Reflection.Metadata.dll</AssemblyName>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
-      <HintPath>..\ilspy7\System.Reflection.Metadata.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Threading.Tasks.Dataflow</Name>
-      <AssemblyName>System.Threading.Tasks.Dataflow.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <HintPath>bin\Debug\System.Reflection.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
       <Name>System.Xaml</Name>
@@ -226,7 +211,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PreBuildEvent />
     <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\ilspy7"</PostBuildEvent>
-    <RunPostBuildEvent />
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PreBuildEvent />

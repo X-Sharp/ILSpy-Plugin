@@ -76,7 +76,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF (existingElement != NULL)
                 existingElement:ReplaceWith(section)
             ELSE
-                root.Add(section)
+                root:Add(section)
             ENDIF
             
             END CLASS

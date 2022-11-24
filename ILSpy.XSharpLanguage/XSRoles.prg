@@ -1,7 +1,7 @@
 ﻿// XSRoles.prg
 // Created by    : fabri
 // Creation Date : 3/31/2018 12:09:37 AM
-// Created for   : 
+// Created for   :
 // WorkStation   : FABPORTABLE
 
 
@@ -20,19 +20,20 @@ USING ICSharpCode.Decompiler.CSharp.OutputVisitor
 USING ICSharpCode.Decompiler.TypeSystem
 USING Mono.Cecil
 
+
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 	/// <summary>
     /// The XSRoles class.
     /// </summary>
-    
+
     STATIC CLASS XSRoles
         // Fields
         STATIC INITONLY PUBLIC AliasKeyword := TokenRole{"alias"} AS TokenRole
         STATIC INITONLY PUBLIC Argument := Role<Expression>{"Argument", Expression.Null} AS Role<Expression>
         STATIC INITONLY PUBLIC Arrow := TokenRole{"=>"} AS TokenRole
         STATIC INITONLY PUBLIC @@Assign := TokenRole{":="} AS TokenRole
-        STATIC INITONLY PUBLIC Attribute := Role<ICSharpCode.Decompiler.CSharp.Syntax.Attribute>{"Attribute", NULL} AS Role<ICSharpCode.Decompiler.CSharp.Syntax.Attribute>
+        STATIC INITONLY PUBLIC Attribute := Role<Attribute>{"Attribute", NULL} AS Role<Attribute>
         STATIC INITONLY PUBLIC AttributeTargetRole := Role<CSharpTokenNode>{"AttributeTarget", CSharpTokenNode.Null} AS Role<CSharpTokenNode>
         STATIC INITONLY PUBLIC BaseType := Role<AstType>{"BaseType", AstType.Null} AS Role<AstType>
         STATIC INITONLY PUBLIC Body := Role<BlockStatement>{"Body", BlockStatement.Null} AS Role<BlockStatement>

@@ -1,7 +1,7 @@
 ﻿// XSharpHighlightingTokenWriter.prg
 // Created by    : fabri
 // Creation Date : 4/1/2018 8:56:43 PM
-// Created for   : 
+// Created for   :
 // WorkStation   : FABPORTABLE
 
 
@@ -28,10 +28,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 	/// <summary>
 	/// The XSharpHighlightingTokenWriter class.
 	/// </summary>
-	
-	
-	
-	
+
+
+
+
 	INTERNAL CLASS XSharpHighlightingTokenWriter INHERIT DecoratingTokenWriter
 		// Fields
 		PRIVATE accessorKeywordsColor AS HighlightingColor
@@ -70,9 +70,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 		PRIVATE specialTypeNames AS Hashtable
 		PRIVATE beginend AS LOGIC
 		PRIVATE xsSettings AS XSharpOptions
-		
+
 		PUBLIC PROPERTY Settings AS XSharpOptions GET SELF:xsSettings
-		
+
 		// Methods
 		CONSTRUCTOR(decoratedWriter AS TokenWriter, textOutput AS ISmartTextOutput, settings AS XSharpOptions)//Inline call to base() in C#
 			SUPER(decoratedWriter)
@@ -112,7 +112,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			SELF:commentColor := definition:GetNamedColor("Comment")
 			//
 			SELF:xsInitialize()
-			
+
 		PRIVATE METHOD xsInitialize() AS VOID
 			// Special XSharp Init
 			IF (specialTypeNames == NULL)
@@ -136,12 +136,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				specialTypeNames["decimal"] := "Decimal"
 			ENDIF
 			SELF:beginend := FALSE
-		
+
 		VIRTUAL METHOD EndNode(node AS AstNode) AS VOID
 			//
 			SUPER:EndNode(node)
 			SELF:nodeStack:Pop()
-		
+
 		PRIVATE METHOD GetCurrentDefinition() AS ISymbol
 			LOCAL parent AS AstNode
 			//
@@ -158,7 +158,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ENDIF
 			ENDIF
 			RETURN NULL
-		
+
 		PRIVATE METHOD GetCurrentMemberReference() AS ISymbol
 			LOCAL mbr AS IMember
 			LOCAL node AS AstNode
@@ -176,7 +176,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				sym := AnnotationExtensions.GetSymbol(node:Parent)
 			ENDIF
 			VAR nodeIE := node ASTYPE IdentifierExpression
-			IF ((nodeIE != NULL) .AND. (node:Role == Roles.TargetExpression)) 
+			IF ((nodeIE != NULL) .AND. (node:Role == Roles.TargetExpression))
 				VAR nodeParent := node:Parent ASTYPE InvocationExpression
 				mbr := sym ASTYPE IMember
 				IF ((nodeParent != NULL ) .AND. (mbr != NULL))
@@ -189,7 +189,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ENDIF
 			ENDIF
 			RETURN sym
-		
+
 		PRIVATE STATIC METHOD IsDefinition(node REF AstNode) AS LOGIC
 			//
 			IF ((node IS EntityDeclaration))
@@ -202,21 +202,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				RETURN TRUE
 			ENDIF
 			RETURN (node IS FixedVariableInitializer)
-		
+
 		VIRTUAL METHOD StartNode(node AS AstNode) AS VOID
 			//
 			SELF:nodeStack:Push(node)
 			SUPER:StartNode(node)
-			
-		
+
+
 		VIRTUAL METHOD WriteComment( cmtType AS CommentType, content AS STRING ) AS VOID
 			//
 			SELF:textOutput:BeginSpan( SELF:commentColor)
 			SUPER:WriteComment( cmtType, content )
 			SELF:textOutput:EndSpan()
-			
-			
-		
+
+
+
 		VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
 			LOCAL color AS HighlightingColor
 			LOCAL accessor AS Accessor
@@ -341,13 +341,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-		
+
 		VIRTUAL METHOD WriteKeyword(role AS Role, keyword AS STRING) AS VOID
 			LOCAL color AS HighlightingColor
 			//
 			color := NULL
 			keyword := keyword:ToLower()
-			SWITCH (keyword) 
+			SWITCH (keyword)
 				CASE "using"
 					IF beginend
 						color := structureKeywordsColor
@@ -428,7 +428,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				CASE "remove"
 					color := accessorKeywordsColor
 				CASE "abstract"
-				CASE "initonly"				
+				CASE "initonly"
 				CASE "extern"
 				CASE "override"
 				CASE "readonly"
@@ -503,13 +503,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-		
+
 		VIRTUAL METHOD WritePrimitiveType(typeDef AS STRING) AS VOID
 			LOCAL color AS HighlightingColor
 			//
 			color := NULL
 			typeDef := typeDef:ToLower()
-			SWITCH (typeDef) 
+			SWITCH (typeDef)
 				CASE "new"
 					color := typeKeywordsColor
 				CASE "logic"
@@ -541,7 +541,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			ENDIF
 			//
 			// Convert System Types
-			IF (specialTypeNames.Contains(typeDef))
+			IF (specialTypeNames:Contains(typeDef))
 				typeDef := (STRING)specialTypeNames[typeDef]
 			END IF
 			//
@@ -550,7 +550,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-		
+
 		VIRTUAL METHOD WritePrimitiveValue(VALUE AS OBJECT, format := LiteralFormat.None AS LiteralFormat ) AS VOID
 			LOCAL color AS HighlightingColor
 			//
@@ -578,14 +578,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				//
 				SELF:textOutput:EndSpan()
 			ENDIF
-				
+
 		PRIVATE METHOD StringNeedsEscape(sString AS STRING) AS LOGIC
 			FOREACH VAR c IN sString
-				IF c < 32 .OR. c > 127 
+				IF c < 32 .OR. c > 127
 					RETURN TRUE
 				ENDIF
 			NEXT
 			RETURN FALSE
-		
+
 	END CLASS
 END NAMESPACE // ILSpy.XSharpLanguage

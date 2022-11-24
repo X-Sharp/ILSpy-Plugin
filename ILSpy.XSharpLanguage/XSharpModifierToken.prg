@@ -26,44 +26,44 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             LOCAL result AS STRING
             SWITCH (modifier) 
                 CASE Modifiers.Private
-                    Result := "private"
+                    result := "private"
                 CASE Modifiers.Internal
-                    Result := "internal"
+                    result := "internal"
                 CASE Modifiers.Protected
-                    Result := "protected"
+                    result := "protected"
                 CASE Modifiers.Public
-                    Result := "public"
+                    result := "public"
                 CASE Modifiers.Abstract
-                    Result := "abstract"
+                    result := "abstract"
                 CASE Modifiers.Virtual
-                    Result := "virtual"
+                    result := "virtual"
                 CASE Modifiers.Sealed
-                    Result := "sealed"
+                    result := "sealed"
                 CASE Modifiers.Static
-                    Result := "static"
+                    result := "static"
                 CASE Modifiers.Override
-                    Result := "override"
+                    result := "override"
                 CASE Modifiers.Readonly
-                    Result := "initonly"
+                    result := "initonly"
                 CASE Modifiers.Const
-                    Result := "const"
+                    result := "const"
                 CASE Modifiers.New
-                    Result := "new"
+                    result := "new"
                 CASE Modifiers.Partial
-                    Result := "partial"
+                    result := "partial"
                 CASE Modifiers.Extern
-                    Result := "extern"
+                    result := "extern"
                 CASE Modifiers.Volatile
-                    Result := "volatile"
+                    result := "volatile"
                 CASE Modifiers.Unsafe
-                    Result := "unsafe"
+                    result := "unsafe"
                 CASE Modifiers.Async
-                    Result := "async"
+                    result := "async"
                 CASE Modifiers.Ref
-                    Result := "ref"
+                    result := "ref"
                 CASE Modifiers.Any
                     // even though it's used for pattern matching only, 'any' needs to be in this list to be usable in the AST
-                    Result := "any"
+                    result := "any"
                 OTHERWISE
                 THROW NotSupportedException{"Invalid value for Modifiers"}
             END SWITCH
