@@ -75,7 +75,13 @@
   <!-- Exclude XSharpOptionPage.xaml from Page compilation to avoid MarkupCompilePass1 crash with Language="X#" -->
   <ItemGroup>
     <Page Remove="XSharpOptionPage.xaml" />
-    <Page Include="XSharpOptionPage.xaml" />
+    <None Include="XSharpOptionPage.xaml" />
   </ItemGroup>
+
+  <Target Name="CopyToILSpyCore" AfterTargets="Build"
+          Condition="Exists('$(MSBuildProjectDirectory)\..\ILSpy_Core\')">
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(MSBuildProjectDirectory)\..\ILSpy_Core\" />
+  </Target>
 
 </Project>

@@ -97,6 +97,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				ELSE
 					//
 					//SELF:writer:WriteToken( XSRoles.Comma, ",")
+                    Nop
 				ENDIF
 				node:AcceptVisitor(SELF)
 			NEXT

@@ -78,13 +78,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:DataContext := s
             _currentSettings := s
-			
+
 		PUBLIC METHOD LoadDefaults( ) AS VOID
 			// Create without params, so ... default value
             LOCAL s := XSharpOptions{ } AS XSharpOptions
             //
             SELF:DataContext := s
-            
+
         PUBLIC METHOD Save( root AS XElement ) AS VOID
             LOCAL s := (XSharpOptions)SELF:DataContext AS XSharpOptions
             // Save the options back into XML:
@@ -99,19 +99,19 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ELSE
                 root:Add(section)
             ENDIF
-            
+
             END CLASS
-            
-            
+
+
     PUBLIC CLASS XSharpOptions INHERIT INotifyPropertyChanged
-    
+
         PRIVATE _upperkeyword AS LOGIC
 		PRIVATE _ifstatement AS LOGIC
-        
+
         PUBLIC CONSTRUCTOR()
             SELF:_upperkeyword := TRUE
 			SELF:_ifstatement := TRUE
-            
+
         PUBLIC CONSTRUCTOR( e AS XElement )
             LOCAL attr AS XAttribute
             //
@@ -119,7 +119,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF ( attr != NULL )
                 LOCAL val := attr:Value AS STRING
                 LOCAL bVal := TRUE AS LOGIC
-                IF Boolean.TryParse( val, bVal )
+                IF Boolean.TryParse( val, OUT bVal )
                     SELF:_upperkeyword := bVal
                 ELSE
                     SELF:_upperkeyword := TRUE
@@ -130,48 +130,48 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             IF ( attr != NULL )
                 LOCAL val := attr:Value AS STRING
                 LOCAL bVal := TRUE AS LOGIC
-                IF Boolean.TryParse( val, bVal )
+                IF Boolean.TryParse( val, OUT bVal )
                     SELF:_ifstatement := bVal
                 ELSE
                     SELF:_ifstatement := TRUE
                 ENDIF
             ENDIF
-            //			
-            
-            
+            //
+
+
         PUBLIC PROPERTY UpperKeyword AS LOGIC
             GET
             RETURN _upperkeyword
             END GET
-            
-            SET 
-                IF (_upperkeyword != VALUE) 
+
+            SET
+                IF (_upperkeyword != VALUE)
                     _upperkeyword := VALUE
                     OnPropertyChanged("UpperKeyword")
                 ENDIF
             END SET
 		END PROPERTY
-		
+
         PUBLIC PROPERTY IfStatement AS LOGIC
             GET
             RETURN _ifstatement
             END GET
-            
-            SET 
-                IF (_ifstatement != VALUE) 
+
+            SET
+                IF (_ifstatement != VALUE)
                     _ifstatement := VALUE
                     OnPropertyChanged("IfStatement")
                 ENDIF
             END SET
-        END PROPERTY		
-        
+        END PROPERTY
+
         PUBLIC EVENT PropertyChanged AS PropertyChangedEventHandler
-        
+
     PROTECTED VIRTUAL METHOD OnPropertyChanged( propertyName AS STRING ) AS VOID
-        IF (PropertyChanged != NULL) 
+        IF (PropertyChanged != NULL)
             PropertyChanged(SELF, PropertyChangedEventArgs{propertyName})
         ENDIF
-        
+
     END CLASS
-    
+
 END NAMESPACE

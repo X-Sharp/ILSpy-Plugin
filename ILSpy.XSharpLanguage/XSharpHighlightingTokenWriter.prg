@@ -152,7 +152,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					//
 					parent := parent:Parent
 				ENDIF
-				IF (XSharpHighlightingTokenWriter.IsDefinition(parent))
+				IF (XSharpHighlightingTokenWriter.IsDefinition(REF parent))
 					//
 					RETURN AnnotationExtensions.GetSymbol(parent)
 				ENDIF
@@ -217,9 +217,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 
 
-		VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
+		VIRTUAL METHOD WriteIdentifier(oIdentifier AS Identifier) AS VOID
 			LOCAL color AS HighlightingColor
-			LOCAL accessor AS Accessor
+			LOCAL oAccessor AS Accessor
 			LOCAL currentDefinition AS ISymbol
 			LOCAL definition AS ITypeDefinition
 			LOCAL mthd AS IMethod
@@ -236,9 +236,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL type2 AS IType
 			//
 			color := NULL
-			IF (identifier:Name == "value")
-				accessor := identifier:Ancestors.OfType<Accessor>().FirstOrDefault()
-				IF (( accessor != NULL) .AND. (accessor:Role != PropertyDeclaration.GetterRole))
+			IF (oIdentifier:Name == "value")
+				oAccessor := oIdentifier:Ancestors.OfType<Accessor>().FirstOrDefault()
+				IF (( oAccessor != NULL) .AND. (oAccessor:Role != PropertyDeclaration.GetterRole))
 					//
 					color := SELF:valueKeywordColor
 				ENDIF
@@ -332,11 +332,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				SELF:textOutput:BeginSpan(color)
 			ENDIF
 			//
-			IF ( XSharpOutputVisitor.IsKeyword( identifier:Name, identifier ) )
+			IF ( XSharpOutputVisitor.IsKeyword( oIdentifier:Name, oIdentifier ) )
 				SELF:textOutput:Write("@@")
 			ENDIF
 			//
-			SUPER:WriteIdentifier(identifier)
+			SUPER:WriteIdentifier(oIdentifier)
 			IF (color != NULL)
 				//
 				SELF:textOutput:EndSpan()

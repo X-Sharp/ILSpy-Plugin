@@ -211,21 +211,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:isAfterSpace := FALSE
          ENDIF
 
-      STATIC METHOD IsKeyword(identifier AS STRING, context AS AstNode) AS LOGIC
+      STATIC METHOD IsKeyword(oIdentifier AS STRING, context AS AstNode) AS LOGIC
          //
-         identifier := identifier:ToLower()
+         oIdentifier := oIdentifier:ToLower()
          //
-         IF (((identifier:Length <= XSharpOutputVisitor.maxKeywordLength) .AND. (identifier:Length >= 2)) .AND. (identifier:Chars[0] >= 'a'))
+         IF (((oIdentifier:Length <= XSharpOutputVisitor.maxKeywordLength) .AND. (oIdentifier:Length >= 2)) .AND. (oIdentifier:Chars[0] >= 'a'))
             //
-            IF (XSharpOutputVisitor.unconditionalKeywords:Contains(identifier))
+            IF (XSharpOutputVisitor.unconditionalKeywords:Contains(oIdentifier))
                //
                RETURN TRUE
             ENDIF
-            IF (XSharpOutputVisitor.queryKeywords:Contains(identifier))
+            IF (XSharpOutputVisitor.queryKeywords:Contains(oIdentifier))
                //
                RETURN System.Linq.Enumerable.Any<AstNode>(context:Ancestors,{ |ancestor| (ancestor IS QueryExpression) })
             ENDIF
-            IF (identifier == "await")
+            IF (oIdentifier == "await")
                //
                FOREACH node AS AstNode IN context:Ancestors
                   //
@@ -267,12 +267,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          ENDIF
          RETURN TRUE
 
-      PROTECTED METHOD LambdaNeedsParenthesis(lambdaExpression AS LambdaExpression) AS LOGIC
+      PROTECTED METHOD LambdaNeedsParenthesis(oLambdaExpression AS LambdaExpression) AS LOGIC
          LOCAL declaration AS ParameterDeclaration
          //
-         IF (lambdaExpression:Parameters:Count == 1)
+         IF (oLambdaExpression:Parameters:Count == 1)
             //
-            declaration := System.Linq.Enumerable.Single<ParameterDeclaration>(lambdaExpression:Parameters)
+            declaration := System.Linq.Enumerable.Single<ParameterDeclaration>(oLambdaExpression:Parameters)
             IF (declaration:@@Type:IsNull)
                //
                RETURN (declaration:ParameterModifier > ReferenceKind.None .OR. declaration:IsParams)
@@ -442,13 +442,14 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:WriteToken(XSRoles.RPar)
 
       PROTECTED VIRTUAL METHOD Semicolon() AS VOID
-         LOCAL role AS Role
+         LOCAL oRole AS Role
          //
-         role := SELF:containerStack:Peek():Role
-         IF (((role != ForStatement.InitializerRole) .AND. (role != ForStatement.IteratorRole)) .AND. (role != UsingStatement.ResourceAcquisitionRole))
+         oRole := SELF:containerStack:Peek():Role
+         IF (((oRole != ForStatement.InitializerRole) .AND. (oRole != ForStatement.IteratorRole)) .AND. (oRole != UsingStatement.ResourceAcquisitionRole))
             //
             //SELF:WriteToken(XSRoles.Semicolon)
             //SELF:NewLine()
+            NOP
          ENDIF
 
       PROTECTED VIRTUAL METHOD Space( addSpace := TRUE AS LOGIC) AS VOID
@@ -464,186 +465,186 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:containerStack:Push(node)
          SELF:writer:StartNode(node)
 
-      VIRTUAL METHOD VisitAccessor(accessor AS Accessor) AS VOID
+      VIRTUAL METHOD VisitAccessor(oAccessor AS Accessor) AS VOID
          LOCAL statementBraceStyle AS BraceStyle
          //
-         SELF:StartNode(accessor)
+         SELF:StartNode(oAccessor)
          //
-         SELF:WriteAttributes(accessor:Attributes)
-         SELF:WriteModifiers(accessor:ModifierTokens)
+         SELF:WriteAttributes(oAccessor:Attributes)
+         SELF:WriteModifiers(oAccessor:ModifierTokens)
          statementBraceStyle := SELF:policy:StatementBraceStyle
          DO CASE
-         CASE accessor:Role == PropertyDeclaration.GetterRole
+         CASE oAccessor:Role == PropertyDeclaration.GetterRole
             //
             SELF:WriteKeyword("GET", PropertyDeclaration.GetKeywordRole)
             statementBraceStyle := SELF:policy:PropertyGetBraceStyle
-         CASE accessor:Role == PropertyDeclaration.SetterRole
+         CASE oAccessor:Role == PropertyDeclaration.SetterRole
             //
             SELF:WriteKeyword("SET", PropertyDeclaration.SetKeywordRole)
             statementBraceStyle := SELF:policy:PropertySetBraceStyle
-         CASE accessor:Role == CustomEventDeclaration.AddAccessorRole
+         CASE oAccessor:Role == CustomEventDeclaration.AddAccessorRole
             //
             SELF:WriteKeyword("ADD", CustomEventDeclaration.AddKeywordRole)
             statementBraceStyle := SELF:policy:EventAddBraceStyle
-         CASE accessor:Role == CustomEventDeclaration.RemoveAccessorRole
+         CASE oAccessor:Role == CustomEventDeclaration.RemoveAccessorRole
             //
             SELF:WriteKeyword("REMOVE", CustomEventDeclaration.RemoveKeywordRole)
             statementBraceStyle := SELF:policy:EventRemoveBraceStyle
          ENDCASE
-         SELF:WriteMethodBody(accessor:Body, statementBraceStyle)
+         SELF:WriteMethodBody(oAccessor:Body, statementBraceStyle)
          //
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
          DO CASE
-         CASE accessor:Role == PropertyDeclaration.GetterRole
+         CASE oAccessor:Role == PropertyDeclaration.GetterRole
             //
             SELF:WriteKeyword("GET")
-         CASE accessor:Role == PropertyDeclaration.SetterRole
+         CASE oAccessor:Role == PropertyDeclaration.SetterRole
             //
             SELF:WriteKeyword("SET")
-         CASE accessor:Role == CustomEventDeclaration.AddAccessorRole
+         CASE oAccessor:Role == CustomEventDeclaration.AddAccessorRole
             //
             SELF:WriteKeyword("ADD")
-         CASE accessor:Role == CustomEventDeclaration.RemoveAccessorRole
+         CASE oAccessor:Role == CustomEventDeclaration.RemoveAccessorRole
             //
             SELF:WriteKeyword("REMOVE")
          ENDCASE
          SELF:NewLine()
-         SELF:EndNode(accessor)
+         SELF:EndNode(oAccessor)
 
-      VIRTUAL METHOD VisitAnonymousMethodExpression(anonymousMethodExpression AS AnonymousMethodExpression) AS VOID
+      VIRTUAL METHOD VisitAnonymousMethodExpression(oAnonymousMethodExpression AS AnonymousMethodExpression) AS VOID
          //
-         SELF:StartNode(anonymousMethodExpression)
-         IF (anonymousMethodExpression:IsAsync)
+         SELF:StartNode(oAnonymousMethodExpression)
+         IF (oAnonymousMethodExpression:IsAsync)
             //
             SELF:WriteKeyword(AnonymousMethodExpression.AsyncModifierRole)
             SELF:Space(TRUE)
          ENDIF
          SELF:WriteToken( "{" )
-         IF (anonymousMethodExpression:HasParameterList)
+         IF (oAnonymousMethodExpression:HasParameterList)
             //
             SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)anonymousMethodExpression:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oAnonymousMethodExpression:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
          ENDIF
          SELF:Space(TRUE)
          SELF:WriteToken(XSRoles.Arrow)
-         SELF:WriteBlock(anonymousMethodExpression:Body, SELF:policy:AnonymousMethodBraceStyle)
+         SELF:WriteBlock(oAnonymousMethodExpression:Body, SELF:policy:AnonymousMethodBraceStyle)
          SELF:WriteToken( "}" )
-         SELF:EndNode(anonymousMethodExpression)
+         SELF:EndNode(oAnonymousMethodExpression)
 
 
 
 
 
-      VIRTUAL METHOD VisitAnonymousTypeCreateExpression(anonymousTypeCreateExpression AS AnonymousTypeCreateExpression) AS VOID
+      VIRTUAL METHOD VisitAnonymousTypeCreateExpression(oAnonymousTypeCreateExpression AS AnonymousTypeCreateExpression) AS VOID
          //
-         SELF:StartNode(anonymousTypeCreateExpression)
+         SELF:StartNode(oAnonymousTypeCreateExpression)
          SELF:WriteKeyword(AnonymousTypeCreateExpression.NewKeywordRole)
-         SELF:PrintInitializerElements(anonymousTypeCreateExpression:Initializers)
-         SELF:EndNode(anonymousTypeCreateExpression)
+         SELF:PrintInitializerElements(oAnonymousTypeCreateExpression:Initializers)
+         SELF:EndNode(oAnonymousTypeCreateExpression)
 
-      PRIVATE METHOD VisitAnyNode(anyNode AS AnyNode) AS VOID
+      PRIVATE METHOD VisitAnyNode(oAnyNode AS AnyNode) AS VOID
          //
-         IF (! String.IsNullOrEmpty(anyNode:GroupName))
+         IF (! String.IsNullOrEmpty(oAnyNode:GroupName))
             //
-            SELF:WriteIdentifier(anyNode:GroupName)
+            SELF:WriteIdentifier(oAnyNode:GroupName)
             SELF:WriteToken(".")
          ENDIF
 
-      VIRTUAL METHOD VisitArrayCreateExpression(arrayCreateExpression AS ArrayCreateExpression) AS VOID
+      VIRTUAL METHOD VisitArrayCreateExpression(oArrayCreateExpression AS ArrayCreateExpression) AS VOID
          //
-         SELF:StartNode(arrayCreateExpression)
-         IF ( arrayCreateExpression:Initializer:IsNull )
-            arrayCreateExpression:@@Type:AcceptVisitor(SELF)
-            IF (arrayCreateExpression:Arguments:Count > 0)
+         SELF:StartNode(oArrayCreateExpression)
+         IF ( oArrayCreateExpression:Initializer:IsNull )
+            oArrayCreateExpression:@@Type:AcceptVisitor(SELF)
+            IF (oArrayCreateExpression:Arguments:Count > 0)
                //
                SELF:LBracket()
                SELF:RBracket()
-               SELF:WriteCommaSeparatedListInBraces(arrayCreateExpression:Arguments, TRUE)
+               SELF:WriteCommaSeparatedListInBraces(oArrayCreateExpression:Arguments, TRUE)
             ENDIF
-            FOREACH specifier AS ArraySpecifier IN arrayCreateExpression:AdditionalArraySpecifiers
+            FOREACH specifier AS ArraySpecifier IN oArrayCreateExpression:AdditionalArraySpecifiers
                //
                specifier:AcceptVisitor(SELF)
             NEXT
          ELSE
             SELF:LChevron()
-            arrayCreateExpression:@@Type:AcceptVisitor(SELF)
+            oArrayCreateExpression:@@Type:AcceptVisitor(SELF)
             SELF:RChevron()
             SELF:WriteToken( ";" )
-            arrayCreateExpression:Initializer:AcceptVisitor(SELF)
+            oArrayCreateExpression:Initializer:AcceptVisitor(SELF)
          ENDIF
-         SELF:EndNode(arrayCreateExpression)
+         SELF:EndNode(oArrayCreateExpression)
 
-      VIRTUAL METHOD VisitArrayInitializerExpression(arrayInitializerExpression AS ArrayInitializerExpression) AS VOID
+      VIRTUAL METHOD VisitArrayInitializerExpression(oArrayInitializerExpression AS ArrayInitializerExpression) AS VOID
          //
          // we could have something like "List<int>{} { 1, 2, 3 }"
          // or "MyObject{}{ field1 := 1, field2 := 2 }"
-         SELF:StartNode(arrayInitializerExpression)
-         IF ((((arrayInitializerExpression:Elements:Count == 1) .AND. SELF:IsObjectOrCollectionInitializer(arrayInitializerExpression:Parent)) .AND. ! SELF:CanBeConfusedWithObjectInitializer(System.Linq.Enumerable.Single<Expression>(arrayInitializerExpression:Elements))) .AND. arrayInitializerExpression:LBraceToken:IsNull)
+         SELF:StartNode(oArrayInitializerExpression)
+         IF ((((oArrayInitializerExpression:Elements:Count == 1) .AND. SELF:IsObjectOrCollectionInitializer(oArrayInitializerExpression:Parent)) .AND. ! SELF:CanBeConfusedWithObjectInitializer(System.Linq.Enumerable.Single<Expression>(oArrayInitializerExpression:Elements))) .AND. oArrayInitializerExpression:LBraceToken:IsNull)
             //
-            System.Linq.Enumerable.Single<Expression>(arrayInitializerExpression:Elements):AcceptVisitor(SELF)
+            System.Linq.Enumerable.Single<Expression>(oArrayInitializerExpression:Elements):AcceptVisitor(SELF)
          ELSE
             //
-            SELF:PrintInitializerElements(arrayInitializerExpression:Elements)
+            SELF:PrintInitializerElements(oArrayInitializerExpression:Elements)
          ENDIF
-         SELF:EndNode(arrayInitializerExpression)
+         SELF:EndNode(oArrayInitializerExpression)
 
-      VIRTUAL METHOD VisitArraySpecifier(arraySpecifier AS ArraySpecifier) AS VOID
+      VIRTUAL METHOD VisitArraySpecifier(oArraySpecifier AS ArraySpecifier) AS VOID
          //
-         SELF:StartNode(arraySpecifier)
+         SELF:StartNode(oArraySpecifier)
          SELF:WriteToken(XSRoles.LBracket)
-         FOREACH node AS CSharpTokenNode IN arraySpecifier:GetChildrenByRole<CSharpTokenNode>(XSRoles.Comma)
+         FOREACH node AS CSharpTokenNode IN oArraySpecifier:GetChildrenByRole<CSharpTokenNode>(XSRoles.Comma)
             //
             SELF:writer:WriteToken(XSRoles.Comma, ",")
          NEXT
          SELF:WriteToken(XSRoles.RBracket)
-         SELF:EndNode(arraySpecifier)
+         SELF:EndNode(oArraySpecifier)
 
-      VIRTUAL METHOD VisitAsExpression(asExpression AS AsExpression) AS VOID
+      VIRTUAL METHOD VisitAsExpression(oAsExpression AS AsExpression) AS VOID
          //
-         SELF:StartNode(asExpression)
-         asExpression:Expression:AcceptVisitor(SELF)
+         SELF:StartNode(oAsExpression)
+         oAsExpression:Expression:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword("ASTYPE")
          SELF:Space(TRUE)
-         asExpression:@@Type:AcceptVisitor(SELF)
-         SELF:EndNode(asExpression)
+         oAsExpression:@@Type:AcceptVisitor(SELF)
+         SELF:EndNode(oAsExpression)
 
-      VIRTUAL METHOD VisitAssignmentExpression(assignmentExpression AS AssignmentExpression) AS VOID
+      VIRTUAL METHOD VisitAssignmentExpression(oAssignmentExpression AS AssignmentExpression) AS VOID
          //
-         SELF:StartNode(assignmentExpression)
-         assignmentExpression:Left:AcceptVisitor(SELF)
+         SELF:StartNode(oAssignmentExpression)
+         oAssignmentExpression:Left:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpaceAroundAssignment)
-         SELF:WriteToken( XSharpTokenHelper.GetOperatorRole(assignmentExpression:Operator))
+         SELF:WriteToken( XSharpTokenHelper.GetOperatorRole(oAssignmentExpression:Operator))
          SELF:Space(SELF:policy:SpaceAroundAssignment)
-         assignmentExpression:Right:AcceptVisitor(SELF)
-         SELF:EndNode(assignmentExpression)
+         oAssignmentExpression:Right:AcceptVisitor(SELF)
+         SELF:EndNode(oAssignmentExpression)
 
-      VIRTUAL METHOD VisitAttribute(attribute AS ICSharpCode.Decompiler.CSharp.Syntax.Attribute) AS VOID
+      VIRTUAL METHOD VisitAttribute(oAttribute AS ICSharpCode.Decompiler.CSharp.Syntax.Attribute) AS VOID
          //
-         SELF:StartNode(attribute)
-         attribute:@@Type:AcceptVisitor(SELF)
-         //IF ( attribute:Type:
-         IF ((attribute:Arguments:Count != 0) .OR. ! attribute:GetChildByRole<CSharpTokenNode>(XSRoles.LPar):IsNull)
+         SELF:StartNode(oAttribute)
+         oAttribute:@@Type:AcceptVisitor(SELF)
+         //IF ( oAttribute:Type:
+         IF ((oAttribute:Arguments:Count != 0) .OR. ! oAttribute:GetChildByRole<CSharpTokenNode>(XSRoles.LPar):IsNull)
             //
             SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)attribute:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
+            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oAttribute:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
          ENDIF
-         SELF:EndNode(attribute)
+         SELF:EndNode(oAttribute)
 
-      VIRTUAL METHOD VisitAttributeSection(attributeSection AS AttributeSection) AS VOID
+      VIRTUAL METHOD VisitAttributeSection(oAttributeSection AS AttributeSection) AS VOID
          //
-         SELF:StartNode(attributeSection)
+         SELF:StartNode(oAttributeSection)
          SELF:WriteToken(XSRoles.LBracket)
-         IF (! String.IsNullOrEmpty(attributeSection:AttributeTarget))
+         IF (! String.IsNullOrEmpty(oAttributeSection:AttributeTarget))
             //
-            SELF:WriteKeyword(attributeSection:AttributeTarget, XSRoles.Identifier)
+            SELF:WriteKeyword(oAttributeSection:AttributeTarget, XSRoles.Identifier)
             SELF:WriteToken(".")
             SELF:Space(TRUE)
          ENDIF
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)attributeSection:Attributes )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oAttributeSection:Attributes )
          SELF:WriteToken(XSRoles.RBracket)
-         IF ((attributeSection:Parent IS ParameterDeclaration) .OR. (attributeSection:Parent IS TypeParameterDeclaration))
+         IF ((oAttributeSection:Parent IS ParameterDeclaration) .OR. (oAttributeSection:Parent IS TypeParameterDeclaration))
             //
             SELF:Space(TRUE)
          ELSE
@@ -651,36 +652,36 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteToken( XSRoles.Semicolon )
             SELF:NewLine()
          ENDIF
-         SELF:EndNode(attributeSection)
+         SELF:EndNode(oAttributeSection)
 
-      PRIVATE METHOD VisitBackreference(backreference AS Backreference) AS VOID
+      PRIVATE METHOD VisitBackreference(oBackreference AS Backreference) AS VOID
          //
-         SELF:WriteKeyword("backreference", NULL)
+         SELF:WriteKeyword("oBackreference", NULL)
          SELF:LPar()
-         SELF:WriteIdentifier(backreference:ReferencedGroupName)
+         SELF:WriteIdentifier(oBackreference:ReferencedGroupName)
          SELF:RPar()
 
-      VIRTUAL METHOD VisitBaseReferenceExpression(baseReferenceExpression AS BaseReferenceExpression) AS VOID
+      VIRTUAL METHOD VisitBaseReferenceExpression(oBaseReferenceExpression AS BaseReferenceExpression) AS VOID
          //
-         SELF:StartNode(baseReferenceExpression)
-         SELF:WriteKeyword("SUPER", baseReferenceExpression:Role)
-         SELF:EndNode(baseReferenceExpression)
+         SELF:StartNode(oBaseReferenceExpression)
+         SELF:WriteKeyword("SUPER", oBaseReferenceExpression:Role)
+         SELF:EndNode(oBaseReferenceExpression)
 
-      VIRTUAL METHOD VisitBinaryOperatorExpression(binaryOperatorExpression AS BinaryOperatorExpression) AS VOID
+      VIRTUAL METHOD VisitBinaryOperatorExpression(oBinaryOperatorExpression AS BinaryOperatorExpression) AS VOID
          LOCAL spaceAroundBitwiseOperator AS LOGIC
          LOCAL lGroup AS LOGIC
          //
-         lGroup := ( binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalAnd ) .OR. ( binaryOperatorExpression:Operator == BinaryOperatorType.ConditionalOr )
+         lGroup := ( oBinaryOperatorExpression:Operator == BinaryOperatorType.ConditionalAnd ) .OR. ( oBinaryOperatorExpression:Operator == BinaryOperatorType.ConditionalOr )
          //
-         SELF:StartNode(binaryOperatorExpression)
+         SELF:StartNode(oBinaryOperatorExpression)
          IF lGroup
             SELF:LPar()
          ENDIF
-         binaryOperatorExpression:Left:AcceptVisitor(SELF)
+         oBinaryOperatorExpression:Left:AcceptVisitor(SELF)
          IF lGroup
             SELF:RPar()
          ENDIF
-         SWITCH binaryOperatorExpression:Operator
+         SWITCH oBinaryOperatorExpression:Operator
          CASE BinaryOperatorType.BitwiseAnd
          CASE BinaryOperatorType.BitwiseOr
          CASE BinaryOperatorType.ExclusiveOr
@@ -732,7 +733,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             THROW System.NotSupportedException{"Invalid value for BinaryOperatorType"}
          END SWITCH
          SELF:Space(spaceAroundBitwiseOperator)
-         SWITCH binaryOperatorExpression:Operator
+         SWITCH oBinaryOperatorExpression:Operator
          CASE BinaryOperatorType.ConditionalAnd
             SELF:WriteToken(".AND.")
          CASE BinaryOperatorType.ConditionalOr
@@ -740,126 +741,126 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          CASE BinaryOperatorType.NullCoalescing
             SELF:WriteToken("DEFAULT")
          OTHERWISE
-            SELF:WriteToken(BinaryOperatorExpression.GetOperatorRole(binaryOperatorExpression:Operator))
+            SELF:WriteToken(BinaryOperatorExpression.GetOperatorRole(oBinaryOperatorExpression:Operator))
          END SWITCH
          SELF:Space(spaceAroundBitwiseOperator)
          IF lGroup
             SELF:LPar()
          ENDIF
-         binaryOperatorExpression:Right:AcceptVisitor(SELF)
+         oBinaryOperatorExpression:Right:AcceptVisitor(SELF)
          IF lGroup
             SELF:RPar()
          ENDIF
-         SELF:EndNode(binaryOperatorExpression)
+         SELF:EndNode(oBinaryOperatorExpression)
 
-      VIRTUAL METHOD VisitBlockStatement(blockStatement AS BlockStatement) AS VOID
+      VIRTUAL METHOD VisitBlockStatement(oBlockStatement AS BlockStatement) AS VOID
          //
-         SELF:WriteBlock(blockStatement, SELF:policy:StatementBraceStyle)
+         SELF:WriteBlock(oBlockStatement, SELF:policy:StatementBraceStyle)
          SELF:NewLine()
 
-      VIRTUAL METHOD VisitBreakStatement(breakStatement AS BreakStatement) AS VOID
+      VIRTUAL METHOD VisitBreakStatement(oBreakStatement AS BreakStatement) AS VOID
          // In X#, Keyword is EXIT
-         SELF:StartNode(breakStatement)
+         SELF:StartNode(oBreakStatement)
          SELF:WriteKeyword("EXIT", BreakStatement.BreakKeywordRole)
          SELF:NewLine()
          SELF:Semicolon()
-         SELF:EndNode(breakStatement)
+         SELF:EndNode(oBreakStatement)
 
-      VIRTUAL METHOD VisitCaseLabel(caseLabel AS CaseLabel) AS VOID
+      VIRTUAL METHOD VisitCaseLabel(oCaseLabel AS CaseLabel) AS VOID
          //
-         SELF:StartNode(caseLabel)
-         IF (caseLabel:Expression:IsNull)
+         SELF:StartNode(oCaseLabel)
+         IF (oCaseLabel:Expression:IsNull)
             //
             SELF:WriteKeyword("OTHERWISE")
          ELSE
             //
             SELF:WriteKeyword("CASE")
             SELF:Space(TRUE)
-            caseLabel:Expression:AcceptVisitor(SELF)
+            oCaseLabel:Expression:AcceptVisitor(SELF)
          ENDIF
          //SELF:WriteToken(".")
-         SELF:EndNode(caseLabel)
+         SELF:EndNode(oCaseLabel)
 
-      VIRTUAL METHOD VisitCastExpression(castExpression AS CastExpression) AS VOID
+      VIRTUAL METHOD VisitCastExpression(oCastExpression AS CastExpression) AS VOID
          //
-         SELF:StartNode(castExpression)
+         SELF:StartNode(oCastExpression)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinCastParentheses)
-         castExpression:Type:AcceptVisitor(SELF)
+         oCastExpression:Type:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinCastParentheses)
          SELF:RPar()
          SELF:Space(SELF:policy:SpaceAfterTypecast)
-         castExpression:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(castExpression)
+         oCastExpression:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oCastExpression)
 
-      VIRTUAL METHOD VisitCatchClause(catchClause AS CatchClause) AS VOID
+      VIRTUAL METHOD VisitCatchClause(oCatchClause AS CatchClause) AS VOID
          //
-         SELF:StartNode(catchClause)
+         SELF:StartNode(oCatchClause)
          SELF:WriteKeyword("CATCH")
-         IF (! catchClause:Type:IsNull)
+         IF (! oCatchClause:Type:IsNull)
             //
             SELF:Space(TRUE)
-            IF (! String.IsNullOrEmpty(catchClause:VariableName))
+            IF (! String.IsNullOrEmpty(oCatchClause:VariableName))
                //
-               SELF:WriteIdentifier(catchClause:VariableNameToken)
+               SELF:WriteIdentifier(oCatchClause:VariableNameToken)
                SELF:Space(TRUE)
                SELF:WriteKeyword(AsExpression.AsKeywordRole)
                SELF:Space(TRUE)
             ENDIF
-            catchClause:@@Type:AcceptVisitor(SELF)
+            oCatchClause:@@Type:AcceptVisitor(SELF)
             SELF:Space(SELF:policy:SpacesWithinCatchParentheses)
          ENDIF
          // No Catch Condition in XSharp, but leave the code generation
-         IF (! catchClause:Condition:IsNull)
+         IF (! oCatchClause:Condition:IsNull)
             //
             SELF:Space(TRUE)
             SELF:WriteKeyword(CatchClause.WhenKeywordRole)
             SELF:Space(SELF:policy:SpaceBeforeIfParentheses)
             SELF:LPar()
             SELF:Space(SELF:policy:SpacesWithinIfParentheses)
-            catchClause:Condition:AcceptVisitor(SELF)
+            oCatchClause:Condition:AcceptVisitor(SELF)
             SELF:Space(SELF:policy:SpacesWithinIfParentheses)
             SELF:RPar()
          ENDIF
-         SELF:WriteBlock(catchClause:Body, SELF:policy:StatementBraceStyle)
-         SELF:EndNode(catchClause)
+         SELF:WriteBlock(oCatchClause:Body, SELF:policy:StatementBraceStyle)
+         SELF:EndNode(oCatchClause)
 
-      VIRTUAL METHOD VisitCheckedExpression(checkedExpression AS CheckedExpression) AS VOID
+      VIRTUAL METHOD VisitCheckedExpression(oCheckedExpression AS CheckedExpression) AS VOID
          //
-         SELF:StartNode(checkedExpression)
+         SELF:StartNode(oCheckedExpression)
          SELF:WriteKeyword(CheckedExpression.CheckedKeywordRole)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinCheckedExpressionParantheses)
-         checkedExpression:Expression:AcceptVisitor(SELF)
+         oCheckedExpression:Expression:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinCheckedExpressionParantheses)
          SELF:RPar()
-         SELF:EndNode(checkedExpression)
+         SELF:EndNode(oCheckedExpression)
 
-      VIRTUAL METHOD VisitCheckedStatement(checkedStatement AS CheckedStatement) AS VOID
+      VIRTUAL METHOD VisitCheckedStatement(oCheckedStatement AS CheckedStatement) AS VOID
          //
-         SELF:StartNode(checkedStatement)
+         SELF:StartNode(oCheckedStatement)
          SELF:WriteKeyword("BEGIN")
          SELF:Space(TRUE)
          SELF:WriteKeyword("CHECKED")
          SELF:Space(TRUE)
          SELF:NewLine()
-         checkedStatement:Body:AcceptVisitor(SELF)
+         oCheckedStatement:Body:AcceptVisitor(SELF)
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
          SELF:WriteKeyword("CHECKED")
-         SELF:EndNode(checkedStatement)
+         SELF:EndNode(oCheckedStatement)
 
-      PRIVATE METHOD VisitChoice(choice AS Choice) AS VOID
+      PRIVATE METHOD VisitChoice(oChoice AS Choice) AS VOID
          //
-         SELF:WriteKeyword("choice", NULL)
+         SELF:WriteKeyword("oChoice", NULL)
          SELF:Space(TRUE)
          SELF:LPar()
          SELF:NewLine()
          SELF:writer:Indent()
-         FOREACH node AS INode IN (System.Collections.Generic.IEnumerable<INode>)choice
+         FOREACH node AS INode IN (System.Collections.Generic.IEnumerable<INode>)oChoice
             //
             SELF:VisitNodeInPattern(node)
-            IF (node != System.Linq.Enumerable.Last<INode>(choice))
+            IF (node != System.Linq.Enumerable.Last<INode>(oChoice))
                //
                SELF:WriteToken(XSRoles.Comma)
             ENDIF
@@ -868,104 +869,104 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:writer:Unindent()
          SELF:RPar()
 
-      VIRTUAL METHOD VisitComment(comment AS Comment) AS VOID
+      VIRTUAL METHOD VisitComment(oComment AS Comment) AS VOID
          //
-         SELF:writer:StartNode(comment)
-         SELF:writer:WriteComment(comment:CommentType, comment:Content)
-         SELF:writer:EndNode(comment)
+         SELF:writer:StartNode(oComment)
+         SELF:writer:WriteComment(oComment:CommentType, oComment:Content)
+         SELF:writer:EndNode(oComment)
 
-      VIRTUAL METHOD VisitComposedType(composedType AS ComposedType) AS VOID
+      VIRTUAL METHOD VisitComposedType(oComposedType AS ComposedType) AS VOID
          LOCAL i AS LONG
          //
-         SELF:StartNode(composedType)
-         IF (composedType:HasRefSpecifier)
+         SELF:StartNode(oComposedType)
+         IF (oComposedType:HasRefSpecifier)
             //
             SELF:WriteKeyword(ComposedType.RefRole)
          ENDIF
-         composedType:BaseType:AcceptVisitor(SELF)
-         IF (composedType:HasNullableSpecifier)
+         oComposedType:BaseType:AcceptVisitor(SELF)
+         IF (oComposedType:HasNullableSpecifier)
             //
             SELF:WriteToken(ComposedType.NullableRole)
          ENDIF
          i := 0
-         WHILE ((i < composedType:PointerRank))
+         WHILE ((i < oComposedType:PointerRank))
             //
             SELF:WriteToken(ComposedType.PointerRole)
             i++
          ENDDO
-         FOREACH specifier AS ArraySpecifier IN composedType:ArraySpecifiers
+         FOREACH specifier AS ArraySpecifier IN oComposedType:ArraySpecifiers
             //
             specifier:AcceptVisitor(SELF)
          NEXT
-         SELF:EndNode(composedType)
+         SELF:EndNode(oComposedType)
 
-      VIRTUAL METHOD VisitConditionalExpression(conditionalExpression AS ConditionalExpression) AS VOID
+      VIRTUAL METHOD VisitConditionalExpression(oConditionalExpression AS ConditionalExpression) AS VOID
          //
-         SELF:StartNode(conditionalExpression)
+         SELF:StartNode(oConditionalExpression)
          SELF:WriteToken("IIF" )
          SELF:LPar()
-         conditionalExpression:Condition:AcceptVisitor(SELF)
+         oConditionalExpression:Condition:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpaceBeforeConditionalOperatorCondition)
          SELF:WriteToken("," )
          SELF:Space(SELF:policy:SpaceAfterConditionalOperatorCondition)
-         conditionalExpression:TrueExpression:AcceptVisitor(SELF)
+         oConditionalExpression:TrueExpression:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpaceBeforeConditionalOperatorSeparator)
          SELF:WriteToken("," )
          SELF:Space(SELF:policy:SpaceAfterConditionalOperatorSeparator)
-         conditionalExpression:FalseExpression:AcceptVisitor(SELF)
+         oConditionalExpression:FalseExpression:AcceptVisitor(SELF)
          SELF:RPar()
-         SELF:EndNode(conditionalExpression)
+         SELF:EndNode(oConditionalExpression)
 
-      VIRTUAL METHOD VisitConstraint(constraint AS Constraint) AS VOID
+      VIRTUAL METHOD VisitConstraint(oConstraint AS Constraint) AS VOID
          //
-         SELF:StartNode(constraint)
+         SELF:StartNode(oConstraint)
          SELF:Space(TRUE)
          SELF:WriteKeyword(XSRoles.WhereKeyword)
          SELF:Space(TRUE)
-         constraint:TypeParameter:AcceptVisitor(SELF)
+         oConstraint:TypeParameter:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword("IS")
          SELF:Space(TRUE)
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)constraint:BaseTypes )
-         SELF:EndNode(constraint)
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oConstraint:BaseTypes )
+         SELF:EndNode(oConstraint)
 
-      VIRTUAL METHOD VisitConstructorDeclaration(ctorDeclaration AS ConstructorDeclaration) AS VOID
-         LOCAL parent AS TypeDeclaration
+      VIRTUAL METHOD VisitConstructorDeclaration(oCtorDeclaration AS ConstructorDeclaration) AS VOID
+         LOCAL oParent AS TypeDeclaration
          //
-         SELF:StartNode(ctorDeclaration)
-         SELF:WriteAttributes(ctorDeclaration:Attributes)
-         SELF:WriteModifiers(ctorDeclaration:ModifierTokens)
-         parent := ctorDeclaration:Parent ASTYPE TypeDeclaration
-         IF ((parent != NULL) .AND. (parent:Name != ctorDeclaration:Name))
+         SELF:StartNode(oCtorDeclaration)
+         SELF:WriteAttributes(oCtorDeclaration:Attributes)
+         SELF:WriteModifiers(oCtorDeclaration:ModifierTokens)
+         oParent := oCtorDeclaration:Parent ASTYPE TypeDeclaration
+         IF ((oParent != NULL) .AND. (oParent:Name != oCtorDeclaration:Name))
             //
-            SELF:WriteIdentifier((Identifier)parent:NameToken:Clone() )
+            SELF:WriteIdentifier((Identifier)oParent:NameToken:Clone() )
          ELSE
             //
             SELF:WriteKeyword("CONSTRUCTOR")
          ENDIF
          SELF:Space(SELF:policy:SpaceBeforeConstructorDeclarationParentheses)
-         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)ctorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
-         IF (! ctorDeclaration:Initializer:IsNull)
+         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oCtorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+         IF (! oCtorDeclaration:Initializer:IsNull)
             // Continue on Next Line
             // Yes, but not in XSharp
             // SELF:WriteToken(XSRoles.Semicolon)
             SELF:NewLine()
             SELF:writer:Indent()
-            ctorDeclaration:Initializer:AcceptVisitor(SELF)
+            oCtorDeclaration:Initializer:AcceptVisitor(SELF)
             SELF:writer:Unindent()
          ENDIF
          // Save the current/Declaring type
-         SELF:currentType := SELF:GetElementType( ctorDeclaration )
+         SELF:currentType := SELF:GetElementType( oCtorDeclaration )
          //
-         SELF:WriteMethodBody(ctorDeclaration:Body, SELF:policy:ConstructorBraceStyle)
+         SELF:WriteMethodBody(oCtorDeclaration:Body, SELF:policy:ConstructorBraceStyle)
          SELF:currentType := NULL
-         SELF:EndNode(ctorDeclaration)
+         SELF:EndNode(oCtorDeclaration)
 
-      VIRTUAL METHOD VisitConstructorInitializer(constructorInitializer AS ConstructorInitializer) AS VOID
+      VIRTUAL METHOD VisitConstructorInitializer(oConstructorInitializer AS ConstructorInitializer) AS VOID
          //
-         SELF:StartNode(constructorInitializer)
+         SELF:StartNode(oConstructorInitializer)
          SELF:Space(TRUE)
-         IF (constructorInitializer:ConstructorInitializerType == ConstructorInitializerType.This)
+         IF (oConstructorInitializer:ConstructorInitializerType == ConstructorInitializerType.This)
             //
             SELF:WriteKeyword("SELF")
          ELSE
@@ -974,44 +975,44 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //SELF:WriteKeyword(ConstructorInitializer.BaseKeywordRole)
          ENDIF
          SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)constructorInitializer:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
-         SELF:EndNode(constructorInitializer)
+         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oConstructorInitializer:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
+         SELF:EndNode(oConstructorInitializer)
 
-      VIRTUAL METHOD VisitContinueStatement(continueStatement AS ContinueStatement) AS VOID
+      VIRTUAL METHOD VisitContinueStatement(oContinueStatement AS ContinueStatement) AS VOID
          //
-         SELF:StartNode(continueStatement)
+         SELF:StartNode(oContinueStatement)
          SELF:WriteKeyword("Loop", ContinueStatement.ContinueKeywordRole)
          SELF:NewLine()
-         SELF:EndNode(continueStatement)
+         SELF:EndNode(oContinueStatement)
 
-      VIRTUAL METHOD VisitCSharpTokenNode(cSharpTokenNode AS CSharpTokenNode) AS VOID
+      VIRTUAL METHOD VisitCSharpTokenNode(oCSharpTokenNode AS CSharpTokenNode) AS VOID
          LOCAL token AS CSharpModifierToken
          //
-         token := (CSharpModifierToken)(cSharpTokenNode)
+         token := (CSharpModifierToken)(oCSharpTokenNode)
          IF (token == NULL)
             //
             THROW System.NotSupportedException{"Should never visit individual tokens"}
          ENDIF
-         SELF:WriteKeyword(CSharpModifierToken.GetModifierName(token:Modifier), cSharpTokenNode:Role)
+         SELF:WriteKeyword(CSharpModifierToken.GetModifierName(token:Modifier), oCSharpTokenNode:Role)
 
-      VIRTUAL METHOD VisitCustomEventDeclaration(customEventDeclaration AS CustomEventDeclaration) AS VOID
+      VIRTUAL METHOD VisitCustomEventDeclaration(oCustomEventDeclaration AS CustomEventDeclaration) AS VOID
          LOCAL bodyStarted := FALSE AS LOGIC
          //
-         SELF:StartNode(customEventDeclaration)
-         SELF:WriteAttributes(customEventDeclaration:Attributes)
-         SELF:WriteModifiers(customEventDeclaration:ModifierTokens)
+         SELF:StartNode(oCustomEventDeclaration)
+         SELF:WriteAttributes(oCustomEventDeclaration:Attributes)
+         SELF:WriteModifiers(oCustomEventDeclaration:ModifierTokens)
          SELF:WriteKeyword(CustomEventDeclaration.EventKeywordRole)
          SELF:Space(TRUE)
          //
-         SELF:WritePrivateImplementationType(customEventDeclaration:PrivateImplementationType)
-         SELF:WriteIdentifier(customEventDeclaration:NameToken)
+         SELF:WritePrivateImplementationType(oCustomEventDeclaration:PrivateImplementationType)
+         SELF:WriteIdentifier(oCustomEventDeclaration:NameToken)
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS", NULL )
          SELF:Space(TRUE)
-         customEventDeclaration:ReturnType:AcceptVisitor(SELF)
+         oCustomEventDeclaration:ReturnType:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:OpenBrace(SELF:policy:EventBraceStyle)
-         FOREACH node AS AstNode IN customEventDeclaration:Children
+         FOREACH node AS AstNode IN oCustomEventDeclaration:Children
             //
             IF ((node:Role == CustomEventDeclaration.AddAccessorRole) .OR. (node:Role == CustomEventDeclaration.RemoveAccessorRole))
                //
@@ -1027,63 +1028,63 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword("EVENT" )
          ENDIF
          SELF:NewLine()
-         SELF:EndNode(customEventDeclaration)
+         SELF:EndNode(oCustomEventDeclaration)
 
-      VIRTUAL METHOD VisitDeclarationExpression( declarationExpression AS DeclarationExpression ) AS VOID
-         SELF:StartNode(declarationExpression)
-         declarationExpression:Type:AcceptVisitor(SELF)
+      VIRTUAL METHOD VisitDeclarationExpression( oDeclarationExpression AS DeclarationExpression ) AS VOID
+         SELF:StartNode(oDeclarationExpression)
+         oDeclarationExpression:Type:AcceptVisitor(SELF)
          SELF:Space()
-         declarationExpression:Designation:AcceptVisitor(SELF)
-         SELF:EndNode(declarationExpression)
+         oDeclarationExpression:Designation:AcceptVisitor(SELF)
+         SELF:EndNode(oDeclarationExpression)
 
-      VIRTUAL METHOD VisitDefaultValueExpression(defaultValueExpression AS DefaultValueExpression) AS VOID
+      VIRTUAL METHOD VisitDefaultValueExpression(oDefaultValueExpression AS DefaultValueExpression) AS VOID
          //
-         SELF:StartNode(defaultValueExpression)
+         SELF:StartNode(oDefaultValueExpression)
          SELF:WriteKeyword(DefaultValueExpression.DefaultKeywordRole)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinTypeOfParentheses)
-         defaultValueExpression:@@Type:AcceptVisitor(SELF)
+         oDefaultValueExpression:@@Type:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinTypeOfParentheses)
          SELF:RPar()
-         SELF:EndNode(defaultValueExpression)
+         SELF:EndNode(oDefaultValueExpression)
 
-      VIRTUAL METHOD VisitDelegateDeclaration(delegateDeclaration AS DelegateDeclaration) AS VOID
+      VIRTUAL METHOD VisitDelegateDeclaration(oDelegateDeclaration AS DelegateDeclaration) AS VOID
          //
-         SELF:StartNode(delegateDeclaration)
-         SELF:WriteAttributes(delegateDeclaration:Attributes)
-         SELF:WriteModifiers(delegateDeclaration:ModifierTokens)
+         SELF:StartNode(oDelegateDeclaration)
+         SELF:WriteAttributes(oDelegateDeclaration:Attributes)
+         SELF:WriteModifiers(oDelegateDeclaration:ModifierTokens)
          SELF:WriteKeyword(XSRoles.DelegateKeyword)
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(delegateDeclaration:NameToken)
-         SELF:WriteTypeParameters(delegateDeclaration:TypeParameters)
+         SELF:WriteIdentifier(oDelegateDeclaration:NameToken)
+         SELF:WriteTypeParameters(oDelegateDeclaration:TypeParameters)
          SELF:Space(SELF:policy:SpaceBeforeDelegateDeclarationParentheses)
-         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)delegateDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
-         FOREACH constraint AS Constraint IN delegateDeclaration:Constraints
+         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oDelegateDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+         FOREACH oConstraint AS Constraint IN oDelegateDeclaration:Constraints
             //
-            constraint:AcceptVisitor(SELF)
+            oConstraint:AcceptVisitor(SELF)
          NEXT
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS", NULL )
          SELF:Space(TRUE)
-         delegateDeclaration:ReturnType:AcceptVisitor(SELF)
+         oDelegateDeclaration:ReturnType:AcceptVisitor(SELF)
          SELF:Semicolon()
-         SELF:EndNode(delegateDeclaration)
+         SELF:EndNode(oDelegateDeclaration)
 
-      VIRTUAL METHOD VisitDestructorDeclaration(destructorDeclaration AS DestructorDeclaration) AS VOID
-         LOCAL parent AS TypeDeclaration
+      VIRTUAL METHOD VisitDestructorDeclaration(oDestructorDeclaration AS DestructorDeclaration) AS VOID
+         LOCAL oParent AS TypeDeclaration
          //
-         SELF:StartNode(destructorDeclaration)
-         SELF:WriteAttributes(destructorDeclaration:Attributes)
-         SELF:WriteModifiers(destructorDeclaration:ModifierTokens)
-         IF (System.Linq.Enumerable.Any<CSharpModifierToken>(destructorDeclaration:ModifierTokens))
+         SELF:StartNode(oDestructorDeclaration)
+         SELF:WriteAttributes(oDestructorDeclaration:Attributes)
+         SELF:WriteModifiers(oDestructorDeclaration:ModifierTokens)
+         IF (System.Linq.Enumerable.Any<CSharpModifierToken>(oDestructorDeclaration:ModifierTokens))
             //
             SELF:Space(TRUE)
          ENDIF
          //SELF:WriteToken(DestructorDeclaration.TildeRole)
-         parent := destructorDeclaration:Parent ASTYPE TypeDeclaration
-         IF ((parent != NULL) .AND. (parent:Name != destructorDeclaration:Name))
+         oParent := oDestructorDeclaration:Parent ASTYPE TypeDeclaration
+         IF ((oParent != NULL) .AND. (oParent:Name != oDestructorDeclaration:Name))
             //
-            SELF:WriteIdentifier((Identifier)parent:NameToken:Clone() )
+            SELF:WriteIdentifier((Identifier)oParent:NameToken:Clone() )
          ELSE
             //
             SELF:WriteIdentifier("DESTRUCTOR")
@@ -1091,15 +1092,15 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:Space(SELF:policy:SpaceBeforeConstructorDeclarationParentheses)
          SELF:LPar()
          SELF:RPar()
-         SELF:WriteMethodBody(destructorDeclaration:Body, SELF:policy:DestructorBraceStyle)
-         SELF:EndNode(destructorDeclaration)
+         SELF:WriteMethodBody(oDestructorDeclaration:Body, SELF:policy:DestructorBraceStyle)
+         SELF:EndNode(oDestructorDeclaration)
 
-      VIRTUAL METHOD VisitDirectionExpression(directionExpression AS DirectionExpression) AS VOID
-         LOCAL fieldDirection AS FieldDirection
+      VIRTUAL METHOD VisitDirectionExpression(oDirectionExpression AS DirectionExpression) AS VOID
+         LOCAL ofieldDirection AS FieldDirection
          //
-         SELF:StartNode(directionExpression)
-         fieldDirection := directionExpression:FieldDirection
-         SWITCH (fieldDirection)
+         SELF:StartNode(oDirectionExpression)
+         ofieldDirection := oDirectionExpression:FieldDirection
+         SWITCH (ofieldDirection)
          CASE  FieldDirection.Out
             SELF:WriteKeyword("OUT")
          CASE  FieldDirection.Ref
@@ -1110,34 +1111,34 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             THROW System.NotSupportedException{"Invalid value for FieldDirection"}
          END
          SELF:Space(TRUE)
-         directionExpression:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(directionExpression)
+         oDirectionExpression:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oDirectionExpression)
 
-      VIRTUAL METHOD VisitDocumentationReference(documentationReference AS DocumentationReference) AS VOID
-         LOCAL symbolKind AS SymbolKind
-         LOCAL operatorType AS OperatorType
+      VIRTUAL METHOD VisitDocumentationReference(oDocumentationReference AS DocumentationReference) AS VOID
+         LOCAL oSymbolKind AS SymbolKind
+         LOCAL oOperatorType AS OperatorType
          //
-         SELF:StartNode(documentationReference)
-         IF (! documentationReference:DeclaringType:IsNull)
+         SELF:StartNode(oDocumentationReference)
+         IF (! oDocumentationReference:DeclaringType:IsNull)
             //
-            documentationReference:DeclaringType:AcceptVisitor(SELF)
-            IF (documentationReference:SymbolKind != SymbolKind.TypeDefinition)
+            oDocumentationReference:DeclaringType:AcceptVisitor(SELF)
+            IF (oDocumentationReference:SymbolKind != SymbolKind.TypeDefinition)
                //
                SELF:WriteToken(".")
             ENDIF
          ENDIF
-         symbolKind := documentationReference:SymbolKind
-         IF (symbolKind != SymbolKind.TypeDefinition)
+         oSymbolKind := oDocumentationReference:SymbolKind
+         IF (oSymbolKind != SymbolKind.TypeDefinition)
             //
-            IF (symbolKind == SymbolKind.Indexer)
+            IF (oSymbolKind == SymbolKind.Indexer)
                //
                SELF:WriteKeyword(IndexerDeclaration.ThisKeywordRole)
             ELSE
                //
-               IF (symbolKind == SymbolKind.Operator)
+               IF (oSymbolKind == SymbolKind.Operator)
                   //
-                  operatorType := documentationReference:OperatorType
-                  SWITCH operatorType
+                  oOperatorType := oDocumentationReference:OperatorType
+                  SWITCH oOperatorType
                   CASE OperatorType.Explicit
                      //
                      SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
@@ -1150,304 +1151,304 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                   SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
                   SELF:Space(TRUE)
 
-                  SWITCH operatorType
+                  SWITCH oOperatorType
                   CASE OperatorType.Explicit
                   CASE OperatorType.Implicit
                      //
-                     documentationReference:ConversionOperatorReturnType:AcceptVisitor(SELF)
+                     oDocumentationReference:ConversionOperatorReturnType:AcceptVisitor(SELF)
 
                   OTHERWISE
                      //
-                     SELF:WriteToken(OperatorDeclaration.GetToken(operatorType), OperatorDeclaration.GetRole(operatorType))
+                     SELF:WriteToken(OperatorDeclaration.GetToken(oOperatorType), OperatorDeclaration.GetRole(oOperatorType))
 
                   END SWITCH
                ELSE
                   //
-                  SELF:WriteIdentifier(documentationReference:GetChildByRole<Identifier>(XSRoles.Identifier))
+                  SELF:WriteIdentifier(oDocumentationReference:GetChildByRole<Identifier>(XSRoles.Identifier))
                ENDIF
             ENDIF
          ENDIF
-         SELF:WriteTypeArguments(documentationReference:TypeArguments)
-         IF (documentationReference:HasParameterList)
+         SELF:WriteTypeArguments(oDocumentationReference:TypeArguments)
+         IF (oDocumentationReference:HasParameterList)
             //
             SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-            IF (documentationReference:SymbolKind == SymbolKind.Indexer)
+            IF (oDocumentationReference:SymbolKind == SymbolKind.Indexer)
                //
-               SELF:WriteCommaSeparatedListInBrackets(documentationReference:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
+               SELF:WriteCommaSeparatedListInBrackets(oDocumentationReference:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
             ELSE
                //
-               SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)documentationReference:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+               SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oDocumentationReference:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
             ENDIF
          ENDIF
-         SELF:EndNode(documentationReference)
+         SELF:EndNode(oDocumentationReference)
 
-      VIRTUAL METHOD VisitDoWhileStatement(doWhileStatement AS DoWhileStatement) AS VOID
+      VIRTUAL METHOD VisitDoWhileStatement(oDoWhileStatement AS DoWhileStatement) AS VOID
          //
-         SELF:StartNode(doWhileStatement)
+         SELF:StartNode(oDoWhileStatement)
          SELF:WriteKeyword("REPEAT")
-         SELF:WriteEmbeddedStatement(doWhileStatement:EmbeddedStatement, SELF:policy:WhileNewLinePlacement)
+         SELF:WriteEmbeddedStatement(oDoWhileStatement:EmbeddedStatement, SELF:policy:WhileNewLinePlacement)
          SELF:WriteKeyword("UNTIL")
          SELF:Space(SELF:policy:SpaceBeforeWhileParentheses)
          SELF:WriteKeyword("!")
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinWhileParentheses)
-         doWhileStatement:Condition:AcceptVisitor(SELF)
+         oDoWhileStatement:Condition:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinWhileParentheses)
          SELF:RPar()
          SELF:NewLine()
          SELF:Semicolon()
-         SELF:EndNode(doWhileStatement)
+         SELF:EndNode(oDoWhileStatement)
 
-      VIRTUAL METHOD VisitEmptyStatement(emptyStatement AS EmptyStatement) AS VOID
+      VIRTUAL METHOD VisitEmptyStatement(oEmptyStatement AS EmptyStatement) AS VOID
          //
-         SELF:StartNode(emptyStatement)
+         SELF:StartNode(oEmptyStatement)
          SELF:WriteKeyword("NOP")
          SELF:Semicolon()
-         SELF:EndNode(emptyStatement)
+         SELF:EndNode(oEmptyStatement)
 
-      VIRTUAL METHOD VisitEnumMemberDeclaration(enumMemberDeclaration AS EnumMemberDeclaration) AS VOID
+      VIRTUAL METHOD VisitEnumMemberDeclaration(oEnumMemberDeclaration AS EnumMemberDeclaration) AS VOID
          //
-         SELF:StartNode(enumMemberDeclaration)
-         SELF:WriteAttributes(enumMemberDeclaration:Attributes)
-         SELF:WriteModifiers(enumMemberDeclaration:ModifierTokens)
+         SELF:StartNode(oEnumMemberDeclaration)
+         SELF:WriteAttributes(oEnumMemberDeclaration:Attributes)
+         SELF:WriteModifiers(oEnumMemberDeclaration:ModifierTokens)
          SELF:WriteKeyword( "MEMBER" )
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(enumMemberDeclaration:NameToken)
-         IF (! enumMemberDeclaration:Initializer:IsNull)
+         SELF:WriteIdentifier(oEnumMemberDeclaration:NameToken)
+         IF (! oEnumMemberDeclaration:Initializer:IsNull)
             //
             SELF:Space(SELF:policy:SpaceAroundAssignment)
             SELF:WriteToken(":=")
             SELF:Space(SELF:policy:SpaceAroundAssignment)
-            enumMemberDeclaration:Initializer:AcceptVisitor(SELF)
+            oEnumMemberDeclaration:Initializer:AcceptVisitor(SELF)
          ENDIF
-         SELF:EndNode(enumMemberDeclaration)
+         SELF:EndNode(oEnumMemberDeclaration)
 
-      VIRTUAL METHOD VisitEventDeclaration(eventDeclaration AS EventDeclaration) AS VOID
+      VIRTUAL METHOD VisitEventDeclaration(oEventDeclaration AS EventDeclaration) AS VOID
          //
-         SELF:StartNode(eventDeclaration)
-         SELF:WriteAttributes(eventDeclaration:Attributes)
-         SELF:WriteModifiers(eventDeclaration:ModifierTokens)
+         SELF:StartNode(oEventDeclaration)
+         SELF:WriteAttributes(oEventDeclaration:Attributes)
+         SELF:WriteModifiers(oEventDeclaration:ModifierTokens)
          SELF:WriteKeyword(EventDeclaration.EventKeywordRole)
          SELF:Space(TRUE)
          //
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)eventDeclaration:Variables )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oEventDeclaration:Variables )
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS", NULL )
          SELF:Space(TRUE)
-         eventDeclaration:ReturnType:AcceptVisitor(SELF)
+         oEventDeclaration:ReturnType:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:Semicolon()
-         SELF:EndNode(eventDeclaration)
+         SELF:EndNode(oEventDeclaration)
 
-      VIRTUAL METHOD VisitExpressionStatement(expressionStatement AS ExpressionStatement) AS VOID
+      VIRTUAL METHOD VisitExpressionStatement(oExpressionStatement AS ExpressionStatement) AS VOID
          //
-         SELF:StartNode(expressionStatement)
-         expressionStatement:Expression:AcceptVisitor(SELF)
+         SELF:StartNode(oExpressionStatement)
+         oExpressionStatement:Expression:AcceptVisitor(SELF)
          SELF:NewLine()
-         SELF:EndNode(expressionStatement)
+         SELF:EndNode(oExpressionStatement)
 
-      VIRTUAL METHOD VisitExternAliasDeclaration(externAliasDeclaration AS ExternAliasDeclaration) AS VOID
+      VIRTUAL METHOD VisitExternAliasDeclaration(oExternAliasDeclaration AS ExternAliasDeclaration) AS VOID
          //
-         SELF:StartNode(externAliasDeclaration)
+         SELF:StartNode(oExternAliasDeclaration)
          SELF:WriteKeyword(XSRoles.ExternKeyword)
          SELF:Space(TRUE)
          SELF:WriteKeyword(XSRoles.AliasKeyword)
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(externAliasDeclaration:NameToken)
+         SELF:WriteIdentifier(oExternAliasDeclaration:NameToken)
          SELF:Semicolon()
-         SELF:EndNode(externAliasDeclaration)
+         SELF:EndNode(oExternAliasDeclaration)
 
-      VIRTUAL METHOD VisitFieldDeclaration(fldDeclaration AS FieldDeclaration) AS VOID
+      VIRTUAL METHOD VisitFieldDeclaration(oFldDeclaration AS FieldDeclaration) AS VOID
          //
-         SELF:StartNode(fldDeclaration)
-         SELF:WriteAttributes(fldDeclaration:Attributes)
-         SELF:WriteModifiers(fldDeclaration:ModifierTokens)
+         SELF:StartNode(oFldDeclaration)
+         SELF:WriteAttributes(oFldDeclaration:Attributes)
+         SELF:WriteModifiers(oFldDeclaration:ModifierTokens)
          SELF:Space(TRUE)
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)fldDeclaration:Variables )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oFldDeclaration:Variables )
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS" )
          SELF:Space(TRUE)
-         fldDeclaration:ReturnType:AcceptVisitor(SELF)
+         oFldDeclaration:ReturnType:AcceptVisitor(SELF)
          SELF:Semicolon()
          SELF:NewLine()
-         SELF:EndNode(fldDeclaration)
+         SELF:EndNode(oFldDeclaration)
 
-      VIRTUAL METHOD VisitFixedFieldDeclaration(fixedFieldDeclaration AS FixedFieldDeclaration) AS VOID
+      VIRTUAL METHOD VisitFixedFieldDeclaration(oFixedFieldDeclaration AS FixedFieldDeclaration) AS VOID
          //
-         SELF:StartNode(fixedFieldDeclaration)
-         SELF:WriteAttributes(fixedFieldDeclaration:Attributes)
-         SELF:WriteModifiers(fixedFieldDeclaration:ModifierTokens)
+         SELF:StartNode(oFixedFieldDeclaration)
+         SELF:WriteAttributes(oFixedFieldDeclaration:Attributes)
+         SELF:WriteModifiers(oFixedFieldDeclaration:ModifierTokens)
          SELF:WriteKeyword(FixedFieldDeclaration.FixedKeywordRole)
          SELF:Space(TRUE)
-         fixedFieldDeclaration:ReturnType:AcceptVisitor(SELF)
+         oFixedFieldDeclaration:ReturnType:AcceptVisitor(SELF)
          SELF:Space(TRUE)
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)fixedFieldDeclaration:Variables )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oFixedFieldDeclaration:Variables )
          SELF:Semicolon()
-         SELF:EndNode(fixedFieldDeclaration)
+         SELF:EndNode(oFixedFieldDeclaration)
 
-      VIRTUAL METHOD VisitFixedStatement(fixedStatement AS FixedStatement) AS VOID
+      VIRTUAL METHOD VisitFixedStatement(oFixedStatement AS FixedStatement) AS VOID
          //
-         SELF:StartNode(fixedStatement)
+         SELF:StartNode(oFixedStatement)
          SELF:WriteKeyword(FixedStatement.FixedKeywordRole)
          SELF:Space(SELF:policy:SpaceBeforeUsingParentheses)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinUsingParentheses)
-         fixedStatement:@@Type:AcceptVisitor(SELF)
+         oFixedStatement:@@Type:AcceptVisitor(SELF)
          SELF:Space(TRUE)
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)fixedStatement:Variables )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oFixedStatement:Variables )
          SELF:Space(SELF:policy:SpacesWithinUsingParentheses)
          SELF:RPar()
-         SELF:WriteEmbeddedStatement(fixedStatement:EmbeddedStatement, NewLinePlacement.NewLine)
-         SELF:EndNode(fixedStatement)
+         SELF:WriteEmbeddedStatement(oFixedStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         SELF:EndNode(oFixedStatement)
 
-      VIRTUAL METHOD VisitFixedVariableInitializer(fixedVariableInitializer AS FixedVariableInitializer) AS VOID
+      VIRTUAL METHOD VisitFixedVariableInitializer(oFixedVariableInitializer AS FixedVariableInitializer) AS VOID
          //
-         SELF:StartNode(fixedVariableInitializer)
-         SELF:WriteIdentifier(fixedVariableInitializer:NameToken)
-         IF (! fixedVariableInitializer:CountExpression:IsNull)
+         SELF:StartNode(oFixedVariableInitializer)
+         SELF:WriteIdentifier(oFixedVariableInitializer:NameToken)
+         IF (! oFixedVariableInitializer:CountExpression:IsNull)
             //
             SELF:WriteToken(XSRoles.LBracket)
             SELF:Space(SELF:policy:SpacesWithinBrackets)
-            fixedVariableInitializer:CountExpression:AcceptVisitor(SELF)
+            oFixedVariableInitializer:CountExpression:AcceptVisitor(SELF)
             SELF:Space(SELF:policy:SpacesWithinBrackets)
             SELF:WriteToken(XSRoles.RBracket)
          ENDIF
-         SELF:EndNode(fixedVariableInitializer)
+         SELF:EndNode(oFixedVariableInitializer)
 
-      VIRTUAL METHOD VisitForeachStatement(foreachStatement AS ForeachStatement) AS VOID
+      VIRTUAL METHOD VisitForeachStatement(oForeachStatement AS ForeachStatement) AS VOID
          //
-         SELF:StartNode(foreachStatement)
+         SELF:StartNode(oForeachStatement)
          SELF:WriteKeyword("FOREACH")
          SELF:Space()
-         //SELF:WriteIdentifier(foreachStatement:VariableNameToken)
-         foreachStatement:VariableDesignation:AcceptVisitor(SELF)
+         //SELF:WriteIdentifier(oForeachStatement:VariableNameToken)
+         oForeachStatement:VariableDesignation:AcceptVisitor(SELF)
          SELF:Space()
          SELF:WriteKeyword("AS")
          SELF:Space()
-         foreachStatement:VariableType:AcceptVisitor(SELF)
+         oForeachStatement:VariableType:AcceptVisitor(SELF)
          SELF:Space()
          SELF:WriteKeyword("IN")
          SELF:Space()
-         foreachStatement:InExpression:AcceptVisitor(SELF)
+         oForeachStatement:InExpression:AcceptVisitor(SELF)
          SELF:Space()
-         SELF:WriteEmbeddedStatement(foreachStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         SELF:WriteEmbeddedStatement(oForeachStatement:EmbeddedStatement, NewLinePlacement.NewLine)
          SELF:WriteKeyword("NEXT")
          SELF:NewLine()
-         SELF:EndNode(foreachStatement)
+         SELF:EndNode(oForeachStatement)
 
-      VIRTUAL METHOD VisitForStatement(forStatement AS ForStatement) AS VOID
+      VIRTUAL METHOD VisitForStatement(oForStatement AS ForStatement) AS VOID
          //
-         //            SELF:StartNode(forStatement)
+         //            SELF:StartNode(oForStatement)
          //            SELF:WriteKeyword("FOR")
          //            SELF:Space()
-         //            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Initializers )
+         //            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oForStatement:Initializers )
          //            SELF:Space()
          //            SELF:WriteKeyword("TO")
          //            SELF:Space()
-         //            forStatement:Condition:AcceptVisitor(SELF)
-         //            IF (System.Linq.Enumerable.Any<Statement>(forStatement:Iterators))
+         //            oForStatement:Condition:AcceptVisitor(SELF)
+         //            IF (System.Linq.Enumerable.Any<Statement>(oForStatement:Iterators))
          //                //
          //                SELF:Space()
          //                SELF:WriteKeyword("STEP")
          //                SELF:Space()
-         //                SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
+         //                SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oForStatement:Iterators )
          //            ENDIF
-         //            SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         //            SELF:WriteEmbeddedStatement(oForStatement:EmbeddedStatement, NewLinePlacement.NewLine)
          //            SELF:WriteKeyword("NEXT")
          //            SELF:NewLine()
-         //            SELF:EndNode(forStatement)
-         SELF:StartNode(forStatement)
+         //            SELF:EndNode(oForStatement)
+         SELF:StartNode(oForStatement)
          SELF:WriteSingleCommment( "Init" )
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Initializers )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oForStatement:Initializers )
          IF ( !SELF:isAtStartOfLine )
             SELF:NewLine()
          ENDIF
          //
          SELF:WriteKeyword("WHILE")
          SELF:Space()
-         forStatement:Condition:AcceptVisitor(SELF)
+         oForStatement:Condition:AcceptVisitor(SELF)
          //
-         SELF:WriteEmbeddedStatement(forStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         SELF:WriteEmbeddedStatement(oForStatement:EmbeddedStatement, NewLinePlacement.NewLine)
          //
          SELF:writer:Indent()
          SELF:WriteSingleCommment( "Iterators" )
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)forStatement:Iterators )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oForStatement:Iterators )
          SELF:writer:Unindent()
          SELF:WriteKeyword("ENDDO")
          SELF:NewLine()
-         SELF:EndNode(forStatement)
+         SELF:EndNode(oForStatement)
 
-      VIRTUAL METHOD VisitFunctionPointerType( functionPointerType AS FunctionPointerAstType ) AS VOID
-         SELF:StartNode(functionPointerType)
+      VIRTUAL METHOD VisitFunctionPointerType( oFunctionPointerType AS FunctionPointerAstType ) AS VOID
+         SELF:StartNode(oFunctionPointerType)
          SELF:WriteKeyword(Roles.DelegateKeyword)
          SELF:WriteToken(FunctionPointerAstType.PointerRole)
-         IF (functionPointerType:HasUnmanagedCallingConvention)
+         IF (oFunctionPointerType:HasUnmanagedCallingConvention)
             SELF:Space()
             SELF:WriteKeyword("unmanaged")
          ENDIF
-         IF (functionPointerType:CallingConventions:Any())
+         IF (oFunctionPointerType:CallingConventions:Any())
             SELF:WriteToken(Roles.LBracket)
-            WriteCommaSeparatedList(functionPointerType:CallingConventions)
+            WriteCommaSeparatedList(oFunctionPointerType:CallingConventions)
             SELF:WriteToken(Roles.RBracket)
          ENDIF
          //SELF:WriteToken(Roles.LChevron)
          SELF:WriteCommaSeparatedList(;
-         functionPointerType:Parameters:Concat<AstNode>(<AstNode>{ functionPointerType:ReturnType }))
+         oFunctionPointerType:Parameters:Concat<AstNode>(<AstNode>{ oFunctionPointerType:ReturnType }))
          //SELF:WriteToken(Roles.RChevron)
-         SELF:EndNode(functionPointerType)
+         SELF:EndNode(oFunctionPointerType)
 
-      VIRTUAL METHOD VisitGotoCaseStatement(gotoCaseStatement AS GotoCaseStatement) AS VOID
+      VIRTUAL METHOD VisitGotoCaseStatement(oGotoCaseStatement AS GotoCaseStatement) AS VOID
          //
-         SELF:StartNode(gotoCaseStatement)
+         SELF:StartNode(oGotoCaseStatement)
          SELF:WriteKeyword(GotoCaseStatement.GotoKeywordRole)
          SELF:WriteKeyword(GotoCaseStatement.CaseKeywordRole)
          SELF:Space(TRUE)
-         gotoCaseStatement:LabelExpression:AcceptVisitor(SELF)
+         oGotoCaseStatement:LabelExpression:AcceptVisitor(SELF)
          SELF:Semicolon()
-         SELF:EndNode(gotoCaseStatement)
+         SELF:EndNode(oGotoCaseStatement)
 
-      VIRTUAL METHOD VisitGotoDefaultStatement(gotoDefaultStatement AS GotoDefaultStatement) AS VOID
+      VIRTUAL METHOD VisitGotoDefaultStatement(oGotoDefaultStatement AS GotoDefaultStatement) AS VOID
          //
-         SELF:StartNode(gotoDefaultStatement)
+         SELF:StartNode(oGotoDefaultStatement)
          SELF:WriteKeyword(GotoDefaultStatement.GotoKeywordRole)
          SELF:WriteKeyword(GotoDefaultStatement.DefaultKeywordRole)
          SELF:Semicolon()
-         SELF:EndNode(gotoDefaultStatement)
+         SELF:EndNode(oGotoDefaultStatement)
 
-      VIRTUAL METHOD VisitGotoStatement(gotoStatement AS GotoStatement) AS VOID
+      VIRTUAL METHOD VisitGotoStatement(oGotoStatement AS GotoStatement) AS VOID
          //
-         SELF:StartNode(gotoStatement)
+         SELF:StartNode(oGotoStatement)
          SELF:WriteKeyword(GotoStatement.GotoKeywordRole)
-         SELF:WriteIdentifier(gotoStatement:GetChildByRole<Identifier>(XSRoles.Identifier))
+         SELF:WriteIdentifier(oGotoStatement:GetChildByRole<Identifier>(XSRoles.Identifier))
          SELF:Semicolon()
-         SELF:EndNode(gotoStatement)
+         SELF:EndNode(oGotoStatement)
 
-      VIRTUAL METHOD VisitIdentifier(identifier AS Identifier) AS VOID
+      VIRTUAL METHOD VisitIdentifier(oIdentifier AS Identifier) AS VOID
          //
-         SELF:WriteIdentifier(identifier)
+         SELF:WriteIdentifier(oIdentifier)
 
-      VIRTUAL METHOD VisitIdentifierExpression(identifierExpression AS IdentifierExpression) AS VOID
+      VIRTUAL METHOD VisitIdentifierExpression(oIdentifierExpression AS IdentifierExpression) AS VOID
          //
-         SELF:StartNode(identifierExpression)
+         SELF:StartNode(oIdentifierExpression)
          //
-         SELF:Prefix( identifierExpression )
+         SELF:Prefix( oIdentifierExpression )
          //
-         SELF:WriteIdentifier(identifierExpression:IdentifierToken)
-         SELF:WriteTypeArguments(identifierExpression:TypeArguments)
-         SELF:EndNode(identifierExpression)
+         SELF:WriteIdentifier(oIdentifierExpression:IdentifierToken)
+         SELF:WriteTypeArguments(oIdentifierExpression:TypeArguments)
+         SELF:EndNode(oIdentifierExpression)
 
-      PRIVATE METHOD VisitIdentifierExpressionBackreference(identifierExpressionBackreference AS IdentifierExpressionBackreference) AS VOID
+      PRIVATE METHOD VisitIdentifierExpressionBackreference(oIdentifierExpressionBackreference AS IdentifierExpressionBackreference) AS VOID
          //
          SELF:WriteKeyword("identifierBackreference", NULL)
          SELF:LPar()
-         SELF:WriteIdentifier(identifierExpressionBackreference:ReferencedGroupName)
+         SELF:WriteIdentifier(oIdentifierExpressionBackreference:ReferencedGroupName)
          SELF:RPar()
 
-      VIRTUAL METHOD VisitIfElseStatement(ifElseStatement AS IfElseStatement) AS VOID
+      VIRTUAL METHOD VisitIfElseStatement(oIfElseStatement AS IfElseStatement) AS VOID
          LOCAL addParenthesis AS LOGIC
          addParenthesis := FALSE
          //
-         SELF:StartNode(ifElseStatement)
+         SELF:StartNode(oIfElseStatement)
          //SELF:WriteKeyword(IfElseStatement.IfKeywordRole)
          SELF:WriteKeyword("IF")
          SELF:Space(SELF:policy:SpaceBeforeIfParentheses)
@@ -1458,51 +1459,51 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:LPar()
          ENDIF
          SELF:Space(SELF:policy:SpacesWithinIfParentheses)
-         ifElseStatement:Condition:AcceptVisitor(SELF)
+         oIfElseStatement:Condition:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinIfParentheses)
          IF addParenthesis
             SELF:RPar()
          ENDIF
-         IF (ifElseStatement:FalseStatement:IsNull)
+         IF (oIfElseStatement:FalseStatement:IsNull)
             //
-            SELF:WriteEmbeddedStatement(ifElseStatement:TrueStatement, NewLinePlacement.SameLine)
+            SELF:WriteEmbeddedStatement(oIfElseStatement:TrueStatement, NewLinePlacement.SameLine)
          ELSE
             //
-            SELF:WriteEmbeddedStatement(ifElseStatement:TrueStatement, SELF:policy:ElseNewLinePlacement)
+            SELF:WriteEmbeddedStatement(oIfElseStatement:TrueStatement, SELF:policy:ElseNewLinePlacement)
             //SELF:WriteKeyword(IfElseStatement.ElseKeywordRole)
             SELF:WriteKeyword("ELSE")
-            IF ((ifElseStatement:FalseStatement IS IfElseStatement))
+            IF ((oIfElseStatement:FalseStatement IS IfElseStatement))
                //
                SELF:NewLine()
                SELF:writer:Indent()
-               ifElseStatement:FalseStatement:AcceptVisitor(SELF)
+               oIfElseStatement:FalseStatement:AcceptVisitor(SELF)
                SELF:writer:Unindent()
             ELSE
                //
-               SELF:WriteEmbeddedStatement(ifElseStatement:FalseStatement, NewLinePlacement.SameLine)
+               SELF:WriteEmbeddedStatement(oIfElseStatement:FalseStatement, NewLinePlacement.SameLine)
             ENDIF
          ENDIF
          SELF:WriteKeyword("ENDIF")
          SELF:NewLine()
-         SELF:EndNode(ifElseStatement)
+         SELF:EndNode(oIfElseStatement)
 
-      VIRTUAL METHOD VisitIndexerDeclaration(indexerDeclaration AS IndexerDeclaration) AS VOID
+      VIRTUAL METHOD VisitIndexerDeclaration(oIndexerDeclaration AS IndexerDeclaration) AS VOID
          //
-         SELF:StartNode(indexerDeclaration)
-         SELF:WriteAttributes(indexerDeclaration:Attributes)
-         SELF:WriteModifiers(indexerDeclaration:ModifierTokens)
+         SELF:StartNode(oIndexerDeclaration)
+         SELF:WriteAttributes(oIndexerDeclaration:Attributes)
+         SELF:WriteModifiers(oIndexerDeclaration:ModifierTokens)
          SELF:WriteKeyword("PROPERTY" )
          SELF:Space(TRUE)
-         SELF:WritePrivateImplementationType(indexerDeclaration:PrivateImplementationType)
+         SELF:WritePrivateImplementationType(oIndexerDeclaration:PrivateImplementationType)
          SELF:WriteKeyword("SELF")
          SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-         SELF:WriteCommaSeparatedListInBrackets(indexerDeclaration:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
+         SELF:WriteCommaSeparatedListInBrackets(oIndexerDeclaration:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS", NULL )
          SELF:Space(TRUE)
-         indexerDeclaration:ReturnType:AcceptVisitor(SELF)
+         oIndexerDeclaration:ReturnType:AcceptVisitor(SELF)
          SELF:OpenBrace(SELF:policy:PropertyBraceStyle)
-         FOREACH node AS AstNode IN indexerDeclaration:Children
+         FOREACH node AS AstNode IN oIndexerDeclaration:Children
             //
             IF ((node:Role == IndexerDeclaration.GetterRole) .OR. (node:Role == IndexerDeclaration.SetterRole))
                //
@@ -1514,67 +1515,67 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:WriteKeyword("PROPERTY" )
          SELF:CloseBrace(SELF:policy:PropertyBraceStyle)
          SELF:NewLine()
-         SELF:EndNode(indexerDeclaration)
+         SELF:EndNode(oIndexerDeclaration)
 
-      VIRTUAL METHOD VisitIndexerExpression(indexerExpression AS IndexerExpression) AS VOID
+      VIRTUAL METHOD VisitIndexerExpression(oIndexerExpression AS IndexerExpression) AS VOID
          //
-         SELF:StartNode(indexerExpression)
-         indexerExpression:Target:AcceptVisitor(SELF)
+         SELF:StartNode(oIndexerExpression)
+         oIndexerExpression:Target:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-         SELF:WriteCommaSeparatedListInBrackets(indexerExpression:Arguments)
-         SELF:EndNode(indexerExpression)
+         SELF:WriteCommaSeparatedListInBrackets(oIndexerExpression:Arguments)
+         SELF:EndNode(oIndexerExpression)
 
-      VIRTUAL METHOD VisitInterpolatedStringExpression(interpolatedStringExpression AS InterpolatedStringExpression) AS VOID
+      VIRTUAL METHOD VisitInterpolatedStringExpression(oInterpolatedStringExpression AS InterpolatedStringExpression) AS VOID
          //
-         SELF:StartNode(interpolatedStringExpression)
+         SELF:StartNode(oInterpolatedStringExpression)
          SELF:writer:WriteToken(InterpolatedStringExpression.OpenQuote, "$"+chr(34))
-         FOREACH content AS InterpolatedStringContent IN interpolatedStringExpression:Content
+         FOREACH oContent AS InterpolatedStringContent IN oInterpolatedStringExpression:Content
             //
-            content:AcceptVisitor(SELF)
+            oContent:AcceptVisitor(SELF)
          NEXT
          SELF:writer:WriteToken(InterpolatedStringExpression.CloseQuote, chr(34))
          SELF:isAfterSpace := FALSE
-         SELF:EndNode(interpolatedStringExpression)
+         SELF:EndNode(oInterpolatedStringExpression)
 
-      VIRTUAL METHOD VisitInterpolatedStringText(interpolatedStringText AS InterpolatedStringText) AS VOID
+      VIRTUAL METHOD VisitInterpolatedStringText(oInterpolatedStringText AS InterpolatedStringText) AS VOID
          //
-         SELF:StartNode(interpolatedStringText)
-         SELF:writer:WritePrimitiveValue(TextWriterTokenWriter.ConvertString(interpolatedStringText:Text))
-         SELF:EndNode(interpolatedStringText)
+         SELF:StartNode(oInterpolatedStringText)
+         SELF:writer:WritePrimitiveValue(TextWriterTokenWriter.ConvertString(oInterpolatedStringText:Text))
+         SELF:EndNode(oInterpolatedStringText)
 
-      VIRTUAL METHOD VisitInterpolation(interpolation AS Interpolation) AS VOID
+      VIRTUAL METHOD VisitInterpolation(oInterpolation AS Interpolation) AS VOID
          //
-         SELF:StartNode(interpolation)
+         SELF:StartNode(oInterpolation)
          SELF:writer:WriteToken(Interpolation.LBrace, "{")
-         interpolation:Expression:AcceptVisitor(SELF)
-         IF (interpolation:Suffix != NULL)
+         oInterpolation:Expression:AcceptVisitor(SELF)
+         IF (oInterpolation:Suffix != NULL)
             //
             SELF:writer:WriteToken(NULL, ":")
-            SELF:writer:WritePrimitiveValue( interpolation:Suffix)
+            SELF:writer:WritePrimitiveValue( oInterpolation:Suffix)
          ENDIF
          SELF:writer:WriteToken(Interpolation.RBrace, "}")
-         SELF:EndNode(interpolation)
+         SELF:EndNode(oInterpolation)
 
-      VIRTUAL METHOD VisitInvocationExpression(invocationExpression AS InvocationExpression) AS VOID
-         LOCAL expression AS MemberReferenceExpression
+      VIRTUAL METHOD VisitInvocationExpression(oInvocationExpression AS InvocationExpression) AS VOID
+         LOCAL oExpression AS MemberReferenceExpression
          //
-         SELF:StartNode(invocationExpression)
+         SELF:StartNode(oInvocationExpression)
          //
-         SELF:Prefix( invocationExpression )
+         SELF:Prefix( oInvocationExpression )
          //
-         invocationExpression:Target:AcceptVisitor(SELF)
+         oInvocationExpression:Target:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)invocationExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
-         IF (! (invocationExpression:Parent IS MemberReferenceExpression) )
-            expression := invocationExpression:Target ASTYPE MemberReferenceExpression
-            IF ( expression != NULL)
-               IF (SELF:GetCallChainLengthLimited(expression) >= 3)
+         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oInvocationExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
+         IF (! (oInvocationExpression:Parent IS MemberReferenceExpression) )
+            oExpression := oInvocationExpression:Target ASTYPE MemberReferenceExpression
+            IF ( oExpression != NULL)
+               IF (SELF:GetCallChainLengthLimited(oExpression) >= 3)
                   //
                   SELF:writer:Unindent()
                ENDIF
             ENDIF
          ENDIF
-         SELF:EndNode(invocationExpression)
+         SELF:EndNode(oInvocationExpression)
 
       VIRTUAL METHOD VisitInvocationType( invocationType AS InvocationAstType ) AS VOID
          SELF:StartNode(invocationType)
@@ -1584,28 +1585,28 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          WriteToken(Roles.RPar)
          SELF:EndNode(invocationType)
 
-      VIRTUAL METHOD VisitIsExpression(isExpression AS IsExpression) AS VOID
+      VIRTUAL METHOD VisitIsExpression(oIsExpression AS IsExpression) AS VOID
          //
-         SELF:StartNode(isExpression)
-         isExpression:Expression:AcceptVisitor(SELF)
+         SELF:StartNode(oIsExpression)
+         oIsExpression:Expression:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword("IS")
          SELF:Space(TRUE)
-         isExpression:@@Type:AcceptVisitor(SELF)
-         SELF:EndNode(isExpression)
+         oIsExpression:@@Type:AcceptVisitor(SELF)
+         SELF:EndNode(oIsExpression)
 
-      VIRTUAL METHOD VisitLabelStatement(labelStatement AS LabelStatement) AS VOID
+      VIRTUAL METHOD VisitLabelStatement(oLabelStatement AS LabelStatement) AS VOID
          LOCAL flag AS LOGIC
          LOCAL node AS AstNode
          //
-         SELF:StartNode(labelStatement)
-         SELF:WriteIdentifier(labelStatement:GetChildByRole<Identifier>(XSRoles.Identifier))
+         SELF:StartNode(oLabelStatement)
+         SELF:WriteIdentifier(oLabelStatement:GetChildByRole<Identifier>(XSRoles.Identifier))
          SELF:WriteToken(".")
          flag := FALSE
-         node := labelStatement:NextSibling
+         node := oLabelStatement:NextSibling
          WHILE node != NULL
             //
-            IF node:Role == labelStatement:Role
+            IF node:Role == oLabelStatement:Role
                //
                flag := TRUE
             ENDIF
@@ -1616,232 +1617,232 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteToken(XSRoles.Semicolon)
          ENDIF
          SELF:NewLine()
-         SELF:EndNode(labelStatement)
+         SELF:EndNode(oLabelStatement)
 
-      VIRTUAL METHOD VisitLambdaExpression(lambdaExpression AS LambdaExpression) AS VOID
+      VIRTUAL METHOD VisitLambdaExpression(oLambdaExpression AS LambdaExpression) AS VOID
          //
-         SELF:StartNode(lambdaExpression)
-         IF (lambdaExpression:IsAsync)
+         SELF:StartNode(oLambdaExpression)
+         IF (oLambdaExpression:IsAsync)
             //
             SELF:WriteKeyword(LambdaExpression.AsyncModifierRole)
             SELF:Space(TRUE)
          ENDIF
          SELF:WriteToken( "{" )
-         IF (SELF:LambdaNeedsParenthesis(lambdaExpression))
-            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)lambdaExpression:Parameters)
+         IF (SELF:LambdaNeedsParenthesis(oLambdaExpression))
+            SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oLambdaExpression:Parameters)
          ELSE
-            System.Linq.Enumerable.Single<ParameterDeclaration>(lambdaExpression:Parameters):AcceptVisitor(SELF)
+            System.Linq.Enumerable.Single<ParameterDeclaration>(oLambdaExpression:Parameters):AcceptVisitor(SELF)
          ENDIF
          SELF:Space(TRUE)
          SELF:WriteToken(XSRoles.Arrow)
-         IF ((lambdaExpression:Body IS BlockStatement))
+         IF ((oLambdaExpression:Body IS BlockStatement))
             //
-            SELF:WriteBlock((BlockStatement)lambdaExpression:Body , SELF:policy:AnonymousMethodBraceStyle)
+            SELF:WriteBlock((BlockStatement)oLambdaExpression:Body , SELF:policy:AnonymousMethodBraceStyle)
          ELSE
             //
             SELF:Space(TRUE)
-            lambdaExpression:Body:AcceptVisitor(SELF)
+            oLambdaExpression:Body:AcceptVisitor(SELF)
          ENDIF
          SELF:WriteToken( "}" )
-         SELF:EndNode(lambdaExpression)
+         SELF:EndNode(oLambdaExpression)
 
-      VIRTUAL METHOD VisitLocalFunctionDeclarationStatement(localFunctionDeclarationStatement AS LocalFunctionDeclarationStatement ) AS VOID
-         SELF:StartNode(localFunctionDeclarationStatement)
-         //			SELF:WriteModifiers(localFunctionDeclarationStatement:ModifierTokens)
-         //			localFunctionDeclarationStatement:ReturnType:AcceptVisitor(SELF)
+      VIRTUAL METHOD VisitLocalFunctionDeclarationStatement(oLocalFunctionDeclarationStatement AS LocalFunctionDeclarationStatement ) AS VOID
+         SELF:StartNode(oLocalFunctionDeclarationStatement)
+         //			SELF:WriteModifiers(oLocalFunctionDeclarationStatement:ModifierTokens)
+         //			oLocalFunctionDeclarationStatement:ReturnType:AcceptVisitor(SELF)
          //			SELF:Space()
-         //			SELF:WriteIdentifier(localFunctionDeclarationStatement:NameToken)
-         //			SELF:WriteTypeParameters(localFunctionDeclarationStatement:TypeParameters)
+         //			SELF:WriteIdentifier(oLocalFunctionDeclarationStatement:NameToken)
+         //			SELF:WriteTypeParameters(oLocalFunctionDeclarationStatement:TypeParameters)
          //			SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-         //			SELF:WriteCommaSeparatedListInParenthesis(localFunctionDeclarationStatement:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
-         //			FOREACH constraint AS Constraint IN localFunctionDeclarationStatement:Constraints
-         //				constraint:AcceptVisitor(SELF)
+         //			SELF:WriteCommaSeparatedListInParenthesis(oLocalFunctionDeclarationStatement:Parameters, SELF:policy:SpaceWithinMethodDeclarationParentheses)
+         //			FOREACH oConstraint AS Constraint IN oLocalFunctionDeclarationStatement:Constraints
+         //				oConstraint:AcceptVisitor(SELF)
          //			NEXT
-         //			SELF:WriteMethodBody(localFunctionDeclarationStatement:Body, SELF:policy:MethodBraceStyle)
-         localFunctionDeclarationStatement:Declaration:AcceptVisitor(SELF)
-         SELF:EndNode(localFunctionDeclarationStatement)
+         //			SELF:WriteMethodBody(oLocalFunctionDeclarationStatement:Body, SELF:policy:MethodBraceStyle)
+         oLocalFunctionDeclarationStatement:Declaration:AcceptVisitor(SELF)
+         SELF:EndNode(oLocalFunctionDeclarationStatement)
 
 
-      VIRTUAL METHOD VisitLockStatement(lockStatement AS LockStatement) AS VOID
+      VIRTUAL METHOD VisitLockStatement(oLockStatement AS LockStatement) AS VOID
          //
-         SELF:StartNode(lockStatement)
+         SELF:StartNode(oLockStatement)
          SELF:WriteKeyword("BEGIN")
          SELF:Space(TRUE)
          SELF:WriteKeyword("LOCK")
          SELF:Space(TRUE)
-         lockStatement:Expression:AcceptVisitor(SELF)
+         oLockStatement:Expression:AcceptVisitor(SELF)
          SELF:NewLine()
-         SELF:WriteEmbeddedStatement(lockStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         SELF:WriteEmbeddedStatement(oLockStatement:EmbeddedStatement, NewLinePlacement.NewLine)
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
          SELF:WriteKeyword("LOCK")
-         SELF:EndNode(lockStatement)
+         SELF:EndNode(oLockStatement)
 
-      VIRTUAL METHOD VisitMemberReferenceExpression(memberReferenceExpression AS MemberReferenceExpression) AS VOID
+      VIRTUAL METHOD VisitMemberReferenceExpression(oMemberReferenceExpression AS MemberReferenceExpression) AS VOID
          //
-         SELF:StartNode(memberReferenceExpression)
-         memberReferenceExpression:Target:AcceptVisitor(SELF)
-         SELF:InsertNewLineWhenInMethodCallChain(memberReferenceExpression)
-         IF ( ( memberReferenceExpression:Target ASTYPE TypeReferenceExpression ) != NULL )
+         SELF:StartNode(oMemberReferenceExpression)
+         oMemberReferenceExpression:Target:AcceptVisitor(SELF)
+         SELF:InsertNewLineWhenInMethodCallChain(oMemberReferenceExpression)
+         IF ( ( oMemberReferenceExpression:Target ASTYPE TypeReferenceExpression ) != NULL )
             SELF:WriteToken("." )
          ELSE
             SELF:WriteToken(":")
          ENDIF
-         SELF:WriteIdentifier(memberReferenceExpression:MemberNameToken)
-         SELF:WriteTypeArguments(memberReferenceExpression:TypeArguments)
-         SELF:EndNode(memberReferenceExpression)
+         SELF:WriteIdentifier(oMemberReferenceExpression:MemberNameToken)
+         SELF:WriteTypeArguments(oMemberReferenceExpression:TypeArguments)
+         SELF:EndNode(oMemberReferenceExpression)
 
-      VIRTUAL METHOD VisitMemberType(memberType AS MemberType) AS VOID
+      VIRTUAL METHOD VisitMemberType(oMemberType AS MemberType) AS VOID
          //
-         SELF:StartNode(memberType)
-         memberType:Target:AcceptVisitor(SELF)
-         IF (memberType:IsDoubleColon)
+         SELF:StartNode(oMemberType)
+         oMemberType:Target:AcceptVisitor(SELF)
+         IF (oMemberType:IsDoubleColon)
             //
             SELF:WriteToken("::")
          ELSE
             //
             SELF:WriteToken(".")
          ENDIF
-         SELF:WriteIdentifier(memberType:MemberNameToken)
-         SELF:WriteTypeArguments(memberType:TypeArguments)
-         SELF:EndNode(memberType)
+         SELF:WriteIdentifier(oMemberType:MemberNameToken)
+         SELF:WriteTypeArguments(oMemberType:TypeArguments)
+         SELF:EndNode(oMemberType)
 
-      VIRTUAL METHOD VisitMethodDeclaration(methodDeclaration AS MethodDeclaration) AS VOID
+      VIRTUAL METHOD VisitMethodDeclaration(oMethodDeclaration AS MethodDeclaration) AS VOID
          // Reset Method Call Type
          SELF:isClipper := FALSE
          //
-         SELF:StartNode(methodDeclaration)
+         SELF:StartNode(oMethodDeclaration)
          SELF:inMethodAttributes := ClipperState.Attribute
          SELF:paramsList := List<STRING>{}
-         SELF:WriteAttributes(methodDeclaration:Attributes)
+         SELF:WriteAttributes(oMethodDeclaration:Attributes)
          SELF:inMethodAttributes := ClipperState.Code
-         SELF:WriteModifiers(methodDeclaration:ModifierTokens)
+         SELF:WriteModifiers(oMethodDeclaration:ModifierTokens)
          SELF:Space(TRUE)
          //
          SELF:WriteKeyword("METHOD", NULL )
          SELF:Space(TRUE)
          //
-         SELF:WritePrivateImplementationType(methodDeclaration:PrivateImplementationType)
-         SELF:WriteIdentifier(methodDeclaration:NameToken)
-         SELF:WriteTypeParameters(methodDeclaration:TypeParameters)
+         SELF:WritePrivateImplementationType(oMethodDeclaration:PrivateImplementationType)
+         SELF:WriteIdentifier(oMethodDeclaration:NameToken)
+         SELF:WriteTypeParameters(oMethodDeclaration:TypeParameters)
          SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)methodDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oMethodDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
          //
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS", NULL )
          SELF:Space(TRUE)
          SELF:inMethodAttributes := ClipperState.ReturnType
-         methodDeclaration:ReturnType:AcceptVisitor(SELF)
+         oMethodDeclaration:ReturnType:AcceptVisitor(SELF)
          //
-         FOREACH constraint AS Constraint IN methodDeclaration:Constraints
+         FOREACH oConstraint AS Constraint IN oMethodDeclaration:Constraints
             //
-            constraint:AcceptVisitor(SELF)
+            oConstraint:AcceptVisitor(SELF)
          NEXT
          //
          SELF:inMethodAttributes := ClipperState.Code
          IF ( SELF:isClipper )
-            SELF:paramsList:Insert( 0, methodDeclaration:NameToken:Name)
+            SELF:paramsList:Insert( 0, oMethodDeclaration:NameToken:Name)
          ENDIF
          // Save the current/Declaring type
-         SELF:currentType := SELF:GetElementType( methodDeclaration )
+         SELF:currentType := SELF:GetElementType( oMethodDeclaration )
          //
-         SELF:WriteMethodBody(methodDeclaration:Body, SELF:policy:MethodBraceStyle)
+         SELF:WriteMethodBody(oMethodDeclaration:Body, SELF:policy:MethodBraceStyle)
          SELF:currentType := NULL
          SELF:inMethodAttributes := ClipperState.None
-         SELF:EndNode(methodDeclaration)
+         SELF:EndNode(oMethodDeclaration)
 
-      VIRTUAL METHOD VisitNamedArgumentExpression(namedArgumentExpression AS NamedArgumentExpression) AS VOID
+      VIRTUAL METHOD VisitNamedArgumentExpression(oNamedArgumentExpression AS NamedArgumentExpression) AS VOID
          //
-         SELF:StartNode(namedArgumentExpression)
-         SELF:WriteIdentifier(namedArgumentExpression:NameToken)
+         SELF:StartNode(oNamedArgumentExpression)
+         SELF:WriteIdentifier(oNamedArgumentExpression:NameToken)
          SELF:WriteToken(":")
          SELF:Space(TRUE)
-         namedArgumentExpression:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(namedArgumentExpression)
+         oNamedArgumentExpression:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oNamedArgumentExpression)
 
-      VIRTUAL METHOD VisitNamedExpression(namedExpression AS NamedExpression) AS VOID
+      VIRTUAL METHOD VisitNamedExpression(oNamedExpression AS NamedExpression) AS VOID
          //
-         SELF:StartNode(namedExpression)
-         SELF:WriteIdentifier(namedExpression:NameToken)
+         SELF:StartNode(oNamedExpression)
+         SELF:WriteIdentifier(oNamedExpression:NameToken)
          SELF:Space(TRUE)
          SELF:WriteToken(":=")
          SELF:Space(TRUE)
-         namedExpression:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(namedExpression)
+         oNamedExpression:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oNamedExpression)
 
-      PRIVATE METHOD VisitNamedNode(namedNode AS NamedNode) AS VOID
+      PRIVATE METHOD VisitNamedNode(oNamedNode AS NamedNode) AS VOID
          //
-         IF (! String.IsNullOrEmpty(namedNode:GroupName))
+         IF (! String.IsNullOrEmpty(oNamedNode:GroupName))
             //
-            SELF:WriteIdentifier(namedNode:GroupName)
+            SELF:WriteIdentifier(oNamedNode:GroupName)
             SELF:WriteToken(":")
          ENDIF
-         SELF:VisitNodeInPattern(namedNode:ChildNode)
+         SELF:VisitNodeInPattern(oNamedNode:ChildNode)
 
-      VIRTUAL METHOD VisitNamespaceDeclaration(namespaceDeclaration AS NamespaceDeclaration) AS VOID
+      VIRTUAL METHOD VisitNamespaceDeclaration(oNamespaceDeclaration AS NamespaceDeclaration) AS VOID
          //
-         SELF:StartNode(namespaceDeclaration)
+         SELF:StartNode(oNamespaceDeclaration)
          SELF:WriteKeyword("BEGIN")
          SELF:Space(TRUE)
          SELF:WriteKeyword("NAMESPACE")
-         namespaceDeclaration:NamespaceName:AcceptVisitor(SELF)
+         oNamespaceDeclaration:NamespaceName:AcceptVisitor(SELF)
          SELF:OpenBrace(SELF:policy:NamespaceBraceStyle)
-         FOREACH node AS AstNode IN namespaceDeclaration:Members
+         FOREACH node AS AstNode IN oNamespaceDeclaration:Members
             //
             node:AcceptVisitor(SELF)
             SELF:MaybeNewLinesAfterUsings(node)
          NEXT
          SELF:CloseBrace(SELF:policy:NamespaceBraceStyle)
-         SELF:OptionalSemicolon(namespaceDeclaration:LastChild)
+         SELF:OptionalSemicolon(oNamespaceDeclaration:LastChild)
          SELF:NewLine()
-         SELF:EndNode(namespaceDeclaration)
+         SELF:EndNode(oNamespaceDeclaration)
 
-         //VIRTUAL METHOD VisitNewLine(newLineNode AS NewLineNode) AS VOID
+         //VIRTUAL METHOD VisitNewLine(oNewLineNode AS NewLineNode) AS VOID
 
 
-      PRIVATE METHOD VisitNodeInPattern(childNode AS INode) AS VOID
+      PRIVATE METHOD VisitNodeInPattern(oChildNode AS INode) AS VOID
          //
-         IF ((childNode IS AstNode))
+         IF ((oChildNode IS AstNode))
             //
-            ((AstNode)childNode ):AcceptVisitor(SELF)
+            ((AstNode)oChildNode ):AcceptVisitor(SELF)
          ELSE
             //
-            IF ((childNode IS IdentifierExpressionBackreference))
+            IF ((oChildNode IS IdentifierExpressionBackreference))
                //
-               SELF:VisitIdentifierExpressionBackreference((IdentifierExpressionBackreference)childNode )
+               SELF:VisitIdentifierExpressionBackreference((IdentifierExpressionBackreference)oChildNode )
             ELSE
                //
-               IF ((childNode IS Choice))
+               IF ((oChildNode IS Choice))
                   //
-                  SELF:VisitChoice((Choice)childNode )
+                  SELF:VisitChoice((Choice)oChildNode )
                ELSE
                   //
-                  IF ((childNode IS AnyNode))
+                  IF ((oChildNode IS AnyNode))
                      //
-                     SELF:VisitAnyNode((AnyNode)childNode )
+                     SELF:VisitAnyNode((AnyNode)oChildNode )
                   ELSE
                      //
-                     IF ((childNode IS Backreference))
+                     IF ((oChildNode IS Backreference))
                         //
-                        SELF:VisitBackreference((Backreference)childNode )
+                        SELF:VisitBackreference((Backreference)oChildNode )
                      ELSE
                         //
-                        IF ((childNode IS NamedNode))
+                        IF ((oChildNode IS NamedNode))
                            //
-                           SELF:VisitNamedNode((NamedNode)childNode )
+                           SELF:VisitNamedNode((NamedNode)oChildNode )
                         ELSE
                            //
-                           IF ((childNode IS OptionalNode))
+                           IF ((oChildNode IS OptionalNode))
                               //
-                              SELF:VisitOptionalNode((OptionalNode)childNode )
+                              SELF:VisitOptionalNode((OptionalNode)oChildNode )
                            ELSE
                               //
-                              IF ((childNode IS Repeat))
+                              IF ((oChildNode IS Repeat))
                                  //
-                                 SELF:VisitRepeat((Repeat)childNode )
+                                 SELF:VisitRepeat((Repeat)oChildNode )
                               ELSE
                                  //
-                                 TextWriterTokenWriter.PrintPrimitiveValue(childNode)
+                                 TextWriterTokenWriter.PrintPrimitiveValue(oChildNode)
                               ENDIF
                            ENDIF
                         ENDIF
@@ -1851,57 +1852,57 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
          ENDIF
 
-      VIRTUAL METHOD VisitNullReferenceExpression(nullReferenceExpression AS NullReferenceExpression) AS VOID
+      VIRTUAL METHOD VisitNullReferenceExpression(oNullReferenceExpression AS NullReferenceExpression) AS VOID
          //
-         SELF:StartNode(nullReferenceExpression)
+         SELF:StartNode(oNullReferenceExpression)
          SELF:writer:WritePrimitiveValue(NULL)
          SELF:isAfterSpace := FALSE
-         SELF:EndNode(nullReferenceExpression)
+         SELF:EndNode(oNullReferenceExpression)
 
-      VIRTUAL METHOD VisitObjectCreateExpression(objectCreateExpression AS ObjectCreateExpression) AS VOID
+      VIRTUAL METHOD VisitObjectCreateExpression(oObjectCreateExpression AS ObjectCreateExpression) AS VOID
          LOCAL useBraces AS LOGIC
          //
-         SELF:StartNode(objectCreateExpression)
+         SELF:StartNode(oObjectCreateExpression)
          //SELF:WriteKeyword(ObjectCreateExpression.NewKeywordRole)
-         objectCreateExpression:@@Type:AcceptVisitor(SELF)
-         useBraces := (System.Linq.Enumerable.Any<Expression>(objectCreateExpression:Arguments) .OR. objectCreateExpression:Initializer:IsNull)
-         IF (! objectCreateExpression:LParToken:IsNull)
+         oObjectCreateExpression:@@Type:AcceptVisitor(SELF)
+         useBraces := (System.Linq.Enumerable.Any<Expression>(oObjectCreateExpression:Arguments) .OR. oObjectCreateExpression:Initializer:IsNull)
+         IF (! oObjectCreateExpression:LParToken:IsNull)
             //
             useBraces := TRUE
          ENDIF
          IF (useBraces)
             //
             SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-            SELF:WriteCommaSeparatedListInBraces((System.Collections.Generic.IEnumerable<AstNode>)objectCreateExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
+            SELF:WriteCommaSeparatedListInBraces((System.Collections.Generic.IEnumerable<AstNode>)oObjectCreateExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
          ELSE
             SELF:LBrace()
             SELF:Space(SELF:policy:SpaceWithinMethodCallParentheses)
             SELF:RBrace()
          ENDIF
-         IF (!objectCreateExpression:Initializer:IsNull)
+         IF (!oObjectCreateExpression:Initializer:IsNull)
             SELF:WriteToken(";")
-            objectCreateExpression:Initializer:AcceptVisitor(SELF)
+            oObjectCreateExpression:Initializer:AcceptVisitor(SELF)
          ENDIF
-         SELF:EndNode(objectCreateExpression)
+         SELF:EndNode(oObjectCreateExpression)
 
-      VIRTUAL METHOD VisitOperatorDeclaration(operatorDeclaration AS OperatorDeclaration) AS VOID
+      VIRTUAL METHOD VisitOperatorDeclaration(oOperatorDeclaration AS OperatorDeclaration) AS VOID
          LOCAL needReturnType AS LOGIC
          //
          needReturnType := FALSE
-         SELF:StartNode(operatorDeclaration)
-         SELF:WriteAttributes(operatorDeclaration:Attributes)
-         SELF:WriteModifiers(operatorDeclaration:ModifierTokens)
+         SELF:StartNode(oOperatorDeclaration)
+         SELF:WriteAttributes(oOperatorDeclaration:Attributes)
+         SELF:WriteModifiers(oOperatorDeclaration:ModifierTokens)
          //
          SELF:Space(TRUE)
          SELF:WriteKeyword(OperatorDeclaration.OperatorKeywordRole)
          SELF:Space(TRUE)
          //
-         IF (operatorDeclaration:OperatorType == OperatorType.Explicit)
+         IF (oOperatorDeclaration:OperatorType == OperatorType.Explicit)
             //
             SELF:WriteKeyword(OperatorDeclaration.ExplicitRole)
          ELSE
             //
-            IF (operatorDeclaration:OperatorType == OperatorType.Implicit)
+            IF (oOperatorDeclaration:OperatorType == OperatorType.Implicit)
                //
                SELF:WriteKeyword(OperatorDeclaration.ImplicitRole)
             ELSE
@@ -1911,71 +1912,71 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          ENDIF
          IF needReturnType
             //
-            SELF:WriteToken(OperatorDeclaration.GetToken(operatorDeclaration:OperatorType), OperatorDeclaration.GetRole(operatorDeclaration:OperatorType))
+            SELF:WriteToken(OperatorDeclaration.GetToken(oOperatorDeclaration:OperatorType), OperatorDeclaration.GetRole(oOperatorDeclaration:OperatorType))
          ENDIF
          SELF:Space(SELF:policy:SpaceBeforeMethodDeclarationParentheses)
-         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)operatorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
+         SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oOperatorDeclaration:Parameters , SELF:policy:SpaceWithinMethodDeclarationParentheses)
          //
          SELF:Space(TRUE)
          SELF:WriteKeyword( "AS" )
          SELF:Space(TRUE)
-         operatorDeclaration:ReturnType:AcceptVisitor(SELF)
+         oOperatorDeclaration:ReturnType:AcceptVisitor(SELF)
          //
-         SELF:WriteMethodBody(operatorDeclaration:Body, SELF:policy:MethodBraceStyle)
+         SELF:WriteMethodBody(oOperatorDeclaration:Body, SELF:policy:MethodBraceStyle)
          //
          SELF:WriteKeyword( "END" )
          SELF:Space(TRUE)
          SELF:WriteKeyword( "OPERATOR" )
          SELF:NewLine()
-         SELF:EndNode(operatorDeclaration)
+         SELF:EndNode(oOperatorDeclaration)
 
-      PRIVATE METHOD VisitOptionalNode(optionalNode AS OptionalNode) AS VOID
+      PRIVATE METHOD VisitOptionalNode(oOptionalNode AS OptionalNode) AS VOID
          //
          SELF:WriteKeyword("optional", NULL)
          SELF:LPar()
-         SELF:VisitNodeInPattern(optionalNode:ChildNode)
+         SELF:VisitNodeInPattern(oOptionalNode:ChildNode)
          SELF:RPar()
 
-      VIRTUAL METHOD VisitOutVarDeclarationExpression(outVarDeclarationExpression AS OutVarDeclarationExpression) AS VOID
+      VIRTUAL METHOD VisitOutVarDeclarationExpression(oOutVarDeclarationExpression AS OutVarDeclarationExpression) AS VOID
          //
-         SELF:StartNode(outVarDeclarationExpression)
+         SELF:StartNode(oOutVarDeclarationExpression)
          SELF:Space(TRUE)
          SELF:WriteKeyword("OUT")
          SELF:Space(TRUE)
-         outVarDeclarationExpression:Variable:AcceptVisitor(SELF)
+         oOutVarDeclarationExpression:Variable:AcceptVisitor(SELF)
          SELF:Space(TRUE)
 
-         SELF:EndNode(outVarDeclarationExpression)
+         SELF:EndNode(oOutVarDeclarationExpression)
 
-      VIRTUAL METHOD VisitParameterDeclaration(parameterDeclaration AS ParameterDeclaration) AS VOID
+      VIRTUAL METHOD VisitParameterDeclaration(oParameterDeclaration AS ParameterDeclaration) AS VOID
          //
-         SELF:StartNode(parameterDeclaration)
-         SELF:WriteAttributes(parameterDeclaration:Attributes)
+         SELF:StartNode(oParameterDeclaration)
+         SELF:WriteAttributes(oParameterDeclaration:Attributes)
          //
-         IF ( parameterDeclaration:HasThisModifier )
+         IF ( oParameterDeclaration:HasThisModifier )
             //:ParameterModifier == ParameterModifier.This)
             //
             SELF:WriteKeyword("SELF")
             SELF:Space(TRUE)
          ENDIF
          //
-         IF (! String.IsNullOrEmpty(parameterDeclaration:Name))
+         IF (! String.IsNullOrEmpty(oParameterDeclaration:Name))
             //
-            SELF:WriteIdentifier(parameterDeclaration:NameToken)
+            SELF:WriteIdentifier(oParameterDeclaration:NameToken)
          ENDIF
-         IF (! parameterDeclaration:DefaultExpression:IsNull)
+         IF (! oParameterDeclaration:DefaultExpression:IsNull)
             //
             SELF:Space()
             SELF:WriteToken(":=")
             SELF:Space()
-            parameterDeclaration:DefaultExpression:AcceptVisitor(SELF)
+            oParameterDeclaration:DefaultExpression:AcceptVisitor(SELF)
          ENDIF
          //
          SELF:Space()
-         IF parameterDeclaration:IsParams
+         IF oParameterDeclaration:IsParams
             SELF:WriteKeyword("PARAMS")
          ELSE
-            SWITCH parameterDeclaration:ParameterModifier
+            SWITCH oParameterDeclaration:ParameterModifier
             CASE ReferenceKind.Ref
                //
                SELF:WriteKeyword("REF")
@@ -1994,101 +1995,101 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             END SWITCH
          ENDIF
          SELF:Space(TRUE)
-         parameterDeclaration:@@Type:AcceptVisitor(SELF)
+         oParameterDeclaration:@@Type:AcceptVisitor(SELF)
          //
-         IF (! parameterDeclaration:@@Type:IsNull .AND. ! String.IsNullOrEmpty(parameterDeclaration:Name))
+         IF (! oParameterDeclaration:@@Type:IsNull .AND. ! String.IsNullOrEmpty(oParameterDeclaration:Name))
             //
             SELF:Space(TRUE)
          ENDIF
 
 
-         SELF:EndNode(parameterDeclaration)
+         SELF:EndNode(oParameterDeclaration)
 
-      VIRTUAL METHOD VisitParenthesizedExpression(parenthesizedExpression AS ParenthesizedExpression) AS VOID
+      VIRTUAL METHOD VisitParenthesizedExpression(oParenthesizedExpression AS ParenthesizedExpression) AS VOID
          //
-         SELF:StartNode(parenthesizedExpression)
+         SELF:StartNode(oParenthesizedExpression)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinParentheses)
-         parenthesizedExpression:Expression:AcceptVisitor(SELF)
+         oParenthesizedExpression:Expression:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinParentheses)
          SELF:RPar()
-         SELF:EndNode(parenthesizedExpression)
+         SELF:EndNode(oParenthesizedExpression)
 
       VIRTUAL METHOD VisitParenthesizedVariableDesignation( parenthesizedVariableDesignation AS ParenthesizedVariableDesignation ) AS VOID
 
-      VIRTUAL METHOD VisitPatternPlaceholder(placeholder AS AstNode, pattern AS Pattern) AS VOID
+      VIRTUAL METHOD VisitPatternPlaceholder(oPlaceholder AS AstNode, oPattern AS Pattern) AS VOID
          //
-         SELF:StartNode(placeholder)
-         SELF:VisitNodeInPattern(pattern)
-         SELF:EndNode(placeholder)
+         SELF:StartNode(oPlaceholder)
+         SELF:VisitNodeInPattern(oPattern)
+         SELF:EndNode(oPlaceholder)
 
-      VIRTUAL METHOD VisitPointerReferenceExpression(pointerReferenceExpression AS PointerReferenceExpression) AS VOID
+      VIRTUAL METHOD VisitPointerReferenceExpression(oPointerReferenceExpression AS PointerReferenceExpression) AS VOID
          //
-         SELF:StartNode(pointerReferenceExpression)
-         pointerReferenceExpression:Target:AcceptVisitor(SELF)
+         SELF:StartNode(oPointerReferenceExpression)
+         oPointerReferenceExpression:Target:AcceptVisitor(SELF)
          SELF:WriteToken(PointerReferenceExpression.ArrowRole)
-         SELF:WriteIdentifier(pointerReferenceExpression:MemberNameToken)
-         SELF:WriteTypeArguments(pointerReferenceExpression:TypeArguments)
-         SELF:EndNode(pointerReferenceExpression)
+         SELF:WriteIdentifier(oPointerReferenceExpression:MemberNameToken)
+         SELF:WriteTypeArguments(oPointerReferenceExpression:TypeArguments)
+         SELF:EndNode(oPointerReferenceExpression)
 
-      VIRTUAL METHOD VisitPreProcessorDirective(preProcessorDirective AS PreProcessorDirective) AS VOID
+      VIRTUAL METHOD VisitPreProcessorDirective(oPreProcessorDirective AS PreProcessorDirective) AS VOID
          //
-         SELF:writer:StartNode(preProcessorDirective)
-         SELF:writer:WritePreProcessorDirective(preProcessorDirective:@@Type, preProcessorDirective:Argument)
-         SELF:writer:EndNode(preProcessorDirective)
+         SELF:writer:StartNode(oPreProcessorDirective)
+         SELF:writer:WritePreProcessorDirective(oPreProcessorDirective:@@Type, oPreProcessorDirective:Argument)
+         SELF:writer:EndNode(oPreProcessorDirective)
 
-      VIRTUAL METHOD VisitPrimitiveExpression(primitiveExpression AS PrimitiveExpression) AS VOID
+      VIRTUAL METHOD VisitPrimitiveExpression(oPrimitiveExpression AS PrimitiveExpression) AS VOID
          //
-         SELF:StartNode(primitiveExpression)
-         //			SELF:writer:WritePrimitiveValue(primitiveExpression:Value, primitiveExpression:UnsafeLiteralValue)
+         SELF:StartNode(oPrimitiveExpression)
+         //			SELF:writer:WritePrimitiveValue(oPrimitiveExpression:Value, oPrimitiveExpression:UnsafeLiteralValue)
          //			// Store Parameters Name
          //			IF ( SELF:inMethodAttributes == ClipperState.Attribute) .AND. SELF:isClipper
-         //				SELF:paramsList:Add( primitiveExpression:Value:ToString() )
+         //				SELF:paramsList:Add( oPrimitiveExpression:Value:ToString() )
          //			ENDIF
          //			//
-         SELF:writer:WritePrimitiveValue(primitiveExpression:Value, primitiveExpression:Format )
+         SELF:writer:WritePrimitiveValue(oPrimitiveExpression:Value, oPrimitiveExpression:Format )
          SELF:isAfterSpace := FALSE
-         SELF:EndNode(primitiveExpression)
+         SELF:EndNode(oPrimitiveExpression)
 
-      VIRTUAL METHOD VisitPrimitiveType(primitiveType AS PrimitiveType) AS VOID
+      VIRTUAL METHOD VisitPrimitiveType(oPrimitiveType AS PrimitiveType) AS VOID
          //
-         SELF:StartNode(primitiveType)
-         SELF:writer:WritePrimitiveType(primitiveType:Keyword)
+         SELF:StartNode(oPrimitiveType)
+         SELF:writer:WritePrimitiveType(oPrimitiveType:Keyword)
          IF SELF:isClipper .AND. ( SELF:inMethodAttributes==ClipperState.ReturnType )
             // If so, we have visiting the return Type
-            SELF:paramsList:Insert( 0, primitiveType:Keyword)
+            SELF:paramsList:Insert( 0, oPrimitiveType:Keyword)
          ENDIF
          SELF:isAfterSpace := FALSE
-         SELF:EndNode(primitiveType)
+         SELF:EndNode(oPrimitiveType)
 
-      VIRTUAL METHOD VisitPropertyDeclaration(propertyDeclaration AS PropertyDeclaration) AS VOID
+      VIRTUAL METHOD VisitPropertyDeclaration(oPropertyDeclaration AS PropertyDeclaration) AS VOID
          LOCAL bodyStarted := FALSE AS LOGIC
          LOCAL bEmptyGet, bEmptySet AS LOGIC
          //
-         SELF:StartNode(propertyDeclaration)
-         SELF:WriteAttributes(propertyDeclaration:Attributes)
-         SELF:WriteModifiers(propertyDeclaration:ModifierTokens)
+         SELF:StartNode(oPropertyDeclaration)
+         SELF:WriteAttributes(oPropertyDeclaration:Attributes)
+         SELF:WriteModifiers(oPropertyDeclaration:ModifierTokens)
          SELF:WriteKeyword("PROPERTY" )
          SELF:Space(TRUE)
-         SELF:WritePrivateImplementationType(propertyDeclaration:PrivateImplementationType)
-         SELF:WriteIdentifier(propertyDeclaration:NameToken)
+         SELF:WritePrivateImplementationType(oPropertyDeclaration:PrivateImplementationType)
+         SELF:WriteIdentifier(oPropertyDeclaration:NameToken)
          SELF:Space(TRUE)
          SELF:WriteKeyword("AS" )
          SELF:Space(TRUE)
-         propertyDeclaration:ReturnType:AcceptVisitor(SELF)
-         IF (propertyDeclaration:ExpressionBody:IsNull)
+         oPropertyDeclaration:ReturnType:AcceptVisitor(SELF)
+         IF (oPropertyDeclaration:ExpressionBody:IsNull)
             // AUTO property ?
             bEmptySet := FALSE
             bEmptyGet := FALSE
-            IF ( ( propertyDeclaration:Getter != NULL ) .AND. ( propertyDeclaration:Getter:Role == PropertyDeclaration.GetterRole ) )
-               IF ( propertyDeclaration:Getter:Body:IsNull )
+            IF ( ( oPropertyDeclaration:Getter != NULL ) .AND. ( oPropertyDeclaration:Getter:Role == PropertyDeclaration.GetterRole ) )
+               IF ( oPropertyDeclaration:Getter:Body:IsNull )
                   bEmptyGet := TRUE
                ENDIF
             ELSE
                bEmptyGet := TRUE
             ENDIF
-            IF ( ( propertyDeclaration:Setter != NULL ) .AND. ( propertyDeclaration:Setter:Role == PropertyDeclaration.SetterRole ) )
-               IF ( propertyDeclaration:Setter:Body:IsNull )
+            IF ( ( oPropertyDeclaration:Setter != NULL ) .AND. ( oPropertyDeclaration:Setter:Role == PropertyDeclaration.SetterRole ) )
+               IF ( oPropertyDeclaration:Setter:Body:IsNull )
                   bEmptySet := TRUE
                ENDIF
             ELSE
@@ -2100,25 +2101,25 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                SELF:Space()
             ENDIF
             //
-            IF ( ( propertyDeclaration:Getter != NULL ) .AND. ( propertyDeclaration:Getter:Role == PropertyDeclaration.GetterRole ) )
-               IF ( propertyDeclaration:Getter:Body:IsNull )
+            IF ( ( oPropertyDeclaration:Getter != NULL ) .AND. ( oPropertyDeclaration:Getter:Role == PropertyDeclaration.GetterRole ) )
+               IF ( oPropertyDeclaration:Getter:Body:IsNull )
                   SELF:Space()
-                  SELF:WriteAttributes(propertyDeclaration:Getter:Attributes)
-                  SELF:WriteModifiers(propertyDeclaration:Getter:ModifierTokens)
+                  SELF:WriteAttributes(oPropertyDeclaration:Getter:Attributes)
+                  SELF:WriteModifiers(oPropertyDeclaration:Getter:ModifierTokens)
                   SELF:WriteKeyword("GET", PropertyDeclaration.GetKeywordRole)
                   SELF:Space()
                ELSE
                   bodyStarted := TRUE
                   SELF:writer:Indent()
                   SELF:NewLine()
-                  propertyDeclaration:Getter:AcceptVisitor( SELF )
+                  oPropertyDeclaration:Getter:AcceptVisitor( SELF )
                ENDIF
             ENDIF
-            IF ( ( propertyDeclaration:Setter != NULL ) .AND. ( propertyDeclaration:Setter:Role == PropertyDeclaration.SetterRole ) )
-               IF ( propertyDeclaration:Setter:Body:IsNull )
+            IF ( ( oPropertyDeclaration:Setter != NULL ) .AND. ( oPropertyDeclaration:Setter:Role == PropertyDeclaration.SetterRole ) )
+               IF ( oPropertyDeclaration:Setter:Body:IsNull )
                   SELF:Space()
-                  SELF:WriteAttributes(propertyDeclaration:Setter:Attributes)
-                  SELF:WriteModifiers(propertyDeclaration:Setter:ModifierTokens)
+                  SELF:WriteAttributes(oPropertyDeclaration:Setter:Attributes)
+                  SELF:WriteModifiers(oPropertyDeclaration:Setter:ModifierTokens)
                   SELF:WriteKeyword("SET", PropertyDeclaration.SetKeywordRole)
                   SELF:Space()
                ELSE
@@ -2127,16 +2128,16 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                      SELF:writer:Indent()
                      SELF:NewLine()
                   ENDIF
-                  propertyDeclaration:Setter:AcceptVisitor( SELF )
+                  oPropertyDeclaration:Setter:AcceptVisitor( SELF )
                ENDIF
             ENDIF
             //
-            IF (! propertyDeclaration:Initializer:IsNull)
+            IF (! oPropertyDeclaration:Initializer:IsNull)
                //
                SELF:Space(SELF:policy:SpaceAroundAssignment)
                SELF:WriteToken(":=")
                SELF:Space(SELF:policy:SpaceAroundAssignment)
-               propertyDeclaration:Initializer:AcceptVisitor(SELF)
+               oPropertyDeclaration:Initializer:AcceptVisitor(SELF)
                SELF:Semicolon()
             ENDIF
 
@@ -2152,34 +2153,34 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:Space(TRUE)
             SELF:WriteKeyword("GET", PropertyDeclaration.GetKeywordRole)
             SELF:Space(TRUE)
-            propertyDeclaration:ExpressionBody:AcceptVisitor(SELF)
+            oPropertyDeclaration:ExpressionBody:AcceptVisitor(SELF)
             SELF:Semicolon()
          ENDIF
-         SELF:EndNode(propertyDeclaration)
+         SELF:EndNode(oPropertyDeclaration)
 
-      VIRTUAL METHOD VisitQueryContinuationClause(queryContinuationClause AS QueryContinuationClause) AS VOID
+      VIRTUAL METHOD VisitQueryContinuationClause(oQueryContinuationClause AS QueryContinuationClause) AS VOID
          //
-         SELF:StartNode(queryContinuationClause)
-         queryContinuationClause:PrecedingQuery:AcceptVisitor(SELF)
+         SELF:StartNode(oQueryContinuationClause)
+         oQueryContinuationClause:PrecedingQuery:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword(QueryContinuationClause.IntoKeywordRole)
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(queryContinuationClause:IdentifierToken)
-         SELF:EndNode(queryContinuationClause)
+         SELF:WriteIdentifier(oQueryContinuationClause:IdentifierToken)
+         SELF:EndNode(oQueryContinuationClause)
 
-      VIRTUAL METHOD VisitQueryExpression(queryExpression AS QueryExpression) AS VOID
+      VIRTUAL METHOD VisitQueryExpression(oQueryExpression AS QueryExpression) AS VOID
          LOCAL flag AS LOGIC
          LOCAL flag2 AS LOGIC
          //
-         SELF:StartNode(queryExpression)
-         flag := ((queryExpression:Parent IS QueryClause) .AND. ! (queryExpression:Parent IS QueryContinuationClause))
+         SELF:StartNode(oQueryExpression)
+         flag := ((oQueryExpression:Parent IS QueryClause) .AND. ! (oQueryExpression:Parent IS QueryContinuationClause))
          IF (flag)
             //
             SELF:writer:Indent()
             SELF:NewLine()
          ENDIF
          flag2 := TRUE
-         FOREACH clause AS QueryClause IN queryExpression:Clauses
+         FOREACH clause AS QueryClause IN oQueryExpression:Clauses
             //
             IF (flag2)
                //
@@ -2198,85 +2199,85 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:writer:Unindent()
          ENDIF
-         SELF:EndNode(queryExpression)
+         SELF:EndNode(oQueryExpression)
 
-      VIRTUAL METHOD VisitQueryFromClause(queryFromClause AS QueryFromClause) AS VOID
+      VIRTUAL METHOD VisitQueryFromClause(oQueryFromClause AS QueryFromClause) AS VOID
          //
-         SELF:StartNode(queryFromClause)
+         SELF:StartNode(oQueryFromClause)
          SELF:WriteKeyword(QueryFromClause.FromKeywordRole)
-         queryFromClause:@@Type:AcceptVisitor(SELF)
+         oQueryFromClause:@@Type:AcceptVisitor(SELF)
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(queryFromClause:IdentifierToken)
+         SELF:WriteIdentifier(oQueryFromClause:IdentifierToken)
          SELF:Space(TRUE)
          SELF:WriteKeyword(QueryFromClause.InKeywordRole)
          SELF:Space(TRUE)
-         queryFromClause:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(queryFromClause)
+         oQueryFromClause:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oQueryFromClause)
 
-      VIRTUAL METHOD VisitQueryGroupClause(queryGroupClause AS QueryGroupClause) AS VOID
+      VIRTUAL METHOD VisitQueryGroupClause(oQueryGroupClause AS QueryGroupClause) AS VOID
          //
-         SELF:StartNode(queryGroupClause)
+         SELF:StartNode(oQueryGroupClause)
          SELF:WriteKeyword(QueryGroupClause.GroupKeywordRole)
          SELF:Space(TRUE)
-         queryGroupClause:Projection:AcceptVisitor(SELF)
+         oQueryGroupClause:Projection:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword(QueryGroupClause.ByKeywordRole)
          SELF:Space(TRUE)
-         queryGroupClause:Key:AcceptVisitor(SELF)
-         SELF:EndNode(queryGroupClause)
+         oQueryGroupClause:Key:AcceptVisitor(SELF)
+         SELF:EndNode(oQueryGroupClause)
 
-      VIRTUAL METHOD VisitQueryJoinClause(queryJoinClause AS QueryJoinClause) AS VOID
+      VIRTUAL METHOD VisitQueryJoinClause(oQueryJoinClause AS QueryJoinClause) AS VOID
          //
-         SELF:StartNode(queryJoinClause)
+         SELF:StartNode(oQueryJoinClause)
          SELF:WriteKeyword(QueryJoinClause.JoinKeywordRole)
-         queryJoinClause:@@Type:AcceptVisitor(SELF)
+         oQueryJoinClause:@@Type:AcceptVisitor(SELF)
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(queryJoinClause:JoinIdentifierToken)
+         SELF:WriteIdentifier(oQueryJoinClause:JoinIdentifierToken)
          SELF:Space(TRUE)
          SELF:WriteKeyword(QueryJoinClause.InKeywordRole)
          SELF:Space(TRUE)
-         queryJoinClause:InExpression:AcceptVisitor(SELF)
+         oQueryJoinClause:InExpression:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword(QueryJoinClause.OnKeywordRole)
          SELF:Space(TRUE)
-         queryJoinClause:OnExpression:AcceptVisitor(SELF)
+         oQueryJoinClause:OnExpression:AcceptVisitor(SELF)
          SELF:Space(TRUE)
          SELF:WriteKeyword(QueryJoinClause.EqualsKeywordRole)
          SELF:Space(TRUE)
-         queryJoinClause:EqualsExpression:AcceptVisitor(SELF)
-         IF (queryJoinClause:IsGroupJoin)
+         oQueryJoinClause:EqualsExpression:AcceptVisitor(SELF)
+         IF (oQueryJoinClause:IsGroupJoin)
             //
             SELF:Space(TRUE)
             SELF:WriteKeyword(QueryJoinClause.IntoKeywordRole)
-            SELF:WriteIdentifier(queryJoinClause:IntoIdentifierToken)
+            SELF:WriteIdentifier(oQueryJoinClause:IntoIdentifierToken)
          ENDIF
-         SELF:EndNode(queryJoinClause)
+         SELF:EndNode(oQueryJoinClause)
 
-      VIRTUAL METHOD VisitQueryLetClause(queryLetClause AS QueryLetClause) AS VOID
+      VIRTUAL METHOD VisitQueryLetClause(oQueryLetClause AS QueryLetClause) AS VOID
          //
-         SELF:StartNode(queryLetClause)
+         SELF:StartNode(oQueryLetClause)
          SELF:WriteKeyword(QueryLetClause.LetKeywordRole)
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(queryLetClause:IdentifierToken)
+         SELF:WriteIdentifier(oQueryLetClause:IdentifierToken)
          SELF:Space(SELF:policy:SpaceAroundAssignment)
          SELF:WriteToken(":=")
          SELF:Space(SELF:policy:SpaceAroundAssignment)
-         queryLetClause:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(queryLetClause)
+         oQueryLetClause:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oQueryLetClause)
 
-      VIRTUAL METHOD VisitQueryOrderClause(queryOrderClause AS QueryOrderClause) AS VOID
+      VIRTUAL METHOD VisitQueryOrderClause(oQueryOrderClause AS QueryOrderClause) AS VOID
          //
-         SELF:StartNode(queryOrderClause)
+         SELF:StartNode(oQueryOrderClause)
          SELF:WriteKeyword(QueryOrderClause.OrderbyKeywordRole)
          SELF:Space(TRUE)
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)queryOrderClause:Orderings )
-         SELF:EndNode(queryOrderClause)
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oQueryOrderClause:Orderings )
+         SELF:EndNode(oQueryOrderClause)
 
-      VIRTUAL METHOD VisitQueryOrdering(queryOrdering AS QueryOrdering) AS VOID
+      VIRTUAL METHOD VisitQueryOrdering(oQueryOrdering AS QueryOrdering) AS VOID
          //
-         SELF:StartNode(queryOrdering)
-         queryOrdering:Expression:AcceptVisitor(SELF)
-         SWITCH queryOrdering:Direction
+         SELF:StartNode(oQueryOrdering)
+         oQueryOrdering:Expression:AcceptVisitor(SELF)
+         SWITCH oQueryOrdering:Direction
          CASE QueryOrderingDirection.Ascending
             //
             SELF:Space(TRUE)
@@ -2288,23 +2289,23 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword(QueryOrdering.DescendingKeywordRole)
 
          END SWITCH
-         SELF:EndNode(queryOrdering)
+         SELF:EndNode(oQueryOrdering)
 
-      VIRTUAL METHOD VisitQuerySelectClause(querySelectClause AS QuerySelectClause) AS VOID
+      VIRTUAL METHOD VisitQuerySelectClause(oQuerySelectClause AS QuerySelectClause) AS VOID
          //
-         SELF:StartNode(querySelectClause)
+         SELF:StartNode(oQuerySelectClause)
          SELF:WriteKeyword(QuerySelectClause.SelectKeywordRole)
          SELF:Space(TRUE)
-         querySelectClause:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(querySelectClause)
+         oQuerySelectClause:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oQuerySelectClause)
 
-      VIRTUAL METHOD VisitQueryWhereClause(queryWhereClause AS QueryWhereClause) AS VOID
+      VIRTUAL METHOD VisitQueryWhereClause(oQueryWhereClause AS QueryWhereClause) AS VOID
          //
-         SELF:StartNode(queryWhereClause)
+         SELF:StartNode(oQueryWhereClause)
          SELF:WriteKeyword(QueryWhereClause.WhereKeywordRole)
          SELF:Space(TRUE)
-         queryWhereClause:Condition:AcceptVisitor(SELF)
-         SELF:EndNode(queryWhereClause)
+         oQueryWhereClause:Condition:AcceptVisitor(SELF)
+         SELF:EndNode(oQueryWhereClause)
 
       PRIVATE METHOD VisitRepeat(@@repeat AS Repeat) AS VOID
          //
@@ -2320,35 +2321,35 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:VisitNodeInPattern(@@repeat:ChildNode)
          SELF:RPar()
 
-      VIRTUAL METHOD VisitReturnStatement(returnStatement AS ReturnStatement) AS VOID
+      VIRTUAL METHOD VisitReturnStatement(oReturnStatement AS ReturnStatement) AS VOID
          //
-         SELF:StartNode(returnStatement)
+         SELF:StartNode(oReturnStatement)
          SELF:WriteKeyword(ReturnStatement.ReturnKeywordRole)
-         IF (! returnStatement:Expression:IsNull)
+         IF (! oReturnStatement:Expression:IsNull)
             //
             SELF:Space(TRUE)
-            returnStatement:Expression:AcceptVisitor(SELF)
+            oReturnStatement:Expression:AcceptVisitor(SELF)
          ENDIF
          SELF:NewLine()
-         SELF:EndNode(returnStatement)
+         SELF:EndNode(oReturnStatement)
 
-      VIRTUAL METHOD VisitSimpleType(simpleType AS SimpleType) AS VOID
+      VIRTUAL METHOD VisitSimpleType(oSimpleType AS SimpleType) AS VOID
          //
-         SELF:StartNode(simpleType)
-         SELF:WriteIdentifier(simpleType:IdentifierToken)
-         // Flag ClipperCallingConvention attribute
+         SELF:StartNode(oSimpleType)
+         SELF:WriteIdentifier(oSimpleType:IdentifierToken)
+         // Flag ClipperCallingConvention oAttribute
          IF ( SELF:inMethodAttributes == ClipperState.Attribute )
-            IF ( String.Compare( simpleType:Identifier, "clippercallingconvention", TRUE ) == 0 )
+            IF ( String.Compare( oSimpleType:Identifier, "clippercallingconvention", TRUE ) == 0 )
                SELF:isClipper := TRUE
             ENDIF
          ELSE
             IF SELF:isClipper .AND. ( SELF:inMethodAttributes == ClipperState.ReturnType )
                // If so, we have visiting the return Type
-               SELF:paramsList:Insert( 0, simpleType:Identifier)
+               SELF:paramsList:Insert( 0, oSimpleType:Identifier)
             ENDIF
          ENDIF
-         SELF:WriteTypeArguments(simpleType:TypeArguments)
-         SELF:EndNode(simpleType)
+         SELF:WriteTypeArguments(oSimpleType:TypeArguments)
+         SELF:EndNode(oSimpleType)
 
       VIRTUAL METHOD VisitSingleVariableDesignation( singleVariableDesignation AS SingleVariableDesignation ) AS VOID
          SELF:StartNode(singleVariableDesignation)
@@ -2356,26 +2357,26 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:EndNode(singleVariableDesignation)
 
 
-      VIRTUAL METHOD VisitSizeOfExpression(sizeOfExpression AS SizeOfExpression) AS VOID
+      VIRTUAL METHOD VisitSizeOfExpression(oSizeOfExpression AS SizeOfExpression) AS VOID
          //
-         SELF:StartNode(sizeOfExpression)
+         SELF:StartNode(oSizeOfExpression)
          SELF:WriteKeyword(SizeOfExpression.SizeofKeywordRole)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinSizeOfParentheses)
-         sizeOfExpression:@@Type:AcceptVisitor(SELF)
+         oSizeOfExpression:@@Type:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinSizeOfParentheses)
          SELF:RPar()
-         SELF:EndNode(sizeOfExpression)
+         SELF:EndNode(oSizeOfExpression)
 
-      VIRTUAL METHOD VisitStackAllocExpression(stackAllocExpression AS StackAllocExpression) AS VOID
-         LOCAL list AS Expression[]
+      VIRTUAL METHOD VisitStackAllocExpression(oStackAllocExpression AS StackAllocExpression) AS VOID
+         LOCAL oList AS Expression[]
          //
-         SELF:StartNode(stackAllocExpression)
+         SELF:StartNode(oStackAllocExpression)
          SELF:WriteKeyword(StackAllocExpression.StackallocKeywordRole)
-         stackAllocExpression:@@Type:AcceptVisitor(SELF)
-         list := <Expression>{stackAllocExpression:CountExpression}
-         SELF:WriteCommaSeparatedListInBrackets(list)
-         SELF:EndNode(stackAllocExpression)
+         oStackAllocExpression:@@Type:AcceptVisitor(SELF)
+         oList := <Expression>{oStackAllocExpression:CountExpression}
+         SELF:WriteCommaSeparatedListInBrackets(oList)
+         SELF:EndNode(oStackAllocExpression)
 
       VIRTUAL METHOD VisitSwitchExpression( switchExpression AS SwitchExpression ) AS VOID
          SELF:StartNode(switchExpression)
@@ -2398,13 +2399,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          switchExpressionSection:Body:AcceptVisitor(SELF)
          SELF:EndNode(switchExpressionSection)
 
-      VIRTUAL METHOD VisitSwitchSection(switchSection AS SwitchSection) AS VOID
+      VIRTUAL METHOD VisitSwitchSection(oSwitchSection AS SwitchSection) AS VOID
          LOCAL flag AS LOGIC
          LOCAL flag2 AS LOGIC
          //
-         SELF:StartNode(switchSection)
+         SELF:StartNode(oSwitchSection)
          flag := TRUE
-         FOREACH label AS CaseLabel IN switchSection:CaseLabels
+         FOREACH label AS CaseLabel IN oSwitchSection:CaseLabels
             //
             IF (! flag)
                //
@@ -2413,7 +2414,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             label:AcceptVisitor(SELF)
             flag := FALSE
          NEXT
-         flag2 := ((switchSection:Statements:Count == 1) .AND. (System.Linq.Enumerable.Single<Statement>(switchSection:Statements) IS BlockStatement))
+         flag2 := ((oSwitchSection:Statements:Count == 1) .AND. (System.Linq.Enumerable.Single<Statement>(oSwitchSection:Statements) IS BlockStatement))
          IF (SELF:policy:IndentCaseBody .AND. ! flag2)
             //
             SELF:writer:Indent()
@@ -2422,30 +2423,30 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             SELF:NewLine()
          ENDIF
-         FOREACH statement AS Statement IN switchSection:Statements
+         FOREACH oStatement AS Statement IN oSwitchSection:Statements
             //
-            IF !( statement IS BreakStatement )
-               statement:AcceptVisitor(SELF)
+            IF !( oStatement IS BreakStatement )
+               oStatement:AcceptVisitor(SELF)
             ENDIF
          NEXT
          IF (SELF:policy:IndentCaseBody .AND. ! flag2)
             //
             SELF:writer:Unindent()
          ENDIF
-         SELF:EndNode(switchSection)
+         SELF:EndNode(oSwitchSection)
 
-      VIRTUAL METHOD VisitSwitchStatement(switchStatement AS SwitchStatement) AS VOID
+      VIRTUAL METHOD VisitSwitchStatement(oSwitchStatement AS SwitchStatement) AS VOID
          //
-         SELF:StartNode(switchStatement)
+         SELF:StartNode(oSwitchStatement)
          SELF:WriteKeyword("SWITCH")
          SELF:Space(TRUE)
-         switchStatement:Expression:AcceptVisitor(SELF)
+         oSwitchStatement:Expression:AcceptVisitor(SELF)
          SELF:OpenBrace(SELF:policy:StatementBraceStyle)
          IF (! SELF:policy:IndentSwitchBody)
             //
             SELF:writer:Unindent()
          ENDIF
-         FOREACH section AS SwitchSection IN switchStatement:SwitchSections
+         FOREACH section AS SwitchSection IN oSwitchStatement:SwitchSections
             //
             section:AcceptVisitor(SELF)
          NEXT
@@ -2458,51 +2459,51 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          SELF:Space(TRUE)
          SELF:WriteKeyword("SWITCH")
          SELF:NewLine()
-         SELF:EndNode(switchStatement)
+         SELF:EndNode(oSwitchStatement)
 
-      VIRTUAL METHOD VisitSyntaxTree(syntaxTree AS SyntaxTree) AS VOID
+      VIRTUAL METHOD VisitSyntaxTree(oSyntaxTree AS SyntaxTree) AS VOID
          //
-         FOREACH node AS AstNode IN syntaxTree:Children
+         FOREACH node AS AstNode IN oSyntaxTree:Children
             //
             node:AcceptVisitor(SELF)
             SELF:MaybeNewLinesAfterUsings(node)
          NEXT
 
-         //VIRTUAL METHOD VisitText(textNode AS TextNode) AS VOID
+         //VIRTUAL METHOD VisitText(oTextNode AS TextNode) AS VOID
 
 
-      VIRTUAL METHOD VisitThisReferenceExpression(thisReferenceExpression AS ThisReferenceExpression) AS VOID
+      VIRTUAL METHOD VisitThisReferenceExpression(oThisReferenceExpression AS ThisReferenceExpression) AS VOID
          //
-         SELF:StartNode(thisReferenceExpression)
-         SELF:WriteKeyword("SELF", thisReferenceExpression:Role)
-         SELF:EndNode(thisReferenceExpression)
+         SELF:StartNode(oThisReferenceExpression)
+         SELF:WriteKeyword("SELF", oThisReferenceExpression:Role)
+         SELF:EndNode(oThisReferenceExpression)
 
-      VIRTUAL METHOD VisitThrowExpression(throwExpression AS ThrowExpression) AS VOID
+      VIRTUAL METHOD VisitThrowExpression(oThrowExpression AS ThrowExpression) AS VOID
          //
-         SELF:StartNode(throwExpression)
+         SELF:StartNode(oThrowExpression)
          SELF:WriteKeyword("THROW")
          SELF:Space(TRUE)
-         throwExpression:Expression:AcceptVisitor(SELF)
-         SELF:EndNode(throwExpression)
+         oThrowExpression:Expression:AcceptVisitor(SELF)
+         SELF:EndNode(oThrowExpression)
 
-      VIRTUAL METHOD VisitThrowStatement(throwStatement AS ThrowStatement) AS VOID
+      VIRTUAL METHOD VisitThrowStatement(oThrowStatement AS ThrowStatement) AS VOID
          //
-         SELF:StartNode(throwStatement)
+         SELF:StartNode(oThrowStatement)
          SELF:WriteKeyword("THROW")
-         IF (! throwStatement:Expression:IsNull)
+         IF (! oThrowStatement:Expression:IsNull)
             //
             SELF:Space(TRUE)
-            throwStatement:Expression:AcceptVisitor(SELF)
+            oThrowStatement:Expression:AcceptVisitor(SELF)
          ENDIF
          SELF:NewLine()
-         SELF:EndNode(throwStatement)
+         SELF:EndNode(oThrowStatement)
 
-      VIRTUAL METHOD VisitTryCatchStatement(tryCatchStatement AS TryCatchStatement) AS VOID
+      VIRTUAL METHOD VisitTryCatchStatement(oTryCatchStatement AS TryCatchStatement) AS VOID
          //
-         SELF:StartNode(tryCatchStatement)
+         SELF:StartNode(oTryCatchStatement)
          SELF:WriteKeyword("TRY")
-         SELF:WriteBlock(tryCatchStatement:TryBlock, SELF:policy:StatementBraceStyle)
-         FOREACH clause AS CatchClause IN tryCatchStatement:CatchClauses
+         SELF:WriteBlock(oTryCatchStatement:TryBlock, SELF:policy:StatementBraceStyle)
+         FOREACH clause AS CatchClause IN oTryCatchStatement:CatchClauses
             //
             IF (SELF:policy:CatchNewLinePlacement == NewLinePlacement.SameLine)
                //
@@ -2513,7 +2514,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
             clause:AcceptVisitor(SELF)
          NEXT
-         IF (! tryCatchStatement:FinallyBlock:IsNull)
+         IF (! oTryCatchStatement:FinallyBlock:IsNull)
             //
             IF (SELF:policy:FinallyNewLinePlacement == NewLinePlacement.SameLine)
                //
@@ -2523,50 +2524,50 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                SELF:NewLine()
             ENDIF
             SELF:WriteKeyword("FINALLY")
-            SELF:WriteBlock(tryCatchStatement:FinallyBlock, SELF:policy:StatementBraceStyle)
+            SELF:WriteBlock(oTryCatchStatement:FinallyBlock, SELF:policy:StatementBraceStyle)
          ENDIF
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
          SELF:WriteKeyword("TRY")
          SELF:NewLine()
-         SELF:EndNode(tryCatchStatement)
+         SELF:EndNode(oTryCatchStatement)
 
-      VIRTUAL METHOD VisitTupleExpression(tupleExpression AS TupleExpression ) AS VOID
-         SELF:StartNode(tupleExpression)
+      VIRTUAL METHOD VisitTupleExpression(oTupleExpression AS TupleExpression ) AS VOID
+         SELF:StartNode(oTupleExpression)
          SELF:LPar()
-         SELF:WriteCommaSeparatedList(tupleExpression:Elements)
+         SELF:WriteCommaSeparatedList(oTupleExpression:Elements)
          SELF:RPar()
-         SELF:EndNode(tupleExpression)
+         SELF:EndNode(oTupleExpression)
 
-      VIRTUAL METHOD VisitTupleType(tupleType AS TupleAstType ) AS VOID
-         SELF:StartNode(tupleType)
+      VIRTUAL METHOD VisitTupleType(oTupleType AS TupleAstType ) AS VOID
+         SELF:StartNode(oTupleType)
          SELF:LPar()
-         SELF:WriteCommaSeparatedList(tupleType:Elements)
+         SELF:WriteCommaSeparatedList(oTupleType:Elements)
          SELF:RPar()
-         SELF:EndNode(tupleType)
+         SELF:EndNode(oTupleType)
 
 
-      VIRTUAL METHOD VisitTupleTypeElement(tupleTypeElement AS TupleTypeElement ) AS VOID
-         SELF:StartNode(tupleTypeElement)
-         tupleTypeElement:Type:AcceptVisitor(SELF)
-         IF (!tupleTypeElement:NameToken:IsNull)
+      VIRTUAL METHOD VisitTupleTypeElement(oTupleTypeElement AS TupleTypeElement ) AS VOID
+         SELF:StartNode(oTupleTypeElement)
+         oTupleTypeElement:Type:AcceptVisitor(SELF)
+         IF (!oTupleTypeElement:NameToken:IsNull)
             SELF:Space(TRUE)
-            tupleTypeElement:NameToken:AcceptVisitor(SELF)
+            oTupleTypeElement:NameToken:AcceptVisitor(SELF)
          ENDIF
-         SELF:EndNode(tupleTypeElement)
+         SELF:EndNode(oTupleTypeElement)
 
 
-      VIRTUAL METHOD VisitTypeDeclaration(typeDeclaration AS TypeDeclaration) AS VOID
+      VIRTUAL METHOD VisitTypeDeclaration(oTypeDeclaration AS TypeDeclaration) AS VOID
          LOCAL structBraceStyle AS BraceStyle
          LOCAL flag AS LOGIC
          LOCAL node AS AstNode
          LOCAL flag2 AS LOGIC
          LOCAL i AS LONG
          //
-         SELF:StartNode(typeDeclaration)
-         SELF:WriteAttributes(typeDeclaration:Attributes)
-         SELF:WriteModifiers(typeDeclaration:ModifierTokens)
-         SWITCH typeDeclaration:ClassType
+         SELF:StartNode(oTypeDeclaration)
+         SELF:WriteAttributes(oTypeDeclaration:Attributes)
+         SELF:WriteModifiers(oTypeDeclaration:ModifierTokens)
+         SWITCH oTypeDeclaration:ClassType
          CASE ClassType.Struct
             //
             SELF:WriteKeyword("STRUCTURE")
@@ -2585,15 +2586,15 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             structBraceStyle := SELF:policy:ClassBraceStyle
          END SWITCH
          SELF:Space(TRUE)
-         SELF:WriteIdentifier(typeDeclaration:NameToken)
-         SELF:WriteTypeParameters(typeDeclaration:TypeParameters)
-         IF (typeDeclaration:BaseTypes:Any())
+         SELF:WriteIdentifier(oTypeDeclaration:NameToken)
+         SELF:WriteTypeParameters(oTypeDeclaration:TypeParameters)
+         IF (oTypeDeclaration:BaseTypes:Any())
             //
-            IF ( typeDeclaration:ClassType == ClassType.Enum )
+            IF ( oTypeDeclaration:ClassType == ClassType.Enum )
                SELF:Space()
                SELF:WriteKeyword("AS")
                SELF:Space()
-               SELF:WriteCommaSeparatedList(typeDeclaration:BaseTypes)
+               SELF:WriteCommaSeparatedList(oTypeDeclaration:BaseTypes)
             ELSE
                LOCAL typeList AS System.Collections.Generic.IEnumerable<AstType>
                LOCAL classList AS List<AstType>
@@ -2601,7 +2602,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                LOCAL interfaceList AS List<AstType>
                interfaceList := List<AstType>{}
                //
-               typeList := typeDeclaration:BaseTypes
+               typeList := oTypeDeclaration:BaseTypes
                FOREACH typeDef AS AstType IN typeList
                   LOCAL sym AS ISymbol
                   sym := typeDef:GetSymbol()
@@ -2629,16 +2630,16 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                ENDIF
             ENDIF
          ENDIF
-         FOREACH constraint AS Constraint IN typeDeclaration:Constraints
+         FOREACH oConstraint AS Constraint IN oTypeDeclaration:Constraints
             //
-            constraint:AcceptVisitor(SELF)
+            oConstraint:AcceptVisitor(SELF)
          NEXT
          SELF:OpenBrace(structBraceStyle)
-         IF (typeDeclaration:ClassType == ClassType.Enum)
+         IF (oTypeDeclaration:ClassType == ClassType.Enum)
             //
             flag := TRUE
             node := NULL
-            FOREACH declaration AS EntityDeclaration IN typeDeclaration:Members
+            FOREACH declaration AS EntityDeclaration IN oTypeDeclaration:Members
                //
                IF (flag)
                   //
@@ -2659,7 +2660,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          ELSE
             //
             flag2 := TRUE
-            FOREACH declaration2 AS EntityDeclaration IN typeDeclaration:Members
+            FOREACH declaration2 AS EntityDeclaration IN oTypeDeclaration:Members
                //
                IF (! flag2)
                   //
@@ -2675,11 +2676,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             NEXT
          ENDIF
          SELF:CloseBrace(structBraceStyle)
-         SELF:OptionalSemicolon(typeDeclaration:LastChild)
+         SELF:OptionalSemicolon(oTypeDeclaration:LastChild)
          SELF:NewLine()
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
-         SWITCH typeDeclaration:ClassType
+         SWITCH oTypeDeclaration:ClassType
          CASE ClassType.Struct
             //
             SELF:WriteKeyword("STRUCTURE")
@@ -2694,24 +2695,24 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword("CLASS")
          END SWITCH
          SELF:NewLine()
-         SELF:EndNode(typeDeclaration)
+         SELF:EndNode(oTypeDeclaration)
 
-      VIRTUAL METHOD VisitTypeOfExpression(typeOfExpression AS TypeOfExpression) AS VOID
+      VIRTUAL METHOD VisitTypeOfExpression(oTypeOfExpression AS TypeOfExpression) AS VOID
          //
-         SELF:StartNode(typeOfExpression)
+         SELF:StartNode(oTypeOfExpression)
          SELF:WriteKeyword(TypeOfExpression.TypeofKeywordRole)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinTypeOfParentheses)
-         typeOfExpression:@@Type:AcceptVisitor(SELF)
+         oTypeOfExpression:@@Type:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinTypeOfParentheses)
          SELF:RPar()
-         SELF:EndNode(typeOfExpression)
+         SELF:EndNode(oTypeOfExpression)
 
-      VIRTUAL METHOD VisitTypeParameterDeclaration(typeParameterDeclaration AS TypeParameterDeclaration) AS VOID
+      VIRTUAL METHOD VisitTypeParameterDeclaration(oTypeParameterDeclaration AS TypeParameterDeclaration) AS VOID
          //
-         SELF:StartNode(typeParameterDeclaration)
-         SELF:WriteAttributes(typeParameterDeclaration:Attributes)
-         SWITCH typeParameterDeclaration:Variance
+         SELF:StartNode(oTypeParameterDeclaration)
+         SELF:WriteAttributes(oTypeParameterDeclaration:Attributes)
+         SWITCH oTypeParameterDeclaration:Variance
          CASE VarianceModifier.Invariant
             //
             NOP
@@ -2727,21 +2728,21 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             //
             THROW System.NotSupportedException{"Invalid value for VarianceModifier"}
          END SWITCH
-         SELF:WriteIdentifier(typeParameterDeclaration:NameToken)
-         SELF:EndNode(typeParameterDeclaration)
+         SELF:WriteIdentifier(oTypeParameterDeclaration:NameToken)
+         SELF:EndNode(oTypeParameterDeclaration)
 
-      VIRTUAL METHOD VisitTypeReferenceExpression(typeReferenceExpression AS TypeReferenceExpression) AS VOID
+      VIRTUAL METHOD VisitTypeReferenceExpression(oTypeReferenceExpression AS TypeReferenceExpression) AS VOID
          //
-         SELF:StartNode(typeReferenceExpression)
-         typeReferenceExpression:@@Type:AcceptVisitor(SELF)
-         SELF:EndNode(typeReferenceExpression)
+         SELF:StartNode(oTypeReferenceExpression)
+         oTypeReferenceExpression:@@Type:AcceptVisitor(SELF)
+         SELF:EndNode(oTypeReferenceExpression)
 
-      VIRTUAL METHOD VisitUnaryOperatorExpression(unaryOperatorExpression AS UnaryOperatorExpression) AS VOID
+      VIRTUAL METHOD VisitUnaryOperatorExpression(oUnaryOperatorExpression AS UnaryOperatorExpression) AS VOID
          LOCAL uOperator AS UnaryOperatorType
          LOCAL operatorRole AS TokenRole
          //
-         SELF:StartNode(unaryOperatorExpression)
-         uOperator := unaryOperatorExpression:Operator
+         SELF:StartNode(oUnaryOperatorExpression)
+         uOperator := oUnaryOperatorExpression:Operator
          operatorRole := UnaryOperatorExpression.GetOperatorRole(uOperator)
          IF (uOperator == UnaryOperatorType.Await)
             //
@@ -2753,35 +2754,35 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                SELF:WriteToken(operatorRole)
             ENDIF
          ENDIF
-         unaryOperatorExpression:Expression:AcceptVisitor(SELF)
+         oUnaryOperatorExpression:Expression:AcceptVisitor(SELF)
          IF (XSharpOutputVisitor.IsPostfixOperator(uOperator))
             //
             SELF:WriteToken(operatorRole)
          ENDIF
-         SELF:EndNode(unaryOperatorExpression)
+         SELF:EndNode(oUnaryOperatorExpression)
 
-      VIRTUAL METHOD VisitUncheckedExpression(uncheckedExpression AS UncheckedExpression) AS VOID
+      VIRTUAL METHOD VisitUncheckedExpression(oUncheckedExpression AS UncheckedExpression) AS VOID
          //
-         SELF:StartNode(uncheckedExpression)
+         SELF:StartNode(oUncheckedExpression)
          SELF:WriteKeyword(UncheckedExpression.UncheckedKeywordRole)
          SELF:LPar()
          SELF:Space(SELF:policy:SpacesWithinCheckedExpressionParantheses)
-         uncheckedExpression:Expression:AcceptVisitor(SELF)
+         oUncheckedExpression:Expression:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinCheckedExpressionParantheses)
          SELF:RPar()
-         SELF:EndNode(uncheckedExpression)
+         SELF:EndNode(oUncheckedExpression)
 
-      VIRTUAL METHOD VisitUncheckedStatement(uncheckedStatement AS UncheckedStatement) AS VOID
+      VIRTUAL METHOD VisitUncheckedStatement(oUncheckedStatement AS UncheckedStatement) AS VOID
          //
-         SELF:StartNode(uncheckedStatement)
+         SELF:StartNode(oUncheckedStatement)
          SELF:WriteKeyword(UncheckedStatement.UncheckedKeywordRole)
-         uncheckedStatement:Body:AcceptVisitor(SELF)
-         SELF:EndNode(uncheckedStatement)
+         oUncheckedStatement:Body:AcceptVisitor(SELF)
+         SELF:EndNode(oUncheckedStatement)
 
-      VIRTUAL METHOD VisitUndocumentedExpression(undocumentedExpression AS UndocumentedExpression) AS VOID
+      VIRTUAL METHOD VisitUndocumentedExpression(oUndocumentedExpression AS UndocumentedExpression) AS VOID
          //
-         SELF:StartNode(undocumentedExpression)
-         SWITCH undocumentedExpression:UndocumentedExpressionType
+         SELF:StartNode(oUndocumentedExpression)
+         SWITCH oUndocumentedExpression:UndocumentedExpressionType
          CASE UndocumentedExpressionType.ArgListAccess
          CASE UndocumentedExpressionType.ArgList
             //
@@ -2800,91 +2801,91 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SELF:WriteKeyword(UndocumentedExpression.MakerefKeywordRole)
 
          END SWITCH
-         IF (undocumentedExpression:UndocumentedExpressionType != UndocumentedExpressionType.ArgListAccess)
+         IF (oUndocumentedExpression:UndocumentedExpressionType != UndocumentedExpressionType.ArgListAccess)
             //
             SELF:Space(SELF:policy:SpaceBeforeMethodCallParentheses)
-            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)undocumentedExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
+            SELF:WriteCommaSeparatedListInParenthesis((System.Collections.Generic.IEnumerable<AstNode>)oUndocumentedExpression:Arguments , SELF:policy:SpaceWithinMethodCallParentheses)
          ENDIF
-         SELF:EndNode(undocumentedExpression)
+         SELF:EndNode(oUndocumentedExpression)
 
-      VIRTUAL METHOD VisitUnsafeStatement(unsafeStatement AS UnsafeStatement) AS VOID
+      VIRTUAL METHOD VisitUnsafeStatement(oUnsafeStatement AS UnsafeStatement) AS VOID
          //
-         SELF:StartNode(unsafeStatement)
+         SELF:StartNode(oUnsafeStatement)
          SELF:WriteKeyword(UnsafeStatement.UnsafeKeywordRole)
-         unsafeStatement:Body:AcceptVisitor(SELF)
-         SELF:EndNode(unsafeStatement)
+         oUnsafeStatement:Body:AcceptVisitor(SELF)
+         SELF:EndNode(oUnsafeStatement)
 
-      VIRTUAL METHOD VisitUsingAliasDeclaration(usingAliasDeclaration AS UsingAliasDeclaration) AS VOID
+      VIRTUAL METHOD VisitUsingAliasDeclaration(oUsingAliasDeclaration AS UsingAliasDeclaration) AS VOID
          //
-         SELF:StartNode(usingAliasDeclaration)
+         SELF:StartNode(oUsingAliasDeclaration)
          SELF:WriteKeyword(UsingAliasDeclaration.UsingKeywordRole)
-         SELF:WriteIdentifier(usingAliasDeclaration:GetChildByRole<Identifier>(UsingAliasDeclaration.AliasRole))
+         SELF:WriteIdentifier(oUsingAliasDeclaration:GetChildByRole<Identifier>(UsingAliasDeclaration.AliasRole))
          SELF:Space(SELF:policy:SpaceAroundEqualityOperator)
          SELF:WriteToken(":=")
          SELF:Space(SELF:policy:SpaceAroundEqualityOperator)
-         usingAliasDeclaration:Import:AcceptVisitor(SELF)
+         oUsingAliasDeclaration:Import:AcceptVisitor(SELF)
          SELF:Semicolon()
-         SELF:EndNode(usingAliasDeclaration)
+         SELF:EndNode(oUsingAliasDeclaration)
 
-      VIRTUAL METHOD VisitUsingDeclaration(usingDeclaration AS UsingDeclaration) AS VOID
+      VIRTUAL METHOD VisitUsingDeclaration(oUsingDeclaration AS UsingDeclaration) AS VOID
          //
-         SELF:StartNode(usingDeclaration)
+         SELF:StartNode(oUsingDeclaration)
          SELF:WriteKeyword("USING")
          SELF:Space( TRUE )
-         usingDeclaration:Import:AcceptVisitor(SELF)
+         oUsingDeclaration:Import:AcceptVisitor(SELF)
          SELF:NewLine()
-         SELF:EndNode(usingDeclaration)
+         SELF:EndNode(oUsingDeclaration)
 
-      VIRTUAL METHOD VisitUsingStatement(usingStatement AS UsingStatement) AS VOID
+      VIRTUAL METHOD VisitUsingStatement(oUsingStatement AS UsingStatement) AS VOID
          //
-         SELF:StartNode(usingStatement)
+         SELF:StartNode(oUsingStatement)
          SELF:WriteKeyword("BEGIN")
          SELF:Space(TRUE)
          SELF:WriteKeyword("USING")
          SELF:Space(TRUE)
-         usingStatement:ResourceAcquisition:AcceptVisitor(SELF)
+         oUsingStatement:ResourceAcquisition:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinUsingParentheses)
-         SELF:WriteEmbeddedStatement(usingStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         SELF:WriteEmbeddedStatement(oUsingStatement:EmbeddedStatement, NewLinePlacement.NewLine)
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
          SELF:WriteKeyword("USING")
          SELF:NewLine()
-         SELF:EndNode(usingStatement)
+         SELF:EndNode(oUsingStatement)
 
-      VIRTUAL METHOD VisitVariableDeclarationStatement(variableDeclarationStatement AS VariableDeclarationStatement) AS VOID
+      VIRTUAL METHOD VisitVariableDeclarationStatement(oVariableDeclarationStatement AS VariableDeclarationStatement) AS VOID
          // Now that LOCALs are declare on top of Statement
-         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)variableDeclarationStatement:Variables )
+         SELF:WriteCommaSeparatedList((System.Collections.Generic.IEnumerable<AstNode>)oVariableDeclarationStatement:Variables )
 
-      VIRTUAL METHOD VisitVariableInitializer(variableInitializer AS VariableInitializer) AS VOID
+      VIRTUAL METHOD VisitVariableInitializer(oVariableInitializer AS VariableInitializer) AS VOID
          //
-         SELF:StartNode(variableInitializer)
+         SELF:StartNode(oVariableInitializer)
          //
-         SELF:Prefix( variableInitializer )
-         SELF:Prefix( variableInitializer )
+         SELF:Prefix( oVariableInitializer )
+         SELF:Prefix( oVariableInitializer )
          //
-         SELF:WriteIdentifier(variableInitializer:NameToken)
+         SELF:WriteIdentifier(oVariableInitializer:NameToken)
          //
-         IF (! variableInitializer:Initializer:IsNull)
+         IF (! oVariableInitializer:Initializer:IsNull)
             SELF:Space(SELF:policy:SpaceAroundAssignment)
             SELF:WriteToken(":=")
             SELF:Space(SELF:policy:SpaceAroundAssignment)
-            variableInitializer:Initializer:AcceptVisitor(SELF)
+            oVariableInitializer:Initializer:AcceptVisitor(SELF)
          ENDIF
-         SELF:EndNode(variableInitializer)
+         SELF:EndNode(oVariableInitializer)
 
-      VIRTUAL METHOD VisitWhileStatement(whileStatement AS WhileStatement) AS VOID
+      VIRTUAL METHOD VisitWhileStatement(oWhileStatement AS WhileStatement) AS VOID
          //
-         SELF:StartNode(whileStatement)
+         SELF:StartNode(oWhileStatement)
          SELF:WriteKeyword("WHILE")
          SELF:Space(TRUE)
-         whileStatement:Condition:AcceptVisitor(SELF)
+         oWhileStatement:Condition:AcceptVisitor(SELF)
          SELF:Space(SELF:policy:SpacesWithinWhileParentheses)
-         SELF:WriteEmbeddedStatement(whileStatement:EmbeddedStatement, NewLinePlacement.NewLine)
+         SELF:WriteEmbeddedStatement(oWhileStatement:EmbeddedStatement, NewLinePlacement.NewLine)
          SELF:WriteKeyword("END")
          SELF:Space(TRUE)
          SELF:WriteKeyword("WHILE")
          SELF:NewLine()
-         SELF:EndNode(whileStatement)
+         SELF:EndNode(oWhileStatement)
 
       VIRTUAL METHOD VisitWithInitializerExpression( withInitializerExpression AS WithInitializerExpression ) AS VOID
          //
@@ -2894,26 +2895,26 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          withInitializerExpression:Initializer:AcceptVisitor(SELF)
          SELF:EndNode(withInitializerExpression)
 
-         //VIRTUAL METHOD VisitWhitespace(whitespaceNode AS WhitespaceNode) AS VOID
+         //VIRTUAL METHOD VisitWhitespace(oWhitespaceNode AS WhitespaceNode) AS VOID
 
 
-      VIRTUAL METHOD VisitYieldBreakStatement(yieldBreakStatement AS YieldBreakStatement) AS VOID
+      VIRTUAL METHOD VisitYieldBreakStatement(oYieldBreakStatement AS YieldBreakStatement) AS VOID
          //
-         SELF:StartNode(yieldBreakStatement)
+         SELF:StartNode(oYieldBreakStatement)
          SELF:WriteKeyword(YieldBreakStatement.YieldKeywordRole)
          SELF:WriteKeyword(YieldBreakStatement.BreakKeywordRole)
          SELF:Semicolon()
-         SELF:EndNode(yieldBreakStatement)
+         SELF:EndNode(oYieldBreakStatement)
 
-      VIRTUAL METHOD VisitYieldReturnStatement(yieldReturnStatement AS YieldReturnStatement) AS VOID
+      VIRTUAL METHOD VisitYieldReturnStatement(oYieldReturnStatement AS YieldReturnStatement) AS VOID
          //
-         SELF:StartNode(yieldReturnStatement)
+         SELF:StartNode(oYieldReturnStatement)
          SELF:WriteKeyword(YieldReturnStatement.YieldKeywordRole)
          SELF:WriteKeyword(YieldReturnStatement.ReturnKeywordRole)
          SELF:Space(TRUE)
-         yieldReturnStatement:Expression:AcceptVisitor(SELF)
+         oYieldReturnStatement:Expression:AcceptVisitor(SELF)
          SELF:Semicolon()
-         SELF:EndNode(yieldReturnStatement)
+         SELF:EndNode(oYieldReturnStatement)
 
       PROTECTED VIRTUAL METHOD WriteAttributes(attributes AS System.Collections.Generic.IEnumerable<AttributeSection>) AS VOID
          //
@@ -2922,11 +2923,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             section:AcceptVisitor(SELF)
          NEXT
 
-      PROTECTED VIRTUAL METHOD WriteBlock(blockStatement AS BlockStatement, style AS BraceStyle) AS VOID
+      PROTECTED VIRTUAL METHOD WriteBlock(oBlockStatement AS BlockStatement, style AS BraceStyle) AS VOID
          //
-         SELF:StartNode(blockStatement)
+         SELF:StartNode(oBlockStatement)
          SELF:OpenBrace(style)
-         FOREACH statement AS Statement IN blockStatement:Statements
+         FOREACH statement AS Statement IN oBlockStatement:Statements
             //
             statement:AcceptVisitor(SELF)
             IF ( statement IS VariableDeclarationStatement )
@@ -2935,11 +2936,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          NEXT
          //
          SELF:CloseBrace(style)
-         SELF:EndNode(blockStatement)
+         SELF:EndNode(oBlockStatement)
 
-      PROTECTED VIRTUAL METHOD WriteSingleCommment( comment AS STRING ) AS VOID
+      PROTECTED VIRTUAL METHOD WriteSingleCommment( oComment AS STRING ) AS VOID
          //
-         SELF:writer:WriteComment( CommentType.SingleLine, comment)
+         SELF:writer:WriteComment( CommentType.SingleLine, oComment)
          SELF:isAtStartOfLine := TRUE
 
       PROTECTED VIRTUAL METHOD WriteCommaSeparatedList(list AS System.Collections.Generic.IEnumerable<AstNode>) AS VOID
@@ -3004,17 +3005,17 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 
       PROTECTED VIRTUAL METHOD WriteEmbeddedStatement(embeddedStatement AS Statement,  nlp AS NewLinePlacement) AS VOID
-         LOCAL blockStatement AS BlockStatement
+         LOCAL oBlockStatement AS BlockStatement
          //
          IF (embeddedStatement:IsNull)
             //
             SELF:NewLine()
          ELSE
             //
-            blockStatement := embeddedStatement ASTYPE BlockStatement
-            IF (blockStatement != NULL)
+            oBlockStatement := embeddedStatement ASTYPE BlockStatement
+            IF (oBlockStatement != NULL)
                //
-               SELF:WriteBlock(blockStatement, SELF:policy:StatementBraceStyle)
+               SELF:WriteBlock(oBlockStatement, SELF:policy:StatementBraceStyle)
             ELSE
                //
                SELF:NewLine()
@@ -3024,22 +3025,22 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             ENDIF
          ENDIF
 
-      PROTECTED VIRTUAL METHOD WriteIdentifier(identifier AS Identifier) AS VOID
+      PROTECTED VIRTUAL METHOD WriteIdentifier(oIdentifier AS Identifier) AS VOID
          //
-         VAR mbr := GetMemberReference( identifier )
+         VAR mbr := GetMemberReference( oIdentifier )
          IF (mbr != NULL)
             LOCAL cecil AS MemberReference
             cecil := SymbolToCecil(mbr)
 
          ENDIF
          //
-         SELF:writer:WriteIdentifier(identifier)
+         SELF:writer:WriteIdentifier(oIdentifier)
          SELF:isAtStartOfLine := FALSE
          SELF:isAfterSpace := FALSE
 
-      PROTECTED VIRTUAL METHOD WriteIdentifier(identifier AS STRING) AS VOID
+      PROTECTED VIRTUAL METHOD WriteIdentifier(oIdentifier AS STRING) AS VOID
          //
-         AstType.Create(identifier):AcceptVisitor(SELF)
+         AstType.Create(oIdentifier):AcceptVisitor(SELF)
          SELF:isAtStartOfLine := FALSE
          SELF:isAfterSpace := FALSE
 
@@ -3057,7 +3058,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          LOCAL cmt := "" AS STRING
          //
          IF ( SELF:isClipper )
-            // Build Clipper Calling Convention comment
+            // Build Clipper Calling Convention oComment
             IF ( SELF:paramsList:Count >= 2 )
                //
                cmt := "FUNCTION " + SELF:paramsList[0] + "("
@@ -3118,7 +3119,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          LOCAL flag AS LOGIC
          //
          flag := TRUE
-         FOREACH identifier AS Identifier IN identifiers
+         FOREACH oIdentifier AS Identifier IN identifiers
             //
             IF (flag)
                //
@@ -3127,7 +3128,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                //
                SELF:writer:WriteToken(NULL, ".")
             ENDIF
-            SELF:writer:WriteIdentifier(identifier)
+            SELF:writer:WriteIdentifier(oIdentifier)
          NEXT
 
       PROTECTED VIRTUAL METHOD WriteToken(tokenRole AS TokenRole) AS VOID
@@ -3255,21 +3256,23 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                IF ( elt:IsStatic )
                   //SELF:WriteToken( elt:Name )
                   //SELF:WriteToken( "." )
+                  NOP
                ELSE
                   SELF:WriteKeyword( "SELF" )
                   SELF:WriteToken( ":" )
                ENDIF
             ELSE
+               NOP
             ENDIF
          ENDIF
 
 
 
 
-      PUBLIC METHOD VisitRecursivePatternExpression(recursivePatternExpression AS ICSharpCode.Decompiler.CSharp.Syntax.RecursivePatternExpression) AS VOID
+      PUBLIC METHOD VisitRecursivePatternExpression(oRecursivePatternExpression AS ICSharpCode.Decompiler.CSharp.Syntax.RecursivePatternExpression) AS VOID
          NOP
 
-      PUBLIC METHOD VisitExtensionDeclaration(extensionDeclaration AS ICSharpCode.Decompiler.CSharp.Syntax.ExtensionDeclaration) AS VOID
+      PUBLIC METHOD VisitExtensionDeclaration(oExtensionDeclaration AS ICSharpCode.Decompiler.CSharp.Syntax.ExtensionDeclaration) AS VOID
          NOP
 
    END CLASS
