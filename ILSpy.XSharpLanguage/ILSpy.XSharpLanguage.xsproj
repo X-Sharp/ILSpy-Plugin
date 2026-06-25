@@ -19,6 +19,9 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
     <NoWin32Manifest>false</NoWin32Manifest>
     <VulcanCompatibleResources>false</VulcanCompatibleResources>
+    <Version>10.1.0</Version>
+    <AssemblyVersion>10.1.0.0</AssemblyVersion>
+    <FileVersion>10.1.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
