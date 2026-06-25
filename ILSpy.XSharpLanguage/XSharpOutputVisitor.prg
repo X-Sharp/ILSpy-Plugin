@@ -1972,34 +1972,31 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             oParameterDeclaration:DefaultExpression:AcceptVisitor(SELF)
          ENDIF
          //
-         SELF:Space()
-         IF oParameterDeclaration:IsParams
-            SELF:WriteKeyword("PARAMS")
-         ELSE
-            SWITCH oParameterDeclaration:ParameterModifier
-            CASE ReferenceKind.Ref
-               //
-               SELF:WriteKeyword("REF")
+         IF (! oParameterDeclaration:@@Type:IsNull)
+            SELF:Space()
+            IF oParameterDeclaration:IsParams
+               SELF:WriteKeyword("PARAMS")
+            ELSE
+               SWITCH oParameterDeclaration:ParameterModifier
+               CASE ReferenceKind.Ref
+                  //
+                  SELF:WriteKeyword("REF")
 
-            CASE ReferenceKind.Out
-               //
-               SELF:WriteKeyword("OUT")
+               CASE ReferenceKind.Out
+                  //
+                  SELF:WriteKeyword("OUT")
 
-            CASE ReferenceKind.In
-               //
-               SELF:WriteKeyword("IN")
+               CASE ReferenceKind.In
+                  //
+                  SELF:WriteKeyword("IN")
 
-            OTHERWISE
-               //
-               SELF:WriteKeyword("AS")
-            END SWITCH
-         ENDIF
-         SELF:Space(TRUE)
-         oParameterDeclaration:@@Type:AcceptVisitor(SELF)
-         //
-         IF (! oParameterDeclaration:@@Type:IsNull .AND. ! String.IsNullOrEmpty(oParameterDeclaration:Name))
-            //
+               OTHERWISE
+                  //
+                  SELF:WriteKeyword("AS")
+               END SWITCH
+            ENDIF
             SELF:Space(TRUE)
+            oParameterDeclaration:@@Type:AcceptVisitor(SELF)
          ENDIF
 
 
