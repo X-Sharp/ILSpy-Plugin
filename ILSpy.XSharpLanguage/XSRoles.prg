@@ -9,7 +9,7 @@ USING System
 USING System.Collections.Generic
 USING System.Linq
 USING System.Text
-USING System.ComponentModel.Composition
+USING System.Composition
 USING ICSharpCode.ILSpy
 USING ICSharpCode.Decompiler
 USING ICSharpCode.Decompiler.CSharp

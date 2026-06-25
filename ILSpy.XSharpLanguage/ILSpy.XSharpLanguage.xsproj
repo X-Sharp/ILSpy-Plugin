@@ -1,221 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(XSharpMsBuildDir)\XSharp.Default.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>c9119ba1-5ff2-4c1a-9f92-5584376e6903</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ILSpy.XSharpLanguage</RootNamespace>
-    <AssemblyName>ILSpy.XSharpLanguage.Plugin</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <Name>ILSpy.XSharpLanguage</Name>
-    <Nologo>true</Nologo>
-    <GenerateFullPaths>true</GenerateFullPaths>
     <Dialect>Core</Dialect>
-    <OutputName>ILSpy.XSharpLanguage</OutputName>
-    <StartupObject />
-    <ApplicationIcon />
-    <VulcanCompatibleResources>False</VulcanCompatibleResources>
-    <Includepaths />
-    <Nostandarddefs />
-    <TargetFrameworkProfile />
-    <NoWin32Manifest>False</NoWin32Manifest>
+    <Allowdot>true</Allowdot>
     <NamedArgs>True</NamedArgs>
     <CS>True</CS>
+    <TargetFramework>net10.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>ILSpy.XSharpLanguage</RootNamespace>
+    <AssemblyName>ILSpy.XSharpLanguage.Plugin</AssemblyName>
+    <OutputName>ILSpy.XSharpLanguage</OutputName>
+    <Nologo>true</Nologo>
+    <GenerateFullPaths>true</GenerateFullPaths>
+    <Nullable>enable</Nullable>
+    <StartupObject />
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <NoWin32Manifest>false</NoWin32Manifest>
+    <VulcanCompatibleResources>false</VulcanCompatibleResources>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" Label="Configuration">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <EmitDebugInformation>true</EmitDebugInformation>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DebuggerCommand>$(SolutionDir)\ILSpy7\ILSpy.exe</DebuggerCommand>
-    <DebuggerCommandArguments />
-    <DebuggerWorkingDirectory />
-    <EnableUnmanagedDebugging>False</EnableUnmanagedDebugging>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <CommandLineOption>/allowdot-</CommandLineOption>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" Label="Configuration">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <EmitDebugInformation>false</EmitDebugInformation>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
-    <CommandLineOption>/allowdot-</CommandLineOption>
-    <WarningsAsErrors />
-  </PropertyGroup>
-  <Import Project="$(XSharpMsBuildDir)\XSharp.targets" />
-  <ItemGroup>
-    <Reference Include="Accessibility, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>Accessibility</Name>
-      <AssemblyName>Accessibility.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="ICSharpCode.AvalonEdit, Version=6.0.253.0, Culture=neutral, PublicKeyToken=9cc39be672370310">
-      <Name>ICSharpCode.AvalonEdit</Name>
-      <AssemblyName>ICSharpCode.AvalonEdit.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\ICSharpCode.AvalonEdit.dll</HintPath>
-    </Reference>
-    <Reference Include="ICSharpCode.Decompiler, Version=5.0.0.5124, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
-      <Name>ICSharpCode.Decompiler</Name>
-      <AssemblyName>ICSharpCode.Decompiler.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\ICSharpCode.Decompiler.dll</HintPath>
-    </Reference>
-    <Reference Include="ILSpy, Version=5.0.0.5124, Culture=neutral, PublicKeyToken=d4bfe873e7598c49">
-      <Name>ILSpy</Name>
-      <AssemblyName>ILSpy.exe</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\ILSpy.exe</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.Composition, Version=16.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>Microsoft.VisualStudio.Composition</Name>
-      <AssemblyName>Microsoft.VisualStudio.Composition.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\Microsoft.VisualStudio.Composition.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil, Version=0.10.3.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e">
-      <Name>Mono.Cecil</Name>
-      <AssemblyName>Mono.Cecil.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\ilspy7\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="PresentationCore">
-      <Name>PresentationCore</Name>
-      <SpecificVersion>False</SpecificVersion>
-      <AssemblyName>PresentationCore.dll</AssemblyName>
-    </Reference>
-    <Reference Include="PresentationFramework">
-      <Name>PresentationFramework</Name>
-      <SpecificVersion>False</SpecificVersion>
-      <AssemblyName>PresentationFramework.dll</AssemblyName>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <Name>System.ComponentModel.Composition</Name>
-      <AssemblyName>System.ComponentModel.Composition.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="System.Composition.AttributedModel, Version=1.0.31.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Composition.AttributedModel</Name>
-      <AssemblyName>System.Composition.AttributedModel.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\packages\System.Composition.AttributedModel.1.0.31\lib\portable-net45+win8+wp8+wpa81\System.Composition.AttributedModel.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.Convention, Version=1.0.31.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Composition.Convention</Name>
-      <AssemblyName>System.Composition.Convention.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\packages\System.Composition.Convention.1.0.31\lib\portable-net45+win8+wp8+wpa81\System.Composition.Convention.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.Hosting, Version=1.0.31.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Composition.Hosting</Name>
-      <AssemblyName>System.Composition.Hosting.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\packages\System.Composition.Hosting.1.0.31\lib\portable-net45+win8+wp8+wpa81\System.Composition.Hosting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.Runtime, Version=1.0.31.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Composition.Runtime</Name>
-      <AssemblyName>System.Composition.Runtime.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\packages\System.Composition.Runtime.1.0.31\lib\portable-net45+win8+wp8+wpa81\System.Composition.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.TypedParts, Version=1.0.31.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Composition.TypedParts</Name>
-      <AssemblyName>System.Composition.TypedParts.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>..\packages\System.Composition.TypedParts.1.0.31\lib\portable-net45+win8+wp8+wpa81\System.Composition.TypedParts.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Reflection.Metadata, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <Name>System.Reflection.Metadata</Name>
-      <AssemblyName>System.Reflection.Metadata.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-      <Private>True</Private>
-      <HintPath>bin\Debug\System.Reflection.Metadata.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-      <Name>System.Xaml</Name>
-      <AssemblyName>System.Xaml.dll</AssemblyName>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="WindowsBase">
-      <Name>WindowsBase</Name>
-      <SpecificVersion>False</SpecificVersion>
-      <AssemblyName>WindowsBase.dll</AssemblyName>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.prg">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="XSharpHighlightingTokenWriter.prg" />
-    <Compile Include="XSharpLanguage.prg">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="XSharpLocalVisitor.prg" />
-    <Compile Include="XSharpModifierToken.prg" />
-    <Compile Include="XSharpOptionPage.xaml.prg">
-      <DependentUpon>XSharpOptionPage.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="XSharpOutputVisitor.prg" />
-    <Compile Include="XSRoles.prg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Readme.md">
-      <Link>Readme.md</Link>
-    </None>
-    <None Include="License.txt" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="XSharpOptionPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <!-- This next bit is required unless the macro used to Import your targets is defined in an MSBuild toolset. -->
-  <ProjectExtensions>
-    <ProjectCapabilities>
-      <ProjectConfigurationsDeclaredAsItems />
-    </ProjectCapabilities>
-  </ProjectExtensions>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebuggerCommand>$(SolutionDir)\ILSpy_Core\ILSpy.exe</DebuggerCommand>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <CommandLineOption>/allowdot-</CommandLineOption>
     <PreBuildEvent />
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\ilspy7"</PostBuildEvent>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <CommandLineOption>/allowdot-</CommandLineOption>
     <PreBuildEvent />
-    <PostBuildEvent />
-    <RunPostBuildEvent />
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ICSharpCode.AvalonEdit">
+      <HintPath>..\ILSpy_Core\ICSharpCode.AvalonEdit.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.Decompiler">
+      <HintPath>..\ILSpy_Core\ICSharpCode.Decompiler.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.ILSpyX">
+      <HintPath>..\ILSpy_Core\ICSharpCode.ILSpyX.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ILSpy">
+      <HintPath>..\ILSpy_Core\ILSpy.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\ILSpy_Core\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TomsToolbox.Composition">
+      <HintPath>..\ILSpy_Core\TomsToolbox.Composition.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="TomsToolbox.Wpf.Composition.AttributedModel">
+      <HintPath>..\ILSpy_Core\TomsToolbox.Wpf.Composition.AttributedModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Composition.AttributedModel">
+      <HintPath>..\ILSpy_Core\System.Composition.AttributedModel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Exclude XSharpOptionPage.xaml from Page compilation to avoid MarkupCompilePass1 crash with Language="X#" -->
+  <ItemGroup>
+    <Page Remove="XSharpOptionPage.xaml" />
+    <Page Include="XSharpOptionPage.xaml" />
+  </ItemGroup>
+
 </Project>

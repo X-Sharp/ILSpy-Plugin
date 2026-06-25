@@ -8,7 +8,7 @@ USING System
 USING System.Collections.Generic
 USING System.Linq
 USING System.Text
-USING System.ComponentModel.Composition
+USING System.Composition
 USING ICSharpCode.ILSpy
 USING ICSharpCode.Decompiler
 USING ICSharpCode.Decompiler.CSharp
@@ -538,6 +538,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				RETURN SELF:varList
 			END GET
 		END PROPERTY
+
+		PUBLIC METHOD VisitRecursivePatternExpression(recursivePatternExpression AS ICSharpCode.Decompiler.CSharp.Syntax.RecursivePatternExpression) AS VOID
+			NOP
+
+		PUBLIC METHOD VisitExtensionDeclaration(extensionDeclaration AS ICSharpCode.Decompiler.CSharp.Syntax.ExtensionDeclaration) AS VOID
+			NOP
 
 	END CLASS
 END NAMESPACE // ILSpy.XSharpLanguage

@@ -8,7 +8,7 @@ USING System
 USING System.Collections.Generic
 USING System.Linq
 USING System.Text
-USING System.ComponentModel.Composition
+USING System.Composition
 USING ICSharpCode.ILSpy
 USING ICSharpCode.Decompiler
 USING ICSharpCode.Decompiler.CSharp
@@ -275,7 +275,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             declaration := System.Linq.Enumerable.Single<ParameterDeclaration>(lambdaExpression:Parameters)
             IF (declaration:@@Type:IsNull)
                //
-               RETURN (declaration:ParameterModifier > ParameterModifier.None)
+               RETURN (declaration:ParameterModifier > ReferenceKind.None .OR. declaration:IsParams)
             ENDIF
          ENDIF
          RETURN TRUE
@@ -1972,25 +1972,27 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
          ENDIF
          //
          SELF:Space()
-         SWITCH parameterDeclaration:ParameterModifier
-         CASE ParameterModifier.Ref
-            //
-            SELF:WriteKeyword("REF")
-
-         CASE ParameterModifier.Out
-            //
-            SELF:WriteKeyword("OUT")
-
-         CASE ParameterModifier.Params
-            //
+         IF parameterDeclaration:IsParams
             SELF:WriteKeyword("PARAMS")
-         CASE ParameterModifier.In
-            //
-            SELF:WriteKeyword("IN")
-         OTHERWISE
-            //
-            SELF:WriteKeyword("AS")
-         END SWITCH
+         ELSE
+            SWITCH parameterDeclaration:ParameterModifier
+            CASE ReferenceKind.Ref
+               //
+               SELF:WriteKeyword("REF")
+
+            CASE ReferenceKind.Out
+               //
+               SELF:WriteKeyword("OUT")
+
+            CASE ReferenceKind.In
+               //
+               SELF:WriteKeyword("IN")
+
+            OTHERWISE
+               //
+               SELF:WriteKeyword("AS")
+            END SWITCH
+         ENDIF
          SELF:Space(TRUE)
          parameterDeclaration:@@Type:AcceptVisitor(SELF)
          //
@@ -3263,6 +3265,12 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 
 
+
+      PUBLIC METHOD VisitRecursivePatternExpression(recursivePatternExpression AS ICSharpCode.Decompiler.CSharp.Syntax.RecursivePatternExpression) AS VOID
+         NOP
+
+      PUBLIC METHOD VisitExtensionDeclaration(extensionDeclaration AS ICSharpCode.Decompiler.CSharp.Syntax.ExtensionDeclaration) AS VOID
+         NOP
 
    END CLASS
 

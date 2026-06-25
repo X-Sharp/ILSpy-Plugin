@@ -3,8 +3,9 @@ USING System.IO
 USING System.Collections.Generic
 USING System.Linq
 USING System.Text
-USING System.ComponentModel.Composition
 USING ICSharpCode.ILSpy
+USING ICSharpCode.ILSpyX
+USING System.Composition
 USING ICSharpCode.Decompiler
 USING ICSharpCode.Decompiler.Metadata
 USING ICSharpCode.Decompiler.CSharp
@@ -23,7 +24,7 @@ USING System.Threading
 
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
-	[ExportAttribute( TYPEOF(Language) )];
+	[@@Export( TYPEOF(Language) )];
 	PUBLIC CLASS XSharpLanguage INHERIT Language
 
 
@@ -57,9 +58,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL isReferenceType AS LOGIC?
 			LOCAL definitions AS List<EntityHandle>
 			//
-			SELF:WriteCommentLine(output, SELF:TypeToString( methoddef:DeclaringType, TRUE))
+			SELF:WriteCommentLine(output, SELF:TypeToString( methoddef:DeclaringType))
 			//
-			assembly := methoddef:ParentModule:PEFile
+			assembly := (PEFile)(methoddef:ParentModule:MetadataFile)
 			decompiler := SELF:CreateDecompiler( assembly, options)
 			// Check if we have a Constructor
 			method2 := decompiler:TypeSystem:MainModule:ResolveEntity(methoddef:MetadataToken) ASTYPE IMethod
@@ -81,9 +82,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL decompiler AS CSharpDecompiler
 			LOCAL assembly AS PEFile
 			//
-			assembly := propDef:ParentModule:PEFile
+			assembly := (PEFile)(propDef:ParentModule:MetadataFile)
 			decompiler := SELF:CreateDecompiler(assembly, options)
-			SELF:WriteCommentLine(output, SELF:TypeToString(propDef:DeclaringType, TRUE))
+			SELF:WriteCommentLine(output, SELF:TypeToString(propDef:DeclaringType))
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(propDef:MetadataToken), decompiler:TypeSystem)
 
 		PUBLIC OVERRIDE METHOD DecompileField(fieldDef AS IField, output AS ITextOutput, options AS DecompilationOptions) AS VOID
@@ -92,8 +93,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL definitions AS List<EntityHandle>
 			LOCAL definition AS IField
 			//
-			assembly := fieldDef:ParentModule:PEFile
-			WriteCommentLine(output, SELF:TypeToString(fieldDef:DeclaringType, TRUE))
+			assembly := (PEFile)(fieldDef:ParentModule:MetadataFile)
+			WriteCommentLine(output, SELF:TypeToString(fieldDef:DeclaringType))
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			IF (fieldDef:IsConst)
 				SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(fieldDef:MetadataToken), decompiler:TypeSystem)
@@ -108,8 +109,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
 			//
-			assembly := typeDef:ParentModule:PEFile
-			WriteCommentLine(output, SELF:TypeToString(typeDef, TRUE))
+			assembly := (PEFile)(typeDef:ParentModule:MetadataFile)
+			WriteCommentLine(output, SELF:TypeToString(typeDef))
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(typeDef:MetadataToken), decompiler:TypeSystem)
 
@@ -117,8 +118,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL assembly AS PEFile
 			LOCAL decompiler AS CSharpDecompiler
 			//
-			assembly := evt:ParentModule:PEFile
-			WriteCommentLine(output, SELF:TypeToString(evt:DeclaringType, TRUE))
+			assembly := (PEFile)(evt:ParentModule:MetadataFile)
+			WriteCommentLine(output, SELF:TypeToString(evt:DeclaringType))
 			decompiler := SELF:CreateDecompiler(assembly, options)
 			SELF:WriteCode(output, options:DecompilerSettings, decompiler:Decompile(evt:MetadataToken), decompiler:TypeSystem)
 
@@ -164,7 +165,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			//                WriteCode(output, options:DecompilerSettings, syntax, decompiler:TypeSystem)
 			//            END USING
 			//            //ENDIF
-			LOCAL assembly AS PEFile
+			LOCAL assembly AS ICSharpCode.Decompiler.Metadata.MetadataFile
+			LOCAL peFile AS PEFile
 			LOCAL prjDecompiler AS XSharpWholeProjectDecompiler
 			LOCAL assemblyResolver AS ICSharpCode.Decompiler.Metadata.IAssemblyResolver
 			LOCAL dcmpTypeSystem AS DecompilerTypeSystem
@@ -180,7 +182,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			LOCAL syntax AS SyntaxTree
 			LOCAL decompiler AS CSharpDecompiler
 			//
-			assembly := asmbly:GetPEFileOrNull()
+			assembly := asmbly:GetMetadataFileOrNull()
+			peFile := (PEFile)assembly
 			IF ((options:FullDecompilation) .AND. (options:SaveAsProjectDirectory != NULL))
 				prjDecompiler := XSharpWholeProjectDecompiler{asmbly, options}
 				RETURN prjDecompiler:DecompileProject(assembly, options:SaveAsProjectDirectory, TextOutputWriter{output}, options:CancellationToken)
@@ -190,7 +193,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			output:WriteLine()
 			SUPER:DecompileAssembly(asmbly, output, options)
 			//BEGIN USING IIF(options:FullDecompilation , NULL , LoadedAssembly.DisableAssemblyLoad())
-			assemblyResolver := asmbly:GetAssemblyResolver()
+			assemblyResolver := asmbly:GetAssemblyResolver(FALSE, FALSE)
 			dcmpTypeSystem := DecompilerTypeSystem{assembly, assemblyResolver, options:DecompilerSettings}
 			tpeDefinition := dcmpTypeSystem:MainModule:TypeDefinitions:FirstOrDefault()
 			IF (tpeDefinition != NULL)
@@ -198,8 +201,8 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 				output:WriteReference(tpeDefinition, tpeDefinition:FullName)
 				output:WriteLine()
 			ENDIF
-			metadata := assembly:Metadata
-			cHeader := assembly:Reader:PEHeaders:CorHeader
+			metadata := peFile:Metadata
+			cHeader := peFile:Reader:PEHeaders:CorHeader
 			methodReference := MetadataTokenHelpers.EntityHandleOrNil(cHeader:EntryPointTokenOrRelativeVirtualAddress)
 			IF ((!methodReference:IsNil) .AND. (methodReference:Kind == HandleKind.MethodDefinition))
 				methodRslvd := dcmpTypeSystem:MainModule:ResolveMethod(methodReference, DEFAULT(ICSharpCode.Decompiler.TypeSystem.GenericContext))
@@ -209,11 +212,11 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					output:WriteLine()
 				ENDIF
 			ENDIF
-			output:WriteLine("// Architecture: " + Language.GetPlatformDisplayName(assembly))
+			output:WriteLine("// Architecture: " + Language.GetPlatformDisplayName(peFile))
 			IF ((cHeader:Flags & CorFlags.ILOnly) == (CorFlags)0)
 				output:WriteLine("// This assembly contains unmanaged code.")
 			ENDIF
-			runtimeDisplayName := Language.GetRuntimeDisplayName(assembly)
+			runtimeDisplayName := Language.GetRuntimeDisplayName(peFile)
 			IF (runtimeDisplayName != NULL)
 				output:WriteLine("// Runtime: " + runtimeDisplayName)
 			ENDIF
@@ -234,7 +237,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 					output:WriteLine()
 				ENDIF
 			ENDIF
-			debugInfoOrNull := assembly:GetDebugInfoOrNull()
+			debugInfoOrNull := peFile:GetDebugInfoOrNull()
 			IF (debugInfoOrNull != NULL)
 				output:WriteLine("// Debug info: " + debugInfoOrNull:Description)
 			ENDIF
@@ -488,23 +491,25 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 
 
 	CLASS XSharpWholeProjectDecompiler INHERIT WholeProjectDecompiler
-		PRIVATE INITONLY assembly AS LoadedAssembly
+		PRIVATE INITONLY assembly AS ICSharpCode.ILSpyX.LoadedAssembly
 		PRIVATE INITONLY options AS DecompilationOptions
 
-		PUBLIC CONSTRUCTOR(assembly AS LoadedAssembly , options AS DecompilationOptions )
-			SUPER(options:DecompilerSettings, assembly:GetAssemblyResolver(), assembly:GetAssemblyReferenceClassifier(), assembly:GetDebugInfoOrNull())
+		PUBLIC CONSTRUCTOR(assembly AS ICSharpCode.ILSpyX.LoadedAssembly , options AS DecompilationOptions )
+			SUPER(options:DecompilerSettings, assembly:GetAssemblyResolver(FALSE, FALSE), NULL, assembly:GetAssemblyReferenceClassifier(FALSE), assembly:GetDebugInfoOrNull())
 			SELF:assembly := assembly
 			SELF:options := options
 
 
-		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ValueTuple<STRING, STRING>>
+		PROTECTED OVERRIDE METHOD WriteResourceToFile(fileName AS STRING , resourceName AS STRING , entryStream AS Stream ) AS IEnumerable<ProjectItemInfo>
 			//
-			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>()
-				IF (exportedValue:CanHandle(fileName, SELF:options))
+			LOCAL ctx AS ResourceFileHandlerContext
+			ctx := ResourceFileHandlerContext{SELF:options}
+			FOREACH exportedValue AS IResourceFileHandler IN App.ExportProvider:GetExportedValues<IResourceFileHandler>(TYPEOF(IResourceFileHandler):FullName)
+				IF (exportedValue:CanHandle(fileName, ctx))
 					entryStream:Position := 0L
 					fileName := Path.Combine(TargetDirectory, fileName)
-					fileName := exportedValue:WriteResourceToFile(SELF:assembly, fileName, entryStream, SELF:options)
-					RETURN <ValueTuple<STRING, STRING>>{ ValueTuple.Create<STRING, STRING>(exportedValue:EntryType, fileName) }
+					fileName := exportedValue:WriteResourceToFile(SELF:assembly, fileName, entryStream, ctx)
+					RETURN <ProjectItemInfo>{ ProjectItemInfo{exportedValue:EntryType, fileName} }
 				ENDIF
 			NEXT
 			RETURN SUPER:WriteResourceToFile(fileName, resourceName, entryStream)

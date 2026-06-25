@@ -10,7 +10,6 @@ USING System.Collections.Generic
 USING System.Collections
 USING System.Linq
 USING System.Text
-USING System.ComponentModel.Composition
 USING ICSharpCode.ILSpy
 USING ICSharpCode.Decompiler
 USING ICSharpCode.Decompiler.CSharp
@@ -19,6 +18,7 @@ USING ICSharpCode.Decompiler.CSharp.Syntax.PatternMatching
 USING ICSharpCode.Decompiler.CSharp.Transforms
 USING ICSharpCode.Decompiler.CSharp.OutputVisitor
 USING ICSharpCode.Decompiler.TypeSystem
+USING ICSharpCode.Decompiler.Util
 USING Mono.Cecil
 USING ICSharpCode.AvalonEdit.Highlighting
 
@@ -486,7 +486,9 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
 			END SWITCH
 			//
 			LOCAL isAttr AS AttributeSection
-			isAttr := SELF:nodeStack.PeekOrDefault<AstNode>() ASTYPE AttributeSection
+			LOCAL _topNode AS AstNode
+			_topNode := IIF(SELF:nodeStack:Count > 0, SELF:nodeStack:Peek(), NULL)
+			isAttr := _topNode ASTYPE AttributeSection
 			IF ( isAttr != NULL )
 				//
 				color := SELF:attributeKeywordsColor

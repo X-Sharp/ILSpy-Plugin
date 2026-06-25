@@ -7,6 +7,7 @@
 
 USING System
 USING System.Collections.Generic
+USING System.Collections.Immutable
 USING System.Text
 USING ICSharpCode.Decompiler.CSharp.Syntax
 USING ICSharpCode.Decompiler.CSharp.Syntax.PatternMatching
@@ -28,13 +29,13 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
         CONSTRUCTOR(location AS TextLocation, modifier AS Modifiers)//Inline call to base() in C#
             SUPER(location, NULL)
             //
-            SELF:_Modifier := modifier
+            SELF:_modifier := modifier
         
         PROTECTED VIRTUAL METHOD DoMatch(other AS AstNode, match AS Match) AS LOGIC
             LOCAL token AS CSharpModifierToken
             //
             token := (CSharpModifierToken)(other)
-            RETURN ((token != NULL) .AND. (SELF:modifier == token:modifier))
+            RETURN ((token != NULL) .AND. (SELF:Modifier == token:Modifier))
         
         STATIC METHOD GetModifierLength(modifier AS Modifiers) AS LONG
             //
@@ -304,10 +305,10 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
                 CASE "any"
                     // even though it's used for pattern matching only, 'any' needs to be in this list to be usable in the AST
                     RETURN Modifiers.Any
-                    default
+                OTHERWISE
                     THROW System.NotSupportedException{"Invalid value for Modifiers"}
             END SWITCH
-        
+
         VIRTUAL METHOD ToString(formattingOptions AS CSharpFormattingOptions) AS STRING
             //
             RETURN CSharpModifierToken.GetModifierName(SELF:Modifier)
@@ -345,7 +346,7 @@ BEGIN NAMESPACE ILSpy.XSharpLanguage
             SET
                 //
                 SUPER:ThrowIfFrozen()
-                SELF:modifier := value
+                SELF:_modifier := value
             END SET
         END PROPERTY
         

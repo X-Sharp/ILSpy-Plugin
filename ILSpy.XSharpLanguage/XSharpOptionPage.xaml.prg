@@ -12,51 +12,72 @@ USING System.Windows.Navigation
 USING System.Windows.Shapes
 USING ICSharpCode.ILSpy
 USING ICSharpCode.ILSpy.Options
+USING ICSharpCode.ILSpy.Util
+USING System.Composition
 USING System.ComponentModel
 USING System.Xml.Linq
 
 BEGIN NAMESPACE ILSpy.XSharpLanguage
 
     /// <summary>
-    /// Interaction logic for XSharpOptionPage.xaml
+    /// Option page for XSharp decompiler settings.
     /// </summary>
-    [ExportOptionPage(Title := "XSharp")];
+    [ExportOptionPage];
     PUBLIC PARTIAL CLASS XSharpOptionPage INHERIT UserControl IMPLEMENTS IOptionPage
-    
+
         STATIC INITONLY ns := "XSharp" AS STRING
-        
-        #region Access Settings
-        
-        PUBLIC STATIC PROPERTY CurrentXSharpSettings AS XSharpOptions
+        PRIVATE STATIC _currentSettings AS XSharpOptions
+
+        PUBLIC PROPERTY Title AS STRING
             GET
-                RETURN LoadXSharpSettings( ILSpySettings.Load())
+                RETURN "XSharp"
             END GET
         END PROPERTY
-        
-        PUBLIC STATIC METHOD LoadXSharpSettings( settings AS ILSpySettings) AS XSharpOptions
-            LOCAL xsSettings AS XSharpOptions
-            LOCAL elt AS XElement
-            //
-            elt := settings[ns + "Options"]
-            xsSettings := XSharpOptions{ elt }
-            //
-            RETURN xsSettings
-            
+
+        #region Access Settings
+
+        PUBLIC STATIC PROPERTY CurrentXSharpSettings AS XSharpOptions
+            GET
+                IF _currentSettings == NULL
+                    _currentSettings := XSharpOptions{}
+                ENDIF
+                RETURN _currentSettings
+            END GET
+        END PROPERTY
+
             #endregion
-            
-        PUBLIC CONSTRUCTOR() //XSharpOptionPage()
-            InitializeComponent()
+
+        PUBLIC CONSTRUCTOR()
+            LOCAL cbUpperKeyword AS CheckBox
+            LOCAL cbIfStatement AS CheckBox
+            LOCAL sp AS StackPanel
+            LOCAL grid AS Grid
+            //
+            cbUpperKeyword := CheckBox{}
+            cbUpperKeyword:Content := "Output Keywords in Uppercase"
+            cbUpperKeyword:SetBinding(CheckBox.IsCheckedProperty, Binding{"UpperKeyword"})
+            //
+            cbIfStatement := CheckBox{}
+            cbIfStatement:Content := "Surround IF statement with parenthesis"
+            cbIfStatement:SetBinding(CheckBox.IsCheckedProperty, Binding{"IfStatement"})
+            //
+            sp := StackPanel{}
+            sp:Children:Add(cbUpperKeyword)
+            sp:Children:Add(cbIfStatement)
+            //
+            grid := Grid{}
+            grid:Margin := System.Windows.Thickness{10, 10, 10, 10}
+            grid:Children:Add(sp)
+            //
+            SELF:Content := grid
             RETURN
-            
-            
-        PUBLIC METHOD Load( settings AS ILSpySettings ) AS VOID
-            // For loading options, use ILSpySetting's indexer.
-            // If the specified section does exist, the indexer will return a new empty element.
-            LOCAL e := settings[ns + "Options"] AS XElement
-            // Now load the options from the XML document:
-            LOCAL s := XSharpOptions{ e } AS XSharpOptions
+
+
+        PUBLIC METHOD Load( settings AS SettingsSnapshot ) AS VOID
+            LOCAL s := XSharpOptions{} AS XSharpOptions
             //
             SELF:DataContext := s
+            _currentSettings := s
 			
 		PUBLIC METHOD LoadDefaults( ) AS VOID
 			// Create without params, so ... default value
